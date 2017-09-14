@@ -6,7 +6,7 @@ Aula do dia 13.09.2017
 ##  Para compilar:
   No terminal, digite o seguinte comando:
   
-  make all
+    make all
     
 Obs: necessário ter o Lex e o Bison instalados na máquina para a aplicação funcionar.
 
