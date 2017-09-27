@@ -13,5 +13,6 @@ int main()
 	
 	true and false or false;
 	not true;
-
+	
+	'A';
 }

@@ -82,6 +82,8 @@ COMANDO 	: E ';'
 			E_REL ';'
 			|
 			E_LOGICA ';'
+			|
+			TERMO_CARACTER ';'
 			;
 
 
@@ -224,6 +226,13 @@ E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 				//o tipo resultante deve ser constante_tipo_booleano
 			}
 			;
+			
+TERMO_CARACTER: TK_CHAR
+			{
+				$$.label = gerarNovaVariavel();
+				$$.traducao = "\t" + $$.label + " = " + $1.label + ";\n";
+				$$.tipo = $1.tipo;
+			}
 			
 
 
