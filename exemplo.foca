@@ -16,4 +16,7 @@ int main()
 	var ola;
 	ola = 'A';
 	ola = 'C';
+
+	var b = -1 + 2;
+
 }

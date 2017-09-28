@@ -38,6 +38,7 @@ ID {LETRA}({LETRA}|{NUM})*
 {OP_RELACIONAL} { yylval.label = yytext ; return TK_OP_RELACIONAL; }
 
 {NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
+"-"{NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
 {REAL}		{ yylval.label = yytext; yylval.tipo = constante_tipo_real; return TK_NUM; }
 {BOOLEAN}	{ yylval.label = yytext; yylval.tipo = constante_tipo_booleano; return TK_BOOL; }
 {CHAR}		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CHAR; }
