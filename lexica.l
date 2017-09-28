@@ -25,9 +25,11 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "int"		{return TK_TIPO_INT;}
 
+"var"		{return TK_PALAVRA_VAR;}
+
 [(){}[\];,]	{ return *yytext; }
 
-[+\-*/]		{ return *yytext; }
+[+\-*/=]		{ return *yytext; }
 
 "and"		{ yylval.label = "&&"; return TK_OP_LOGICO_BIN;}
 "or"		{ yylval.label = "||"; return TK_OP_LOGICO_BIN;}

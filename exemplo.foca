@@ -13,6 +13,7 @@ int main()
 	
 	true and false or false;
 	not true;
-	
-	'A';
+	var ola;
+	ola = 'A';
+	ola = 'C';
 }
