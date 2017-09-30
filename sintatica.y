@@ -4,6 +4,8 @@
 #include <sstream>
 #include <map>
 
+#include "MapaTipos.h"
+
 #include "controleDeVariaveis.h"
 
 #define YYSTYPE atributos
@@ -15,6 +17,7 @@
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo booelan"
 
 using namespace std;
+using namespace MapaTiposLib;
 using namespace ControleDeVariaveis;
 
 struct atributos
@@ -25,10 +28,19 @@ struct atributos
 	string tipo;
 };
 
+/*struct DADOS_VARIAVEL
+{
+	string tipo;
+	string nome;
+	string valor;
+};*/
+
 int yylex(void);
 void yyerror(string);
 bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
+
+map<string, string> mapaTipos;
 
 %}
 
@@ -206,7 +218,55 @@ E 			: E '+' E
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
-				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
+				
+				if($1.tipo == $3.tipo)
+				{
+					
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
+				}
+				
+				else //necessita conversão de tipo
+				{
+					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"+");
+					string resultado = mapaTipos[chaveFinal];
+					
+					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
+					if (resultado == "")
+					{
+						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"+");
+						resultado = mapaTipos[chaveFinal];
+					}
+					
+					if(resultado == constante_erro)
+						yyerror("Tipos incompátiveis para se realizar operação");
+					
+					
+					
+					string label_old = $$.label;
+					if($3.tipo == resultado)
+					{
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+						
+						$$.label = gerarNovaVariavel();
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " + " + label_old + ";\n";
+					}
+					else if($1.tipo == resultado)
+					{
+							
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+						$$.label = gerarNovaVariavel();
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + label_old + ";\n";
+						
+					}
+					
+	
+					$$.tipo = resultado;	
+				
+						
+				}
 			}
 			|
 			E '-' E
@@ -215,7 +275,57 @@ E 			: E '+' E
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
-				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
+				
+				if($1.tipo == $3.tipo)
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
+				}
+				
+				else //necessita conversão de tipo
+				{
+					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"-");
+					string resultado = mapaTipos[chaveFinal];
+					
+					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
+					if (resultado == "")
+					{
+						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"-");
+						resultado = mapaTipos[chaveFinal];
+					}
+					
+					if(resultado == constante_erro)
+						yyerror("Tipos incompátiveis para se realizar operação");
+					
+					
+					
+					string label_old = $$.label;
+					if($3.tipo == resultado)
+					{
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+						
+						$$.label = gerarNovaVariavel();
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " - " + label_old + ";\n";
+					}
+					else if($1.tipo == resultado)
+					{
+							
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+						$$.label = gerarNovaVariavel();
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + label_old + ";\n";
+						
+					}
+					
+	
+					$$.tipo = resultado;	
+				
+						
+				}
+				
+				
+				
+				
 			}
 			|
 			E1
@@ -227,7 +337,53 @@ E1 			: E1 '*' E1
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
-				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
+				
+				if($1.tipo == $3.tipo)
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
+				}
+				
+				else //necessita conversão de tipo
+				{
+					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"*");
+					string resultado = mapaTipos[chaveFinal];
+					
+					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
+					if (resultado == "")
+					{
+						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"*");
+						resultado = mapaTipos[chaveFinal];
+					}
+					
+					if(resultado == constante_erro)
+						yyerror("Tipos incompátiveis para se realizar operação");
+					
+					
+					
+					string label_old = $$.label;
+					if($3.tipo == resultado)
+					{
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+						
+						$$.label = gerarNovaVariavel();
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " * " + label_old + ";\n";
+					}
+					else if($1.tipo == resultado)
+					{
+							
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+						$$.label = gerarNovaVariavel();
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + label_old + ";\n";
+						
+					}
+					
+	
+					$$.tipo = resultado;	
+				
+						
+				}
 			}
 			|
 			E1 '/' E1
@@ -236,7 +392,53 @@ E1 			: E1 '*' E1
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
-				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label + ";\n";
+				
+				if($1.tipo == $3.tipo)
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label + ";\n";
+				}
+				
+				else //necessita conversão de tipo
+				{
+					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"/");
+					string resultado = mapaTipos[chaveFinal];
+					
+					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
+					if (resultado == "")
+					{
+						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"/");
+						resultado = mapaTipos[chaveFinal];
+					}
+					
+					if(resultado == constante_erro)
+						yyerror("Tipos incompátiveis para se realizar operação");
+					
+					
+					
+					string label_old = $$.label;
+					if($3.tipo == resultado)
+					{
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+						
+						$$.label = gerarNovaVariavel();
+						
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " / " + label_old + ";\n";
+					}
+					else if($1.tipo == resultado)
+					{
+							
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+						$$.label = gerarNovaVariavel();
+						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " / " + label_old + ";\n";
+						
+					}
+					
+	
+					$$.tipo = resultado;	
+				
+						
+				}
 			}
 			|
 			'(' E ')'
@@ -383,11 +585,20 @@ TERMO_CARACTER: TK_CHAR
 
 #include "lex.yy.c"
 
+DADOS_VARIAVEL d;
+
+std::map<string, DADOS_VARIAVEL > tabelaDeVariaveis;
+
+
 int yyparse();
 
 int main( int argc, char* argv[] )
 {
+	
+	mapaTipos = criarMapa();
 	yyparse();
+	
+	
 
 	return 0;
 }
@@ -405,6 +616,25 @@ string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao)
 	}else{
 		return constante_tipo_inteiro;
 	}
+}
+//declaração de variaveis var <nome variavel>;
+string gerarNovaVariavel(){
+	static int num = 0;
+	num++;
+	//cout << num << endl;
+	string temp = "temp";
+	
+	/*d.nome = "var1";
+	d.valor = "10";
+	d.tipo = constante_tipo_inteiro;
+	
+	tabelaDeVariaveis[d.nome] = d;
+	cout << tabelaDeVariaveis[d.nome].valor << endl;
+	DADOS_VARIAVEL A = tabelaDeVariaveis["aaa"];
+	cout << (A.nome == "") << endl;*/
+	
+	string numInt = to_string(num);
+	return temp + numInt;
 }
 
 void yyerror( string MSG )

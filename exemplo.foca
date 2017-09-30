@@ -1,5 +1,6 @@
 int main()
 {
+	78 / 63 / 24 - 23.1;
 
 	var teste1 = 'A';
 	var teste2 = (2 - 2 / (3 - 9) * 10);
@@ -15,5 +16,5 @@ int main()
 	logico = logico and true;
 	
 	var a = (float) teste2;
-	var b = (float) (2 - 2 / (3 - 9) * 10);
+	var b = (float) (2 - 2 / (3 - 9) * 100);
 }
