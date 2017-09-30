@@ -1,16 +1,19 @@
 int main()
 {
 
-/*
 	var teste1 = 'A';
 	var teste2 = (2 - 2 / (3 - 9) * 10);
+/*
 	teste2 = teste2 + 4;
 	var teste3 = (not (true or false));
 	--teste2;
 	++teste2;
 	teste2 = -teste2;
-*/
+*/	
+
 	var logico = true or false;
 	logico = logico and true;
 	
+	var a = (float) teste2;
+	var b = (float) (2 - 2 / (3 - 9) * 10);
 }

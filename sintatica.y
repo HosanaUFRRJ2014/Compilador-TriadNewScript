@@ -27,6 +27,7 @@ struct atributos
 
 int yylex(void);
 void yyerror(string);
+bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
 
 %}
@@ -40,6 +41,7 @@ string verificarTipoResultanteDeCoercao(string, string, string);
 %token TK_MAIN TK_ID TK_TIPO_INT TK_PALAVRA_VAR
 %token TK_FIM TK_ERROR
 %token TK_COMENTARIO_1L TK_ABRE_COMENTARIO_NL TK_FECHA_COMENTARIO_NL
+%token TK_CONVERSAO_EXPLICITA
 
 %start S
 
@@ -74,8 +76,13 @@ COMANDOS	: COMANDO COMANDOS
 				$$.traducao = $$.traducao + $2.traducao;
 			}
 			|
-			TK_ABRE_COMENTARIO_NL COMANDO COMANDOS TK_FECHA_COMENTARIO_NL
+			COMANDOS TK_ABRE_COMENTARIO_NL COMANDOS TK_FECHA_COMENTARIO_NL COMANDOS
 			{
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis;
+				if($1.traducao != "")
+					$$.traducao = $1.traducao + "\n";
+				if($5.traducao != "")
+					$$.traducao = $$.traducao + $5.traducao;
 			}
 			|
 			;
@@ -177,6 +184,20 @@ VALOR_ATRIBUICAO: E
 			E_LOGICA
 			|
 			TERMO_CARACTER
+			|
+			TK_CONVERSAO_EXPLICITA VALOR_ATRIBUICAO
+			{
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $2.traducao;
+				if(verificarPossibilidadeDeConversaoExplicita($2.tipo, $1.tipo)){
+					$$.label = gerarNovaVariavel();
+					$$.tipo = $1.tipo;
+					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $$.tipo + " " + $$.label + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + $2.label + ";\n";
+				}else{
+					//dispara erro de mensagem tipo não pdoe ser convertido
+				}
+			}
 			;
 
 E 			: E '+' E
@@ -369,6 +390,10 @@ int main( int argc, char* argv[] )
 	yyparse();
 
 	return 0;
+}
+
+bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
+	return true;
 }
 
 string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao){
