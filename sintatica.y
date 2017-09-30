@@ -3,16 +3,17 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <vector>
 
 #include "MapaTipos.h"
 
 #include "controleDeVariaveis.h"
 
 #define YYSTYPE atributos
-#define constante_tipo_inteiro "int"
+/*#define constante_tipo_inteiro "int"
 #define constante_tipo_real "float"
 #define constante_tipo_booleano "bool"
-#define constante_tipo_caracter "char"
+#define constante_tipo_caracter "char"*/
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo booelan"
 
@@ -40,7 +41,7 @@ void yyerror(string);
 bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
 
-map<string, string> mapaTipos;
+//map<string, string> mapaTipos;
 
 %}
 
@@ -219,54 +220,58 @@ E 			: E '+' E
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
 				
-				if($1.tipo == $3.tipo)
+
+				/*string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"+");
+				string resultado = mapaTipos[chaveFinal];
+				
+				//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
+				if (resultado == "")
 				{
+					chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"+");
+					resultado = mapaTipos[chaveFinal];
+				}*/
+				
+				
+				string resultado = getTipoResultante($1.tipo, $3.tipo,"+");
+				
+				string label_old = $$.label;
+				
+				if(resultado == constante_erro)
+				{
+					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "+");
+					yyerror(msgErro);
+				}
 					
-					
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				{
+							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
 				}
 				
-				else //necessita conversão de tipo
+				
+				else if($3.tipo == resultado)
 				{
-					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"+");
-					string resultado = mapaTipos[chaveFinal];
 					
-					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
-					if (resultado == "")
-					{
-						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"+");
-						resultado = mapaTipos[chaveFinal];
-					}
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
 					
-					if(resultado == constante_erro)
-						yyerror("Tipos incompátiveis para se realizar operação");
+					$$.label = gerarNovaVariavel();
 					
-					
-					
-					string label_old = $$.label;
-					if($3.tipo == resultado)
-					{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " + " + label_old + ";\n";
+				}
+				else if($1.tipo == resultado)
+				{
 						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-						
-						$$.label = gerarNovaVariavel();
-						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " + " + label_old + ";\n";
-					}
-					else if($1.tipo == resultado)
-					{
-							
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-						$$.label = gerarNovaVariavel();
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + label_old + ";\n";
-						
-					}
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + label_old + ";\n";
 					
-	
-					$$.tipo = resultado;	
+				}
+				
+
+				$$.tipo = resultado;	
 				
 						
-				}
+				
 			}
 			|
 			E '-' E
@@ -276,52 +281,43 @@ E 			: E '+' E
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
 				
-				if($1.tipo == $3.tipo)
+				string resultado = getTipoResultante($1.tipo, $3.tipo,"-");
+				
+				string label_old = $$.label;
+				
+				if(resultado == constante_erro)
 				{
+					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "-");
+					yyerror(msgErro);
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				{
+							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
 				}
 				
-				else //necessita conversão de tipo
-				{
-					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"-");
-					string resultado = mapaTipos[chaveFinal];
-					
-					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
-					if (resultado == "")
-					{
-						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"-");
-						resultado = mapaTipos[chaveFinal];
-					}
-					
-					if(resultado == constante_erro)
-						yyerror("Tipos incompátiveis para se realizar operação");
-					
-					
-					
-					string label_old = $$.label;
-					if($3.tipo == resultado)
-					{
-						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-						
-						$$.label = gerarNovaVariavel();
-						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " - " + label_old + ";\n";
-					}
-					else if($1.tipo == resultado)
-					{
-							
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-						$$.label = gerarNovaVariavel();
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + label_old + ";\n";
-						
-					}
-					
-	
-					$$.tipo = resultado;	
 				
-						
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " - " + label_old + ";\n";
 				}
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + label_old + ";\n";
+					
+				}
+				
+
+				$$.tipo = resultado;	
 				
 				
 				
@@ -338,52 +334,43 @@ E1 			: E1 '*' E1
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
 				
-				if($1.tipo == $3.tipo)
+				string resultado = getTipoResultante($1.tipo, $3.tipo,"*");
+				
+				string label_old = $$.label;
+				
+				if(resultado == constante_erro)
 				{
+					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "*");
+					yyerror(msgErro);
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				{
+							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
 				}
 				
-				else //necessita conversão de tipo
-				{
-					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"*");
-					string resultado = mapaTipos[chaveFinal];
-					
-					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
-					if (resultado == "")
-					{
-						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"*");
-						resultado = mapaTipos[chaveFinal];
-					}
-					
-					if(resultado == constante_erro)
-						yyerror("Tipos incompátiveis para se realizar operação");
-					
-					
-					
-					string label_old = $$.label;
-					if($3.tipo == resultado)
-					{
-						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-						
-						$$.label = gerarNovaVariavel();
-						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " * " + label_old + ";\n";
-					}
-					else if($1.tipo == resultado)
-					{
-							
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-						$$.label = gerarNovaVariavel();
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + label_old + ";\n";
-						
-					}
-					
-	
-					$$.tipo = resultado;	
 				
-						
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " * " + label_old + ";\n";
 				}
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + label_old + ";\n";
+					
+				}
+				
+
+				$$.tipo = resultado;	
 			}
 			|
 			E1 '/' E1
@@ -393,52 +380,43 @@ E1 			: E1 '*' E1
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
 				
-				if($1.tipo == $3.tipo)
-				{
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label + ";\n";
-				}
+				string resultado = getTipoResultante($1.tipo, $3.tipo,"/");
 				
-				else //necessita conversão de tipo
+				string label_old = $$.label;
+				
+				if(resultado == constante_erro)
 				{
-					string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"/");
-					string resultado = mapaTipos[chaveFinal];
+					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "/");
+					yyerror(msgErro);
+				}
 					
-					//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
-					if (resultado == "")
-					{
-						chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"/");
-						resultado = mapaTipos[chaveFinal];
-					}
-					
-					if(resultado == constante_erro)
-						yyerror("Tipos incompátiveis para se realizar operação");
-					
-					
-					
-					string label_old = $$.label;
-					if($3.tipo == resultado)
-					{
-						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-						
-						$$.label = gerarNovaVariavel();
-						
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " / " + label_old + ";\n";
-					}
-					else if($1.tipo == resultado)
-					{
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				{
 							
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-						$$.label = gerarNovaVariavel();
-						$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " / " + label_old + ";\n";
-						
-					}
-					
-	
-					$$.tipo = resultado;	
-				
-						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + $3.label + ";\n";
 				}
+				
+				
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + "/" + label_old + ";\n";
+				}
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + label_old + ";\n";
+					
+				}
+				
+
+				$$.tipo = resultado;	
 			}
 			|
 			'(' E ')'
@@ -607,7 +585,7 @@ bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDe
 	return true;
 }
 
-string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao){
+/*string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao){
 	//a principio será feito com if devido a pouca quantidade de tipo e falta de noção de como fazer o certo
 	// mas depois vai ser preciso trocar para matriz
 	
@@ -616,7 +594,7 @@ string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao)
 	}else{
 		return constante_tipo_inteiro;
 	}
-}
+}*/
 //declaração de variaveis var <nome variavel>;
 string gerarNovaVariavel(){
 	static int num = 0;
