@@ -27,6 +27,10 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "var"		{return TK_PALAVRA_VAR;}
 
+"//"		{return TK_COMENTARIO_1L;}
+"/*"		{return TK_ABRE_COMENTARIO_NL;}
+"*/"		{return TK_FECHA_COMENTARIO_NL;}
+
 [(){}[\];,]	{ return *yytext; }
 
 [+\-*/=]		{ return *yytext; }
