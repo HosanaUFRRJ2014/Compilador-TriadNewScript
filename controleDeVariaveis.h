@@ -11,23 +11,21 @@ namespace ControleDeVariaveis{
 	{
 		string tipo;
 		string nome;
-		bool variavelReservadaDoSistema;
 	};
 	
 	namespace MapaDeContexto{
 		map<string, DADOS_VARIAVEL> mapaDeContexto;
 		
-		bool incluirNoMapa(string, string, bool);
+		bool incluirNoMapa(string, string);
 		bool atualizarNoMapa(DADOS_VARIAVEL);
 		bool variavelJaDeclarada(string);
 		DADOS_VARIAVEL recuperarDadosVariavel(string);
 		
-		bool incluirNoMapa(string nome, string tipo = "", bool variavelReservadaDoSistema = false){
+		bool incluirNoMapa(string nome, string tipo = ""){
 			if(!variavelJaDeclarada(nome)){
 				DADOS_VARIAVEL variavel;
 				variavel.nome = nome;
 				variavel.tipo = tipo;
-				variavel.variavelReservadaDoSistema = variavelReservadaDoSistema;
 				mapaDeContexto[variavel.nome] = variavel;
 				return true;
 			}

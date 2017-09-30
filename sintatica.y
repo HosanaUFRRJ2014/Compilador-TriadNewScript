@@ -25,6 +25,13 @@ struct atributos
 	string tipo;
 };
 
+/*struct DADOS_VARIAVEL
+{
+	string tipo;
+	string nome;
+	string valor;
+};*/
+
 int yylex(void);
 void yyerror(string);
 string verificarTipoResultanteDeCoercao(string, string, string);
@@ -43,13 +50,20 @@ void disparaErro(string);
 
 %start S
 
-
-%left "not"
-%left "and" "or"
-%nonassoc "==" "!="
-%nonassoc '<' '>' "<=" ">="
 %left '+' '-'
 %left '/' '*'
+
+//%nonassoc 
+
+%left '<'
+%left '>'
+%left "=="
+%left "<="
+%left ">="
+%left "<>"
+%left "and"
+%left "or"
+%left "not"
 
 %%
 
@@ -97,14 +111,10 @@ COMANDO 	: E ';'
 			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO ';'
 			{
 				if(variavelJaDeclarada($2.label)){
-					disparaErro("dupla declaração da variavel com id '" + $2.label + "'");
+					disparaErro("A variavel com id '" + $2.label + "' já existe");
 				}else{
-					string tipo = $4.tipo;
-					if(tipo == constante_tipo_booleano)
-						tipo = constante_tipo_inteiro;
-					
-					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + ";\n";
-					$$.traducao = $4.traducao + "\t" + $2.label + " = " + $4.label + ";\n";
+					$$.traducaoDeclaracaoDeVariaveis = "\t" + $4.tipo + " " + $2.label + ";\n";
+					$$.traducao = $4.traducao + "\t" + $2.label + " = " + $4.label + "\n";
 					incluirNoMapa($2.label, $4.tipo);
 				}
 			}
@@ -117,20 +127,15 @@ COMANDO 	: E ';'
 //isso aqui também pode causar problema no futuro devido as lacunas
 						metaData.tipo = $3.tipo;
 						atualizarNoMapa(metaData);
-						string tipo = metaData.tipo;
-						if(tipo == constante_tipo_booleano)
-							tipo = constante_tipo_inteiro;
-						$$.traducaoDeclaracaoDeVariaveis = "\t" + tipo + " " + metaData.nome + ";\n";
+						$$.traducaoDeclaracaoDeVariaveis = "\t" + metaData.tipo + " " + metaData.nome + ";\n";
 					}
-					
-					$1.tipo = metaData.tipo;
 //provavelmente ainda há lacunas, mas vamos ignorar por enquanto
 					if(metaData.tipo == $3.tipo){
 						$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
 					else{
-						disparaErro("Os tipos da atribuição não são compativeis. A de variavel de id '" + $1.label + "' é do tipo '" + $1.tipo + "' e o valor atribuido é do tipo '"+ $3.tipo + "'\n");
+						disparaErro("Os tipos da atribuição não são compativeis. O tipo da variavel de id '" + $1.label + "' é '" + $1.tipo + "' e o valor atribuido é do tipo '"+ $3.tipo + "'\n");
 					}
 				}
 			}
@@ -144,13 +149,12 @@ TERMO		: TK_NUM
 				$$.traducao = "\t" + $$.label + " = " + $1.label + ";\n";
 				$$.tipo = $1.tipo;
 			}
+			//provisoriamente deixar assim, mas talvez esse id suma
 			| TK_ID
 			{
 				if(variavelJaDeclarada($1.label)){
 					$$.label = $1.label;
-					$$.tipo = recuperarDadosVariavel($1.label).tipo;
-				}else{
-					disparaErro("Variável de id '" + $1.label + "' não declarada");
+					$$.traducao = "\t" + $$.label + " = " + $1.label + ";\n";
 				}
 			}
 			;
@@ -183,7 +187,6 @@ E 			: E '+' E
 			}
 			|
 			E1
-			;
 
 E1 			: E1 '*' E1
 			{
@@ -204,14 +207,18 @@ E1 			: E1 '*' E1
 			}
 			|
 			'(' E ')'
-			{
-				$$ = $2;
-			}
+/*			{
+				$$.label = $2.label;
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $$.traducao + $2.traducao;
+			}*/
 			|
 			'(' E1 ')'
-			{
-				$$ = $2;
-			}
+/*			{
+				$$.label = $2.label;
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $$.traducao + $2.traducao;
+			}*/
 			|
 //ainda em duvida sobre este caso
 //talvez seja somente usar o proprio E1 
@@ -258,8 +265,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 				if($1.tipo == constante_tipo_booleano && $3.tipo == constante_tipo_booleano){
 					$$.label = gerarNovaVariavel();
 					$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $$.label + ";\n";
+					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
 					$$.traducao = $1.traducao + $3.traducao;
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
 					$$.tipo = constante_tipo_booleano;
@@ -275,8 +281,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 				if($2.tipo == constante_tipo_booleano){
 					$$.label = gerarNovaVariavel();
 					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
-					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $$.label + ";\n";
+					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $2.tipo + " " + $$.label + ";\n";
 					$$.traducao = $2.traducao;
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + $2.label + ";\n";
 					$$.tipo = constante_tipo_booleano;
@@ -288,27 +293,15 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 			|
 			TK_BOOL
 			{
-				if(!variavelJaDeclarada($1.label)){
-				//no final das contas o 3º campo não foi necessário, mas pode ser util no futuro;
-				// o motivo de não ter sido necessario é que as palavras true e false nunca serão reconhecidas como id;
-					incluirNoMapa($1.label, $1.tipo, true);
-					string valorBoolInt = "0";
-					if($1.label == "true")
-						valorBoolInt = "1";
-					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = "\t" + tipo + " " + $$.label + " = " + valorBoolInt + ";\n";
-				}
-				
-				$$.label = $1.label;
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
+				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + ";\n";
 				$$.tipo = $1.tipo;
 			}
 			|
-			'(' E_LOGICA ')'
-			{
-				$$ = $2;
-			}
-			|
 			E_REL
+			{
+			}
 			;
 
 TERMO_REL	: E
@@ -333,6 +326,11 @@ TERMO_CARACTER: TK_CHAR
 %%
 
 #include "lex.yy.c"
+
+DADOS_VARIAVEL d;
+
+std::map<string, DADOS_VARIAVEL > tabelaDeVariaveis;
+
 
 int yyparse();
 
