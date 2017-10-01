@@ -10,7 +10,7 @@ int main()
 */
 	
 	var conversao_explicita = (float) 2 * 3;
-	var conversao_implicita = conversao_explicita + 32;
+	var conversao_implicita = 32 + conversao_explicita;
 	
 	var expressao_logica_atribuida = true and false or true and not false;
 	var expressao_logica_com_Variavel = expressao_logica_atribuida or true;
@@ -23,5 +23,7 @@ int main()
 												 (conversao_explicita == conversao_implicita) and
 										 		 true;
 	
-	
+	var declaracao_sem_tipo;
+	var declaracao_com_tipo = 'A';
+	declaracao_sem_tipo = declaracao_com_tipo;
 }
