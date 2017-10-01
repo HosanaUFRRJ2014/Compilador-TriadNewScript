@@ -242,7 +242,7 @@ E 			: E '+' E
 					yyerror(msgErro);
 				}
 					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				else if($1.tipo == $3.tipo)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
@@ -256,13 +256,13 @@ E 			: E '+' E
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " + " + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " + " + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
+					$$.label = gerarNovaVariavel();       //provável que label_old veja antes de label1 também
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + label_old + ";\n";
 					
 				}
@@ -291,7 +291,7 @@ E 			: E '+' E
 					yyerror(msgErro);
 				}
 					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				else if($1.tipo == $3.tipo)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
@@ -305,13 +305,13 @@ E 			: E '+' E
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " - " + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old  + " - " + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
+					$$.label = gerarNovaVariavel();		//provável que label_old veja antes de label1 também
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + label_old + ";\n";
 					
 				}
@@ -344,7 +344,7 @@ E1 			: E1 '*' E1
 					yyerror(msgErro);
 				}
 					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				else if($1.tipo == $3.tipo)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
@@ -358,13 +358,13 @@ E1 			: E1 '*' E1
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " * " + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " * " + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
+					$$.label = gerarNovaVariavel();		//provável que label_old veja antes de label1 também
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + label_old + ";\n";
 					
 				}
@@ -390,7 +390,7 @@ E1 			: E1 '*' E1
 					yyerror(msgErro);
 				}
 					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
+				else if($1.tipo == $3.tipo)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + $3.label + ";\n";
@@ -404,13 +404,13 @@ E1 			: E1 '*' E1
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + "/" + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + "/" + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
+					$$.label = gerarNovaVariavel();			//provável que label_old veja antes de label1 também
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + label_old + ";\n";
 					
 				}
