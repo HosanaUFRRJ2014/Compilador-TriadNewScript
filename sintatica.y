@@ -517,7 +517,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 					yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN);
 				}
 			}
-/*			|
+			|
 			//derivacao ambigua [usar %nonassoc]
 			TK_OP_LOGICO_UNA E_LOGICA
 			{
@@ -534,7 +534,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 					yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN);
 				}
 			}
-/*			|
+			|
 			ID
 			|
 			TK_BOOL
@@ -559,36 +559,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 				$$ = $2;
 			}
 			|
-			E_REL*/
-			|
-			TERMO_LOG
-			;
-			
-TERMO_LOG	: '(' E_LOGICA ')'
-			{
-				$$ = $2;
-			}
-			|
 			E_REL
-			|
-			ID
-			|
-			TK_BOOL
-			{
-				if(!variavelJaDeclarada($1.label)){
-				//no final das contas o 3º campo não foi necessário, mas pode ser util no futuro;
-				// o motivo de não ter sido necessario é que as palavras true e false nunca serão reconhecidas como id;
-					incluirNoMapa($1.label, $1.tipo, true);
-					string valorBoolInt = "0";
-					if($1.label == "true")
-						valorBoolInt = "1";
-					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = "\t\t" + tipo + " " + $$.label + " = " + valorBoolInt + ";\n";
-				}
-				
-				$$.label = $1.label;
-				$$.tipo = $1.tipo;
-			}
 			;
 
 TERMO_REL	: E
