@@ -64,7 +64,7 @@ string verificarTipoResultanteDeCoercao(string, string, string);
 %nonassoc "==" "!="
 %nonassoc '<' '>' "<=" ">="
 %left '+' '-'
-%left '/' '*'
+%left '*' '/'
 
 %%
 
@@ -546,6 +546,17 @@ TERMO_REL	: E
 E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 			{
 				//o tipo resultante deve ser constante_tipo_booleano
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + constante_tipo_booleano + " " + $$.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao;
+				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+				$$.tipo = constante_tipo_booleano;
+			}
+			|
+			'(' E_REL ')'
+			{
+				$$ = $2; 
 			}
 			;
 			
