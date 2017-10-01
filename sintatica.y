@@ -58,6 +58,7 @@ string verificarTipoResultanteDeCoercao(string, string, string);
 %token TK_FIM TK_ERROR
 %token TK_COMENTARIO_1L TK_ABRE_COMENTARIO_NL TK_FECHA_COMENTARIO_NL
 %token TK_CONVERSAO_EXPLICITA
+%token TK_TEXTO
 
 %start S
 
@@ -100,6 +101,7 @@ COMANDOS	: COMANDO COMANDOS
 					$$.traducao = $1.traducao + "\n";
 				if($5.traducao != "")
 					$$.traducao = $$.traducao + $5.traducao;
+				$3.traducao = "";
 			}
 			|
 			;
@@ -570,7 +572,7 @@ E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 				//o tipo resultante deve ser constante_tipo_booleano
 				$$.label = gerarNovaVariavel();
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + constante_tipo_booleano + " " + $$.label + ";\n";
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
 				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
 				$$.tipo = constante_tipo_booleano;
