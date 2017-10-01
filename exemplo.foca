@@ -1,15 +1,20 @@
 int main()
 {
-	var teste1 = 'A';
+	/*
 	78 / 63 / 24 - 23.1;
 
+	var teste1 = 'A';
 	var teste2 = (2.6 - 2 / (3.0 - 9) * 10);	
 
+	var b = (float) (2 - 2 / (3 - 9) * 100);
+*/
 	var logico = true or false;
-	logico = logico and true;
+	logico = logico or true;
 	
-	var b = (float) (7 - (3 - 9.0)/2  * 100);
 
+	
+	var a = true or false;
+	var c = a or logico;
 
 
 }
