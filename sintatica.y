@@ -18,6 +18,7 @@
 #define constante_tipo_caracter "char"*/
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo booelan"
+#define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
 
 using namespace std;
 using namespace MapaTiposLib;
@@ -53,7 +54,10 @@ string verificarTipoResultanteDeCoercao(string, string, string);
 %token TK_CHAR
 %token TK_OP_LOGICO_BIN
 %token TK_OP_LOGICO_UNA
-%token TK_OP_RELACIONAL
+//%token TK_OP_RELACIONAL
+%token TK_OP_RELACIONAL_MENOR_MAIOR
+%token TK_IGUAL_IGUAL TK_DIFERENTE
+%token TK_MAIOR_IGUAL TK_MENOR_IGUAL
 %token TK_MAIN TK_ID TK_TIPO_INT TK_PALAVRA_VAR
 %token TK_FIM TK_ERROR
 %token TK_COMENTARIO_1L TK_ABRE_COMENTARIO_NL TK_FECHA_COMENTARIO_NL
@@ -62,14 +66,16 @@ string verificarTipoResultanteDeCoercao(string, string, string);
 
 %start S
 
-
 %left TK_OP_LOGICO_UNA
 %left TK_OP_LOGICO_BIN
 %right '='
-%nonassoc "==" "!="
-%nonassoc '<' '>' "<=" ">="
+%nonassoc TK_IGUAL_IGUAL TK_DIFERENTE
+%nonassoc '<' '>' TK_MAIOR_IGUAL TK_MENOR_IGUAL 
+//%nonassoc "==" "!="
+//%nonassoc '<' '>' "<=" ">="
 %left '+' '-'
 %left '*' '/'
+
 
 %%
 
@@ -110,7 +116,7 @@ COMANDO 	: E ';'
 			|
 			E_UNARIA ';'
 			|
-			E_REL ';'
+			E_REL_MENOR_PREC ';'
 			|
 			E_LOGICA ';'
 			|
@@ -172,7 +178,8 @@ COMANDO 	: E ';'
 						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
 					else{
-						string params[3] = {$1.label, $1.tipo, $3.tipo};
+						string strPrefixoVarUsuario = prefixo_variavel_usuario;
+						string params[3] = {$1.label.replace(0, strPrefixoVarUsuario.length(), ""), $1.tipo, $3.tipo};
 						yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
 					}
 				}
@@ -194,7 +201,8 @@ ID		: TK_ID
 					string params[1] = {$1.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_NAO_DECLARADA ,params, 1));
 				}
-
+				
+				//cout << "Var:" << endl << $$.label << endl << $$.tipo << endl << endl << $$.traducao << endl;
 			}
 			;
 
@@ -276,7 +284,7 @@ E 			: E '+' E
 				if(resultado == constante_erro)
 				{
 					string params[3] = {$1.tipo, $3.tipo, "+"};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
 				}
 					
 				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
@@ -561,13 +569,120 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 				$$ = $2;
 			}
 			|
-			E_REL
+			//E_REL
+			E_REL_MENOR_PREC
 			;
 
 TERMO_REL	: E
 			;
 
-E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
+E_REL_MENOR_PREC	: TERMO_REL TK_IGUAL_IGUAL TERMO_REL
+					{
+						//o tipo resultante deve ser constante_tipo_booleano
+						if($1.tipo == $3.tipo)
+						{
+							$$.label = gerarNovaVariavel();
+							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+							$$.traducao = $1.traducao + $3.traducao;
+							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+							$$.tipo = constante_tipo_booleano;
+						}
+						else
+						{
+							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
+						}
+					}
+					|
+					TERMO_REL TK_DIFERENTE TERMO_REL
+					{
+						//o tipo resultante deve ser constante_tipo_booleano
+						if($1.tipo == $3.tipo)
+						{
+							$$.label = gerarNovaVariavel();
+							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+							$$.traducao = $1.traducao + $3.traducao;
+							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+							$$.tipo = constante_tipo_booleano;
+						}
+						else
+						{
+							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
+						}
+					}
+					|
+					E_REL_MAIOR_PREC
+					;
+
+E_REL_MAIOR_PREC	: TERMO_REL TK_OP_RELACIONAL_MENOR_MAIOR TERMO_REL
+					{
+						//o tipo resultante deve ser constante_tipo_booleano
+						if($1.tipo == $3.tipo)
+						{
+							$$.label = gerarNovaVariavel();
+							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+							$$.traducao = $1.traducao + $3.traducao;
+							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+							$$.tipo = constante_tipo_booleano;
+						}
+						else
+						{
+							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
+						}
+					}
+					|
+					TERMO_REL TK_MAIOR_IGUAL TERMO_REL
+					{
+						//o tipo resultante deve ser constante_tipo_booleano
+						if($1.tipo == $3.tipo)
+						{
+							$$.label = gerarNovaVariavel();
+							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+							$$.traducao = $1.traducao + $3.traducao;
+							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+							$$.tipo = constante_tipo_booleano;
+						}
+						else
+						{
+							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
+						}
+						
+					}
+					|
+					TERMO_REL TK_MENOR_IGUAL TERMO_REL
+					{
+						//o tipo resultante deve ser constante_tipo_booleano
+						if($1.tipo == $3.tipo)
+						{
+							$$.label = gerarNovaVariavel();
+							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+							$$.traducao = $1.traducao + $3.traducao;
+							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+							$$.tipo = constante_tipo_booleano;
+						}
+						else
+						{
+							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
+						}
+					}
+					|
+					'(' E_REL_MENOR_PREC ')'
+					{
+						$$ = $2;
+					}
+					|
+					'(' E_REL_MAIOR_PREC ')'
+					{
+						$$ = $2;
+					}
+					; 
+
+			/*
+			TERMO_REL TK_OP_RELACIONAL TERMO_REL
 			{
 				//o tipo resultante deve ser constante_tipo_booleano
 				$$.label = gerarNovaVariavel();
@@ -634,7 +749,24 @@ E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 				$$ = $2; 
 			}
 			;
+			*/
 			
+/*
+
+%nonassoc TK_IGUAL_IGUAL TK_DIFERENTE
+%nonassoc '<' '>' TK_MAIOR_IGUAL TK_MENOR_IGUAL 
+
+%token TK_OP_RELACIONAL_MENOR_MAIOR
+%token TK_IGUAL_IGUAL TK_DIFERENTE
+%token TK_MAIOR_IGUAL TK_MENOR_IGUAL
+
+{OP_RELACIONAL_MENOR_MAIOR} { yylval.label = yytext ; return TK_OP_RELACIONAL_MENOR_MAIOR; }
+
+"<="					{ yylval.label = yytext ; return TK_MENOR_IGUAL; }
+">="					{ yylval.label = yytext ; return TK_MAIOR_IGUAL; }
+"=="					{ yylval.label = yytext ; return TK_IGUAL_IGUAL; }
+"!="					{ yylval.label = yytext ; return TK_DIFERENTE; }
+*/
 
 
 %%
@@ -644,7 +776,7 @@ E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 DADOS_VARIAVEL d;
 
 std::map<string, DADOS_VARIAVEL > tabelaDeVariaveis;
-
+extern int yylineno; //Define a linha atual do arquivo fonte.
 
 int yyparse();
 
@@ -686,6 +818,6 @@ string gerarNovaVariavel(){
 
 void yyerror( string MSG )
 {
-	cout << MSG << endl;
+	cout << "Linha " << yylineno << ": " << MSG << endl;
 	exit (0);
 }				
