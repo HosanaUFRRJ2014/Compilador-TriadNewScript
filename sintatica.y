@@ -263,19 +263,7 @@ E 			: E '+' E
 				$$.label = gerarNovaVariavel();
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $1.tipo + " " + $$.label + ";\n";
-				$$.traducao = $1.traducao + $3.traducao;
-				
-
-				/*string chaveFinal = gerarChaveFinal($1.tipo, $3.tipo,"+");
-				string resultado = mapaTipos[chaveFinal];
-				
-				//caso a chave não exista para a primeira ordem de tipos, testar com a ordem invertida
-				if (resultado == "")
-				{
-					chaveFinal = gerarChaveFinal($3.tipo, $1.tipo,"+");
-					resultado = mapaTipos[chaveFinal];
-				}*/
-				
+				$$.traducao = $1.traducao + $3.traducao;				
 				
 				string resultado = getTipoResultante($1.tipo, $3.tipo,"+");
 				
@@ -577,109 +565,332 @@ TERMO_REL	: E
 			;
 
 E_REL_MENOR_PREC	: TERMO_REL TK_IGUAL_IGUAL TERMO_REL
-					{
-						//o tipo resultante deve ser constante_tipo_booleano
-						if($1.tipo == $3.tipo)
-						{
-							$$.label = gerarNovaVariavel();
-							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-							$$.traducao = $1.traducao + $3.traducao;
-							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-							$$.tipo = constante_tipo_booleano;
-						}
-						else
-						{
-							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
-						}
-					}
-					|
-					TERMO_REL TK_DIFERENTE TERMO_REL
-					{
-						//o tipo resultante deve ser constante_tipo_booleano
-						if($1.tipo == $3.tipo)
-						{
-							$$.label = gerarNovaVariavel();
-							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-							$$.traducao = $1.traducao + $3.traducao;
-							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-							$$.tipo = constante_tipo_booleano;
-						}
-						else
-						{
-							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
-						}
-					}
-					|
-					E_REL_MAIOR_PREC
-					;
+			{
+
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao;
+				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
+				
+				string label_old = $$.label;
+				string operador = $2.label;
+				
+				if(resultado == constante_erro)
+				{
+					string params[3] = {$1.tipo, $3.tipo, $2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
+				{
+							
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					string label_old2 = $$.label;
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ label_old2 + ";\n";
+					
+					
+				}
+				
+				
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ operador +" "+ label_old + ";\n";
+					
+				}
+				
+				$$.tipo = constante_tipo_booleano;
+			
+
+			}
+			|
+			TERMO_REL TK_DIFERENTE TERMO_REL
+			{
+
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao;
+				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
+				
+				string label_old = $$.label;
+				string operador = $2.label;
+				
+				if(resultado == constante_erro)
+				{
+					string params[3] = {$1.tipo, $3.tipo, $2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
+				{
+							
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					string label_old2 = $$.label;
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ label_old2 + ";\n";
+					
+					
+				}
+				
+				
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ operador +" "+ label_old + ";\n";
+					
+				}
+				
+				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+				$$.tipo = constante_tipo_booleano;
+		
+			}
+			|
+			E_REL_MAIOR_PREC
+			;
 
 E_REL_MAIOR_PREC	: TERMO_REL TK_OP_RELACIONAL_MENOR_MAIOR TERMO_REL
-					{
-						//o tipo resultante deve ser constante_tipo_booleano
-						if($1.tipo == $3.tipo)
-						{
-							$$.label = gerarNovaVariavel();
-							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-							$$.traducao = $1.traducao + $3.traducao;
-							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-							$$.tipo = constante_tipo_booleano;
-						}
-						else
-						{
-							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
-						}
-					}
-					|
-					TERMO_REL TK_MAIOR_IGUAL TERMO_REL
-					{
-						//o tipo resultante deve ser constante_tipo_booleano
-						if($1.tipo == $3.tipo)
-						{
-							$$.label = gerarNovaVariavel();
-							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-							$$.traducao = $1.traducao + $3.traducao;
-							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-							$$.tipo = constante_tipo_booleano;
-						}
-						else
-						{
-							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
-						}
+			{
+
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao;
+				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
+				
+				string label_old = $$.label;
+				string operador = $2.label;
+				
+				if(resultado == constante_erro)
+				{
+					string params[3] = {$1.tipo, $3.tipo, $2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
+				{
+							
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					string label_old2 = $$.label;
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ label_old2 + ";\n";
+					
+					
+				}
+				
+				
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == resultado)
+				{
 						
-					}
-					|
-					TERMO_REL TK_MENOR_IGUAL TERMO_REL
-					{
-						//o tipo resultante deve ser constante_tipo_booleano
-						if($1.tipo == $3.tipo)
-						{
-							$$.label = gerarNovaVariavel();
-							$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-							$$.traducao = $1.traducao + $3.traducao;
-							$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-							$$.tipo = constante_tipo_booleano;
-						}
-						else
-						{
-							yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES);
-						}
-					}
-					|
-					'(' E_REL_MENOR_PREC ')'
-					{
-						$$ = $2;
-					}
-					|
-					'(' E_REL_MAIOR_PREC ')'
-					{
-						$$ = $2;
-					}
-					; 
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ operador +" "+ label_old + ";\n";
+					
+				}
+				
+				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+				$$.tipo = constante_tipo_booleano;
+				
+
+			}
+			|
+			TERMO_REL TK_MAIOR_IGUAL TERMO_REL
+			{
+
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao;
+				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
+				
+				string label_old = $$.label;
+				string operador = $2.label;
+				
+				if(resultado == constante_erro)
+				{
+					string params[3] = {$1.tipo, $3.tipo, $2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
+				{
+							
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					string label_old2 = $$.label;
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ label_old2 + ";\n";
+					
+					
+				}
+				
+				
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ operador +" "+ label_old + ";\n";
+					
+				}
+				
+				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+				$$.tipo = constante_tipo_booleano;
+			
+				
+				
+			}
+			|
+			TERMO_REL TK_MENOR_IGUAL TERMO_REL
+			{
+
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao;
+				
+				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
+				
+				string label_old = $$.label;
+				string operador = $2.label;
+				
+				if(resultado == constante_erro)
+				{
+					string params[3] = {$1.tipo, $3.tipo, $2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
+				{
+							
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					string label_old2 = $$.label;
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ label_old2 + ";\n";
+					
+					
+				}
+				
+				
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ operador +" "+ label_old + ";\n";
+					
+				}
+				$$.tipo = constante_tipo_booleano;
+				
+
+			}
+			|
+			'(' E_REL_MENOR_PREC ')'
+			{
+				$$ = $2;
+			}
+			|
+			'(' E_REL_MAIOR_PREC ')'
+			{
+				$$ = $2;
+			}
+			; 
 
 			/*
 			TERMO_REL TK_OP_RELACIONAL TERMO_REL
