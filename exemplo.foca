@@ -1,15 +1,29 @@
 int main()
 {
-	var teste1 = 'A';
+/*
 	78 / 63 / 24 - 23.1;
 
+	var teste1 = 'A';
 	var teste2 = (2.6 - 2 / (3.0 - 9) * 10);	
 
-	var logico = true or false;
-	logico = logico and true;
+	var teste3 = (float) (2 - 2 / (3 - 9) * 100);
+*/
 	
-	var b = (float) (7 - (3 - 9.0)/2  * 100);
-
-
-
+	var conversao_explicita = (float) 2 * 3;
+	var conversao_implicita = 32 + conversao_explicita;
+	
+	var expressao_logica_atribuida = true and false or true and not false;
+	var expressao_logica_com_Variavel = expressao_logica_atribuida or true;
+	
+	var expressao_relacional_Logica = (conversao_explicita < conversao_implicita) and
+												 (conversao_explicita > conversao_implicita) and
+												 (conversao_explicita <= conversao_implicita) and
+												 (conversao_explicita < conversao_implicita) and
+												 (conversao_explicita != conversao_implicita) and
+												 (conversao_explicita == conversao_implicita) and
+										 		 true;
+	
+	var declaracao_sem_tipo;
+	var declaracao_com_tipo = 'A';
+	declaracao_sem_tipo = declaracao_com_tipo;
 }

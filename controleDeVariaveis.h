@@ -15,6 +15,7 @@ namespace ControleDeVariaveis{
 	};
 	
 	namespace MapaDeContexto{
+		#define prefixo_variavel_usuario "USER_"
 		map<string, DADOS_VARIAVEL> mapaDeContexto;
 		
 		bool incluirNoMapa(string, string, bool);
@@ -57,6 +58,7 @@ namespace ControleDeVariaveis{
 	namespace VariaveisTemporarias{
 		// a principio esse namespace não esta sendo usado aqui dentro, mas deixei aqui pra importar pro sintatico junto com esse e pq acho que pode ser interessante ter umas variaveis temporarias salvas na tabela (tipo uma com valor true e uma com false, por exemplo)
 		using namespace MapaDeContexto;
+		#define prefixo_variavel_sistema "temp"
 		
 		string gerarNovaVariavel();
 		
@@ -64,7 +66,6 @@ namespace ControleDeVariaveis{
 		string gerarNovaVariavel(){
 			static int num = 0;
 			num++;
-			//cout << num << endl;
 			string temp = "temp";
 	
 			string numInt = to_string(num);

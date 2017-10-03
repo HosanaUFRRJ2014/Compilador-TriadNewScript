@@ -14,6 +14,7 @@ CHAR \'({LETRA}|{NUM})\'
 BOOLEAN "true"|"false"
 OP_RELACIONAL "<"|">"|"<="|">="|"=="|"!="
 ID {LETRA}({LETRA}|{NUM})*
+TEXTO ({LETRA}{DIGITO}{ESPACO})*
 
 %%
 
@@ -33,7 +34,7 @@ ID {LETRA}({LETRA}|{NUM})*
 
 
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
-"(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_real; return TK_CONVERSAO_EXPLICITA;}
+"(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}
 
 
 [(){}[\];,]	{ return *yytext; }
@@ -48,10 +49,12 @@ ID {LETRA}({LETRA}|{NUM})*
 
 {NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
 "-"{NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
-{REAL}		{ yylval.label = yytext; yylval.tipo = constante_tipo_real; return TK_NUM; }
+{REAL}		{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_NUM; }
 {BOOLEAN}	{ yylval.label = yytext; yylval.tipo = constante_tipo_booleano; return TK_BOOL; }
 {CHAR}		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CHAR; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
+
+\"{TEXTO}\""\n"	{ yylval.label = yytext; return TK_TEXTO; }
 
 .			{ *yytext; }
 

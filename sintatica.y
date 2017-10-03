@@ -9,6 +9,8 @@
 
 #include "controleDeVariaveis.h"
 
+#include "MensagensDeErro.h"
+
 #define YYSTYPE atributos
 /*#define constante_tipo_inteiro "int"
 #define constante_tipo_real "float"
@@ -20,6 +22,7 @@
 using namespace std;
 using namespace MapaTiposLib;
 using namespace ControleDeVariaveis;
+using namespace MensagensDeErro;
 
 struct atributos
 {
@@ -55,12 +58,14 @@ string verificarTipoResultanteDeCoercao(string, string, string);
 %token TK_FIM TK_ERROR
 %token TK_COMENTARIO_1L TK_ABRE_COMENTARIO_NL TK_FECHA_COMENTARIO_NL
 %token TK_CONVERSAO_EXPLICITA
+%token TK_TEXTO
 
 %start S
 
 
-%left "not"
-%left "and" "or"
+%left TK_OP_LOGICO_UNA
+%left TK_OP_LOGICO_BIN
+%right '='
 %nonassoc "==" "!="
 %nonassoc '<' '>' "<=" ">="
 %left '+' '-'
@@ -96,6 +101,7 @@ COMANDOS	: COMANDO COMANDOS
 					$$.traducao = $1.traducao + "\n";
 				if($5.traducao != "")
 					$$.traducao = $$.traducao + $5.traducao;
+				$3.traducao = "";
 			}
 			|
 			;
@@ -108,69 +114,89 @@ COMANDO 	: E ';'
 			|
 			E_LOGICA ';'
 			|
-			TERMO_CARACTER ';'
-			|
 			TK_COMENTARIO_1L COMANDO
 			{
+			
 			}
 			|
 			TK_PALAVRA_VAR TK_ID ';'
 			{
-				$$.label = $2.label;
-				if(variavelJaDeclarada($2.label)){
-					yyerror("A variavel com id '" + $2.label + "' já existe");
+				if(variavelJaDeclarada(prefixo_variavel_usuario + $2.label)){
+					//mensagem de erro dupla declaração
+					string params[1] = {$2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
 				}else{
-					incluirNoMapa($2.label);
+					incluirNoMapa(prefixo_variavel_usuario + $2.label);
 				}
 			}
 			|
 			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO ';'
-			{
-				if(variavelJaDeclarada($2.label)){
-					yyerror("dupla declaração da variavel com id '" + $2.label + "'");
+			{	
+				if(variavelJaDeclarada(prefixo_variavel_usuario + $2.label)){
+					//mensagem de erro dupla declaração
+					string params[1] = {$2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
 				}else{
 					string tipo = $4.tipo;
-					if(tipo == constante_tipo_booleano)
+					if(tipo == constante_tipo_booleano){
 						tipo = constante_tipo_inteiro;
+						tipo = "\t" + tipo;
+					}
 					
-					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + ";\n";
-					$$.traducao = $4.traducao + "\t" + $2.label + " = " + $4.label + ";\n";
-					incluirNoMapa($2.label, $4.tipo);
+					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + prefixo_variavel_usuario + $2.label + ";\n";
+					$$.traducao = $4.traducao + "\t" + prefixo_variavel_usuario + $2.label + " = " + $4.label + ";\n";
+					incluirNoMapa(prefixo_variavel_usuario + $2.label, $4.tipo);
 				}
 			}
 			|
-			TK_ID '=' VALOR_ATRIBUICAO ';'
+			ID '=' VALOR_ATRIBUICAO ';'
 			{				
-				if(variavelJaDeclarada($1.label)){
-					if($1.label != $3.label){
-						DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
-						if(metaData.tipo == ""){
-	//isso aqui também pode causar problema no futuro devido as lacunas
-							metaData.tipo = $3.tipo;
-							atualizarNoMapa(metaData);
-							string tipo = metaData.tipo;
-							if(tipo == constante_tipo_booleano)
-								tipo = constante_tipo_inteiro;
-							$$.traducaoDeclaracaoDeVariaveis = "\t" + tipo + " " + metaData.nome + ";\n";
+				if($1.label != $3.label){
+					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
+					if(metaData.tipo == ""){
+//isso aqui também pode causar problema no futuro devido as lacunas
+						metaData.tipo = $3.tipo;
+						atualizarNoMapa(metaData);
+						string tipo = metaData.tipo;
+						if(tipo == constante_tipo_booleano){
+							tipo = constante_tipo_inteiro;
+							tipo = "\t" + tipo;
 						}
-					
-						$1.tipo = metaData.tipo;
-	//provavelmente ainda há lacunas, mas vamos ignorar por enquanto
-						if(metaData.tipo == $3.tipo){
-							$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-							$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
-						}
-						else{
-							yyerror("Os tipos da atribuição não são compativeis. A de variavel de id '" + $1.label + "' é do tipo '" + $1.tipo + "' e o valor atribuido é do tipo '"+ $3.tipo + "'\n");
-						}
+						$$.traducaoDeclaracaoDeVariaveis = "\t" + tipo + " " + metaData.nome + ";\n";
+					}
+				
+					$1.tipo = metaData.tipo;
+//provavelmente ainda há lacunas, mas vamos ignorar por enquanto
+					if(metaData.tipo == $3.tipo){
+						$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
 					else{
-						$$ = $3;
+						string params[3] = {$1.label, $1.tipo, $3.tipo};
+						yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
 					}
+				}
+				else{
+					cout << "entrou .... label: " << $3.label << " tipo: " << $3.tipo << endl;
+					$$ = $3;
 				}
 			}
 			;
 
+//REGRA CRIADA PRA DIMINUIR A QUANTIDADE DE REPETIÇÕES DAS VERIFICAÇÕES DE EXISTENCIA DE VARIAVEL
+ID		: TK_ID
+			{
+				if(variavelJaDeclarada(prefixo_variavel_usuario + $1.label)){
+					$$.label = prefixo_variavel_usuario + $1.label;
+					$$.tipo = recuperarDadosVariavel(prefixo_variavel_usuario + $1.label).tipo;
+				}else{
+					string strPrefixoVarUsuario = prefixo_variavel_usuario;
+					string params[1] = {$1.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_NAO_DECLARADA ,params, 1));
+				}
+
+			}
+			;
 
 TERMO		: TK_NUM
 			{
@@ -179,24 +205,35 @@ TERMO		: TK_NUM
 				$$.traducao = "\t" + $$.label + " = " + $1.label + ";\n";
 				$$.tipo = $1.tipo;
 			}
-			| TK_ID
+			| 
+			ID
+			|
+			TK_CHAR
 			{
-				if(variavelJaDeclarada($1.label)){
-					$$.label = $1.label;
-					$$.tipo = recuperarDadosVariavel($1.label).tipo;
-				}else{
-					yyerror("Variável de id '" + $1.label + "' não declarada");
-				}
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = "\t" + $1.tipo + " " + $$.label + ";\n";
+				$$.traducao = "\t" + $$.label + " = " + $1.label + ";\n";
+				$$.tipo = $1.tipo;
 			}
 			;
 			
 VALOR_ATRIBUICAO: E
+			{
+				//se for variavel aqui sempre vai existir, pq vai ter que ter passado pela verificação da regra TERMO: TK_ID
+				//e por passar nessa regra terá o tipo já buscado
+				if($1.label.find(prefixo_variavel_usuario) == 0 && $1.tipo == ""){
+					string strPrefixoVarUsuario = prefixo_variavel_usuario;
+					string params[1] = {$1.label.replace(0, strPrefixoVarUsuario.length(), "")};
+					//mensagem variavel precisa ter recebido um valor para ter seu tipo definido e atribuido o valor
+					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_UTILIZADA_PRECISA_TER_RECEBIDO_UM_VALOR, params, 1));
+				}
+				$$ = $1;
+			}
 			|
+			//o id tmb pode vir pelas regras de expressão logica, mas não parece ter acontecido alguma vez
 			E_UNARIA
 			|
 			E_LOGICA
-			|
-			TERMO_CARACTER
 			|
 			TK_CONVERSAO_EXPLICITA VALOR_ATRIBUICAO
 			{
@@ -238,11 +275,11 @@ E 			: E '+' E
 				
 				if(resultado == constante_erro)
 				{
-					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "+");
-					yyerror(msgErro);
+					string params[3] = {$1.tipo, $3.tipo, "+"};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 				}
 					
-				else if($1.tipo == $3.tipo)
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
@@ -256,13 +293,13 @@ E 			: E '+' E
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " + " + $3.label + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " + " + label_old + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();       //provável que label_old veja antes de label1 também
+					$$.label = gerarNovaVariavel();
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + label_old + ";\n";
 					
 				}
@@ -287,11 +324,11 @@ E 			: E '+' E
 				
 				if(resultado == constante_erro)
 				{
-					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "-");
-					yyerror(msgErro);
+					string params[3] = {$1.tipo, $3.tipo, "-"};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 				}
 					
-				else if($1.tipo == $3.tipo)
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
@@ -305,13 +342,13 @@ E 			: E '+' E
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old  + " - " + $3.label + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " - " + label_old + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();		//provável que label_old veja antes de label1 também
+					$$.label = gerarNovaVariavel();
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + label_old + ";\n";
 					
 				}
@@ -340,11 +377,11 @@ E1 			: E1 '*' E1
 				
 				if(resultado == constante_erro)
 				{
-					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "*");
-					yyerror(msgErro);
+					string params[3] = {$1.tipo, $3.tipo, "*"};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 				}
 					
-				else if($1.tipo == $3.tipo)
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
@@ -358,13 +395,13 @@ E1 			: E1 '*' E1
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " * " + $3.label + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " * " + label_old + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();		//provável que label_old veja antes de label1 também
+					$$.label = gerarNovaVariavel();
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + label_old + ";\n";
 					
 				}
@@ -386,11 +423,11 @@ E1 			: E1 '*' E1
 				
 				if(resultado == constante_erro)
 				{
-					string msgErro = gerarMensagemErroOperacaoProibida($1.tipo, $3.tipo, "/");
-					yyerror(msgErro);
+					string params[3] = {$1.tipo, $3.tipo, "/"};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 				}
 					
-				else if($1.tipo == $3.tipo)
+				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
 				{
 							
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + $3.label + ";\n";
@@ -404,13 +441,13 @@ E1 			: E1 '*' E1
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + "/" + $3.label + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + "/" + label_old + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
 						
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();			//provável que label_old veja antes de label1 também
+					$$.label = gerarNovaVariavel();
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + label_old + ";\n";
 					
 				}
@@ -466,15 +503,16 @@ E_UNARIA	: '-' TERMO
 				$$.tipo = $3.tipo;
 			}
 			;
+
 E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 			{
 				if($1.tipo == constante_tipo_booleano && $3.tipo == constante_tipo_booleano){
 					$$.label = gerarNovaVariavel();
 					$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $$.label + ";\n";
+					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + tipo + " " + $$.label + ";\n";
 					$$.traducao = $1.traducao + $3.traducao;
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
 					$$.tipo = constante_tipo_booleano;
 				}
 				else{
@@ -489,15 +527,17 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 					$$.label = gerarNovaVariavel();
 					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
 					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $$.label + ";\n";
+					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + tipo + " " + $$.label + ";\n";
 					$$.traducao = $2.traducao;
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + $2.label + ";\n";
+					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + $2.label + ";\n";
 					$$.tipo = constante_tipo_booleano;
 				}
 				else{
 					yyerror(MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN);
 				}
 			}
+			|
+			ID
 			|
 			TK_BOOL
 			{
@@ -509,27 +549,11 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 					if($1.label == "true")
 						valorBoolInt = "1";
 					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = "\t" + tipo + " " + $$.label + " = " + valorBoolInt + ";\n";
+					$$.traducaoDeclaracaoDeVariaveis = "\t\t" + tipo + " " + $$.label + " = " + valorBoolInt + ";\n";
 				}
 				
 				$$.label = $1.label;
 				$$.tipo = $1.tipo;
-			}
-			|
-			TK_ID
-			{
-				if(variavelJaDeclarada($1.label)){
-					if(recuperarDadosVariavel($1.label).tipo == constante_tipo_booleano){
-						$$.label = $1.label;
-						$$.tipo = constante_tipo_booleano;
-					}
-					else{
-						//disparar mensagem de erro variavel de tipo incompativel
-					}		
-				}
-				else{
-					//disparar mensagem de erro variavel não existente				
-				}
 			}
 			|
 			'(' E_LOGICA ')'
@@ -548,7 +572,7 @@ E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 				//o tipo resultante deve ser constante_tipo_booleano
 				$$.label = gerarNovaVariavel();
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + constante_tipo_booleano + " " + $$.label + ";\n";
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
 				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
 				$$.tipo = constante_tipo_booleano;
@@ -559,14 +583,6 @@ E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 				$$ = $2; 
 			}
 			;
-			
-TERMO_CARACTER: TK_CHAR
-			{
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = "\t" + $1.tipo + " " + $$.label + ";\n";
-				$$.traducao = "\t" + $$.label + " = " + $1.label + ";\n";
-				$$.tipo = $1.tipo;
-			}
 			
 
 
@@ -594,36 +610,6 @@ int main( int argc, char* argv[] )
 
 bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
 	return true;
-}
-
-/*string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao){
-	//a principio será feito com if devido a pouca quantidade de tipo e falta de noção de como fazer o certo
-	// mas depois vai ser preciso trocar para matriz
-	
-	if(tipo1 == constante_tipo_real || tipo2 == constante_tipo_real){
-		return constante_tipo_real;
-	}else{
-		return constante_tipo_inteiro;
-	}
-}*/
-//declaração de variaveis var <nome variavel>;
-string gerarNovaVariavel(){
-	static int num = 0;
-	num++;
-	//cout << num << endl;
-	string temp = "temp";
-	
-	/*d.nome = "var1";
-	d.valor = "10";
-	d.tipo = constante_tipo_inteiro;
-	
-	tabelaDeVariaveis[d.nome] = d;
-	cout << tabelaDeVariaveis[d.nome].valor << endl;
-	DADOS_VARIAVEL A = tabelaDeVariaveis["aaa"];
-	cout << (A.nome == "") << endl;*/
-	
-	string numInt = to_string(num);
-	return temp + numInt;
 }
 
 void yyerror( string MSG )
