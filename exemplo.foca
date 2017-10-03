@@ -13,6 +13,8 @@ int main()
 												 (conversao_explicita < conversao_implicita) and
 												 (conversao_explicita != conversao_implicita) and
 												 (conversao_explicita == conversao_implicita) and
-										 		 ;
+										 		 false;
+										 		 
+	var convert = 1 + 2 * (float) 3;
 	
 }

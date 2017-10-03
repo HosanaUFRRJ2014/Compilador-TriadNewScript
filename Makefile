@@ -6,7 +6,7 @@ all:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo.foca
+		./glf < exemplo.foca > codigo.c
 
 
 

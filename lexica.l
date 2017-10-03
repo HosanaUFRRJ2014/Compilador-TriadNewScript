@@ -18,6 +18,7 @@ OP_RELACIONAL_MENOR_MAIOR "<"|">"
 ID {LETRA}({LETRA}|{NUM})*
 TEXTO ({LETRA}{DIGITO}{ESPACO})*
 
+
 %%
 
 "\n"		{}
@@ -37,6 +38,7 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
 "(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}
+"(char)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CONVERSAO_EXPLICITA;}
 
 
 [(){}[\];,]	{ return *yytext; }
