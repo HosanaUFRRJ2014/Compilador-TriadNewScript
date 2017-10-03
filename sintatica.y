@@ -293,7 +293,7 @@ E 			: E '+' E
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " + " + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " + " + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
@@ -342,7 +342,7 @@ E 			: E '+' E
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " - " + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " - " + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
@@ -395,7 +395,7 @@ E1 			: E1 '*' E1
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + " * " + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " * " + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
@@ -441,7 +441,7 @@ E1 			: E1 '*' E1
 					
 					$$.label = gerarNovaVariavel();
 					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $3.label + "/" + label_old + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + "/" + $3.label + ";\n";
 				}
 				else if($1.tipo == resultado)
 				{
@@ -574,7 +574,58 @@ E_REL		: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 				$$.traducao = $1.traducao + $3.traducao;
-				$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
+				
+				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
+				
+				string label_old = $$.label;
+				string operador = $2.label;
+				
+				if(resultado == constante_erro)
+				{
+					string params[3] = {$1.tipo, $3.tipo, $2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+				}
+					
+				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
+				{
+							
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
+				{
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					string label_old2 = $$.label;
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ label_old2 + ";\n";
+					
+					
+				}
+				
+				
+				else if($3.tipo == resultado)
+				{
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
+					
+					$$.label = gerarNovaVariavel();
+					
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ $3.label + ";\n";
+				}
+				
+				else if($1.tipo == resultado)
+				{
+						
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
+					$$.label = gerarNovaVariavel();
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ operador +" "+ label_old + ";\n";
+					
+				}
+				
+
 				$$.tipo = constante_tipo_booleano;
 			}
 			|
@@ -610,6 +661,27 @@ int main( int argc, char* argv[] )
 
 bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
 	return true;
+}
+
+/*string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao){
+	//a principio será feito com if devido a pouca quantidade de tipo e falta de noção de como fazer o certo
+	// mas depois vai ser preciso trocar para matriz
+	
+	if(tipo1 == constante_tipo_real || tipo2 == constante_tipo_real){
+		return constante_tipo_real;
+	}else{
+		return constante_tipo_inteiro;
+	}
+}*/
+//declaração de variaveis var <nome variavel>;
+string gerarNovaVariavel(){
+	static int num = 0;
+	num++;
+	
+	string temp = "temp";
+	
+	string numInt = to_string(num);
+	return temp + numInt;
 }
 
 void yyerror( string MSG )

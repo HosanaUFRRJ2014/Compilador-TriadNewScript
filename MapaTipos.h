@@ -44,11 +44,11 @@ namespace MapaTiposLib
 		
 	}
 	
-	string gerarMensagemErroOperacaoProibida(string tipo1, string tipo2, string operador)
+	/*string gerarMensagemErroOperacaoProibida(string tipo1, string tipo2, string operador)
 	{
 		return "Erro: Não é possível efetuar operação com o operador " + operador + " entre os tipos " + tipo1 + " e " + tipo2;
 		
-	}
+	}*/
 
 
 	map<string, string> criarMapa()
@@ -60,6 +60,7 @@ namespace MapaTiposLib
 		string chaveFinal;
 
 		/*****************operações ariméticas******************/
+		//********** operadores +, -, * , /
 			//soma
 			operador = "+";
 				
@@ -392,24 +393,502 @@ namespace MapaTiposLib
 				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
-		/*******************operações relacionais************************/	
+		/*******************************************operações relacionais*******************************************/	
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		//********************** operadores <, >, <=, >=, ==, !=
+		
+		//menor que
+			operador = "<";
+			
+				//inteiro + inteiro
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_inteiro;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
 				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+			
+				//inteiro + flutuante
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//inteiro + booleano
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//inteiro + caracter
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
+
+
+				//flutuante + flutuante
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//flutuante + booleano
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//flutuante + caracter
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//booleano + booleano
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//booleano + caracter
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+				
+				
+				//caracter + caracter
+				tipo1 = constante_tipo_caracter;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+				
+		//maior que
+			operador = ">";
+			
+				//inteiro + inteiro
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_inteiro;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+			
+				//inteiro + flutuante
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//inteiro + booleano
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//inteiro + caracter
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
+
+
+				//flutuante + flutuante
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//flutuante + booleano
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//flutuante + caracter
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//booleano + booleano
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//booleano + caracter
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+				
+				
+				//caracter + caracter
+				tipo1 = constante_tipo_caracter;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+				
+		//menor ou igual
+			operador = "<=";
+			
+				//inteiro + inteiro
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_inteiro;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+			
+				//inteiro + flutuante
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//inteiro + booleano
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//inteiro + caracter
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
+
+
+				//flutuante + flutuante
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//flutuante + booleano
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//flutuante + caracter
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//booleano + booleano
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//booleano + caracter
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+				
+				
+				//caracter + caracter
+				tipo1 = constante_tipo_caracter;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
+		//maior ou igual
+			operador = ">=";
+			
+				//inteiro + inteiro
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_inteiro;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+			
+				//inteiro + flutuante
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//inteiro + booleano
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//inteiro + caracter
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
+
+
+				//flutuante + flutuante
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//flutuante + booleano
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//flutuante + caracter
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//booleano + booleano
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//booleano + caracter
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+				
+				
+				//caracter + caracter
+				tipo1 = constante_tipo_caracter;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+				
+		//igual igual
+			operador = "==";
+			
+				//inteiro + inteiro
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_inteiro;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+			
+				//inteiro + flutuante
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//inteiro + booleano
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//inteiro + caracter
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
+
+
+				//flutuante + flutuante
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//flutuante + booleano
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//flutuante + caracter
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//booleano + booleano
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//booleano + caracter
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+				
+				
+				//caracter + caracter
+				tipo1 = constante_tipo_caracter;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+				
+		//não igual (diferente)
+			operador = "!=";
+			
+				//inteiro + inteiro
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_inteiro;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+			
+				//inteiro + flutuante
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//inteiro + booleano
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//inteiro + caracter
+				tipo1 = constante_tipo_inteiro;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
+
+
+				//flutuante + flutuante
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_flutuante;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//flutuante + booleano
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//flutuante + caracter
+				tipo1 = constante_tipo_flutuante;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_flutuante));
+
+
+				//booleano + booleano
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_booleano;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+
+
+				//booleano + caracter
+				tipo1 = constante_tipo_booleano;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
+				
+				
+				//caracter + caracter
+				tipo1 = constante_tipo_caracter;
+				tipo2 = constante_tipo_caracter;
+				chaveFinal =  gerarChaveFinal(tipo1,tipo2,operador);
+				
+				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_inteiro));
+
 
 
 		return mapaTipos;
