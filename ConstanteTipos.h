@@ -8,6 +8,7 @@ namespace ConstanteTipos
 	#define constante_tipo_flutuante "float"
 	#define constante_tipo_booleano "boolean"
 	#define constante_tipo_caracter "char"
+	#define constante_tipo_string "string"
 	#define constante_erro "erro"
 	
 

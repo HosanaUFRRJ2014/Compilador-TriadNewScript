@@ -1,6 +1,7 @@
 %{
 #include <iostream>
 #include <string>
+#include <algorithm> 
 #include <sstream>
 #include <map>
 #include <vector>
@@ -11,7 +12,7 @@
 
 #include "MensagensDeErro.h"
 
-#define YYSTYPE atributos
+#define YYSTYPE ATRIBUTOS
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo booelan"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
@@ -21,7 +22,7 @@ using namespace MapaTiposLib;
 using namespace ControleDeVariaveis;
 using namespace MensagensDeErro;
 
-struct atributos
+struct ATRIBUTOS
 {
 	string label;
 	string traducaoDeclaracaoDeVariaveis;
@@ -29,20 +30,12 @@ struct atributos
 	string tipo;
 };
 
-/*struct DADOS_VARIAVEL
-{
-	string tipo;
-	string nome;
-	string valor;
-};*/
-
 int yylex(void);
 void yyerror(string);
 bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
 string constroiPrint(string, string);
-
-//map<string, string> mapaTipos;
+ATRIBUTOS tratarExpressaoAritmetica(string, ATRIBUTOS, ATRIBUTOS);
 
 %}
 
@@ -55,6 +48,7 @@ string constroiPrint(string, string);
 %token TK_OP_RELACIONAL_MENOR_MAIOR
 %token TK_IGUAL_IGUAL TK_DIFERENTE
 %token TK_MAIOR_IGUAL TK_MENOR_IGUAL
+
 %token TK_MAIN TK_ID TK_TIPO_INT TK_PALAVRA_VAR
 %token TK_FIM TK_ERROR
 %token TK_COMENTARIO_1L TK_ABRE_COMENTARIO_NL TK_FECHA_COMENTARIO_NL
@@ -78,7 +72,7 @@ string constroiPrint(string, string);
 
 S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include<string.h>\n#include<stdio.h>\nint main(void)\n{\n" << $5.traducao << "\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include<string.h>\n#include<stdio.h>\n\n#define TRUE 1\n#define FALSE 0\n\nint main(void)\n{\n" << $5.traducao << "\treturn 0;\n}" << endl; 
 			}
 			;
 
@@ -260,101 +254,12 @@ VALOR_ATRIBUICAO: E
 
 E 			: E '+' E
 			{
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducao = $1.traducao + $3.traducao;				
-				
-				string resultado = getTipoResultante($1.tipo, $3.tipo,"+");
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-				
-				string label_old = $$.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, "+"};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
-				{
-							
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " + " + $3.label + ";\n";
-				}
-				else if($1.tipo == resultado)
-				{
-						
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " + " + label_old + ";\n";
-					
-				}
-				
-
-				$$.tipo = resultado;	
-				
-						
-				
+				$$ = tratarExpressaoAritmetica("+", $1, $3);							
 			}
 			|
 			E '-' E
 			{
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducao = $1.traducao + $3.traducao;
-				
-				string resultado = getTipoResultante($1.tipo, $3.tipo,"-");
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-				
-				string label_old = $$.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, "-"};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
-				{
-							
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " - " + $3.label + ";\n";
-				}
-				else if($1.tipo == resultado)
-				{
-						
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " - " + label_old + ";\n";
-					
-				}
-				
-
-				$$.tipo = resultado;	
+				$$ = tratarExpressaoAritmetica("-", $1, $3);
 			}
 			|
 			E1
@@ -362,98 +267,12 @@ E 			: E '+' E
 
 E1 			: E1 '*' E1
 			{
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducao = $1.traducao + $3.traducao;
-				
-				string resultado = getTipoResultante($1.tipo, $3.tipo,"*");
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-				
-				string label_old = $$.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, "*"};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
-				{
-							
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + " * " + $3.label + ";\n";
-				}
-				else if($1.tipo == resultado)
-				{
-						
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + " * " + label_old + ";\n";
-					
-				}
-				
-
-				$$.tipo = resultado;	
+				$$ = tratarExpressaoAritmetica("*", $1, $3);
 			}
 			|
 			E1 '/' E1
 			{
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducao = $1.traducao + $3.traducao;
-				
-				string resultado = getTipoResultante($1.tipo, $3.tipo,"/");
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-				
-				string label_old = $$.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, "/"};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo == resultado && $3.tipo == resultado)
-				{
-							
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + $3.label + ";\n";
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old + "/" + $3.label + ";\n";
-				}
-				else if($1.tipo == resultado)
-				{
-						
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + $$.label + ";\n";
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + "/" + label_old + ";\n";
-					
-				}
-				
-
-				$$.tipo = resultado;	
+				$$ = tratarExpressaoAritmetica("/", $1, $3);
 			}
 			|
 			'(' E ')'
@@ -558,18 +377,10 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 			|
 			TK_BOOL
 			{
-				if(!variavelJaDeclarada($1.label)){
-				//no final das contas o 3º campo não foi necessário, mas pode ser util no futuro;
-				// o motivo de não ter sido necessario é que as palavras true e false nunca serão reconhecidas como id;
-					incluirNoMapa($1.label, $1.tipo, true);
-					string valorBoolInt = "0";
-					if($1.label == "true")
-						valorBoolInt = "1";
-					string tipo = constante_tipo_inteiro;
-					$$.traducaoDeclaracaoDeVariaveis = "\t\t" + tipo + " " + $$.label + " = " + valorBoolInt + ";\n";
-				}
-				
-				$$.label = $1.label;
+				string nomeUpperCase = $1.label;
+				transform(nomeUpperCase.begin(), nomeUpperCase.end(), nomeUpperCase.begin(), ::toupper);
+				$$.label = nomeUpperCase;
+				incluirNoMapa($$.label, $1.tipo);
 				$$.tipo = $1.tipo;
 			}
 			|
@@ -1064,6 +875,55 @@ int main( int argc, char* argv[] )
 	return 0;
 }
 
+ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3){
+	ATRIBUTOS dolarDolar;
+	
+	dolarDolar.label = gerarNovaVariavel();
+	dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
+	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;				
+	
+	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
+	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";
+	
+	string label_old = dolarDolar.label;
+	
+	if(resultado == constante_erro)
+	{
+		string params[3] = {dolar1.tipo, dolar3.tipo, op};
+		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
+	}
+		
+	else if(dolar1.tipo == dolar3.tipo && dolar1.tipo == resultado && dolar3.tipo == resultado)
+	{
+				
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
+	}
+	
+	
+	else if(dolar3.tipo == resultado)
+	{
+		
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
+		
+		dolarDolar.label = gerarNovaVariavel();
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";
+		
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + label_old + " " + op + " " + dolar3.label + ";\n";
+	}
+	else if(dolar1.tipo == resultado)
+	{
+			
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
+		dolarDolar.label = gerarNovaVariavel();
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + label_old + ";\n";
+		
+	}
+	
+	dolarDolar.tipo = resultado;
+	return dolarDolar;	
+}
+
 string constroiPrint(string tipo, string label){
 	string print = "printf(\"\%";
 	if(tipo == constante_tipo_flutuante){
@@ -1079,29 +939,10 @@ string constroiPrint(string tipo, string label){
 }
 
 bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
+	
 	return tipoOrigem != constante_tipo_booleano;
 }
 
-/*string verificarResultanteDeCoercao(string tipo1, string tipo2, string operacao){
-	//a principio será feito com if devido a pouca quantidade de tipo e falta de noção de como fazer o certo
-	// mas depois vai ser preciso trocar para matriz
-	
-	if(tipo1 == constante_tipo_real || tipo2 == constante_tipo_real){
-		return constante_tipo_real;
-	}else{
-		return constante_tipo_inteiro;
-	}
-}*/
-//declaração de variaveis var <nome variavel>;
-string gerarNovaVariavel(){
-	static int num = 0;
-	num++;
-	
-	string temp = "temp";
-	
-	string numInt = to_string(num);
-	return temp + numInt;
-}
 
 void yyerror( string MSG )
 {
