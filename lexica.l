@@ -27,7 +27,6 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 
 "main"		{return TK_MAIN;}
 "int"		{return TK_TIPO_INT;}
-
 "var"		{return TK_PALAVRA_VAR;}
 
 
@@ -39,6 +38,7 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
 "(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}
 "(char)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CONVERSAO_EXPLICITA;}
+"(string)"  { yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_CONVERSAO_EXPLICITA;}
 
 
 [(){}[\];,]	{ return *yytext; }

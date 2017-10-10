@@ -11,31 +11,38 @@ namespace ControleDeVariaveis{
 	{
 		string tipo;
 		string nome;
-		bool variavelReservadaDoSistema;
+		int tamanho;
 	};
 	
 	namespace MapaDeContexto{
 		#define prefixo_variavel_usuario "USER_"
+		int numeroEscopoAtual = 0;
+		vector<map<string, DADOS_VARIAVEL>> pilhaDeMapas;
 		map<string, DADOS_VARIAVEL> mapaDeContexto;
 		
-		bool incluirNoMapa(string, string, bool);
-		bool atualizarNoMapa(DADOS_VARIAVEL);
-		bool variavelJaDeclarada(string);
+		void inicializarMapa();
+		bool incluirNoMapa(string, string, int);
+		bool atualizarNoMapa(DADOS_VARIAVEL, int);
+		bool variavelJaDeclarada(string, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string);
 		
-		bool incluirNoMapa(string nome, string tipo = "", bool variavelReservadaDoSistema = false){
+		void inicializarMapa(){
+			map<string, DADOS_VARIAVEL> mapa0;
+			pilhaDeMapas.push_back(mapa0);
+		}
+				
+		bool incluirNoMapa(string nome, string tipo = "", int escopo = numeroEscopoAtual){
 			if(!variavelJaDeclarada(nome)){
 				DADOS_VARIAVEL variavel;
 				variavel.nome = nome;
 				variavel.tipo = tipo;
-				variavel.variavelReservadaDoSistema = variavelReservadaDoSistema;
 				mapaDeContexto[variavel.nome] = variavel;
 				return true;
 			}
 			return false;
 		}
 		
-		bool atualizarNoMapa(DADOS_VARIAVEL variavel){
+		bool atualizarNoMapa(DADOS_VARIAVEL variavel, int escopo = numeroEscopoAtual){
 			if(variavelJaDeclarada(variavel.nome)){
 				if(mapaDeContexto[variavel.nome].tipo == "")
 					mapaDeContexto[variavel.nome].tipo = variavel.tipo;
@@ -44,9 +51,11 @@ namespace ControleDeVariaveis{
 			}
 			return false;
 		}
-		bool variavelJaDeclarada(string nome){
+		
+		bool variavelJaDeclarada(string nome, int escopo){
 			return mapaDeContexto.find(nome) != mapaDeContexto.end();
 		}
+		
 		DADOS_VARIAVEL recuperarDadosVariavel(string nome){
 			if(variavelJaDeclarada(nome)){
 				return mapaDeContexto[nome];
@@ -56,8 +65,6 @@ namespace ControleDeVariaveis{
 	}
 	
 	namespace VariaveisTemporarias{
-		// a principio esse namespace não esta sendo usado aqui dentro, mas deixei aqui pra importar pro sintatico junto com esse e pq acho que pode ser interessante ter umas variaveis temporarias salvas na tabela (tipo uma com valor true e uma com false, por exemplo)
-		using namespace MapaDeContexto;
 		#define prefixo_variavel_sistema "temp"
 		
 		string gerarNovaVariavel();
@@ -66,7 +73,7 @@ namespace ControleDeVariaveis{
 		string gerarNovaVariavel(){
 			static int num = 0;
 			num++;
-			string temp = "temp";
+			string temp = prefixo_variavel_sistema;
 	
 			string numInt = to_string(num);
 			return temp + numInt;
@@ -75,6 +82,7 @@ namespace ControleDeVariaveis{
 	
 	
 	using namespace VariaveisTemporarias;
+	using namespace MapaDeContexto;
 
 }
 
