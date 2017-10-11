@@ -36,6 +36,7 @@ bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
 string constroiPrint(string, string);
 ATRIBUTOS tratarExpressaoAritmetica(string, ATRIBUTOS, ATRIBUTOS);
+ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 
 %}
 
@@ -399,71 +400,7 @@ TERMO_REL	: E
 E_REL_MENOR_PREC	: TERMO_REL TK_IGUAL_IGUAL TERMO_REL
 			{
 
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-				$$.traducao = $1.traducao + $3.traducao;
-				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
-				
-				string label_old = $$.label;
-				string operador = $2.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, $2.label};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
-				{
-							
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-
-					$1.label = varConvert;
-
-					varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$3.label = varConvert;
-					
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-					
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == resultado)
-				{
-						
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";
-					
-					$3.label = varConvert;
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-				}
-				
-				$$.tipo = constante_tipo_booleano;
+				$$ = tratarExpressaoRelacional($2.label,$1,$3);	
 			
 
 			}
@@ -471,70 +408,7 @@ E_REL_MENOR_PREC	: TERMO_REL TK_IGUAL_IGUAL TERMO_REL
 			TERMO_REL TK_DIFERENTE TERMO_REL
 			{
 
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-				$$.traducao = $1.traducao + $3.traducao;
-				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
-				
-				string label_old = $$.label;
-				string operador = $2.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, $2.label};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
-				{
-							
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-
-					$3.label = varConvert;
-
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-					
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					string varConvert = gerarNovaVariavel();	
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == resultado)
-				{
-						
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";
-					$3.label = varConvert;
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-				}
-				
-				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-				$$.tipo = constante_tipo_booleano;
+				$$ = tratarExpressaoRelacional($2.label,$1,$3);
 		
 			}
 			|
@@ -544,69 +418,7 @@ E_REL_MENOR_PREC	: TERMO_REL TK_IGUAL_IGUAL TERMO_REL
 E_REL_MAIOR_PREC	: TERMO_REL TK_OP_RELACIONAL_MENOR_MAIOR TERMO_REL
 			{
 
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-				$$.traducao = $1.traducao + $3.traducao;
-				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
-				
-				string label_old = $$.label;
-				string operador = $2.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, $2.label};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
-				{
-							
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					varConvert = gerarNovaVariavel();
-					
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$3.label = varConvert;
-					
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-					
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == resultado)
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$3.label = varConvert;
-
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-				}
-				
-				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-				$$.tipo = constante_tipo_booleano;
+				$$ = tratarExpressaoRelacional($2.label,$1,$3);
 				
 
 			}
@@ -614,142 +426,14 @@ E_REL_MAIOR_PREC	: TERMO_REL TK_OP_RELACIONAL_MENOR_MAIOR TERMO_REL
 			TERMO_REL TK_MAIOR_IGUAL TERMO_REL
 			{
 
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-				$$.traducao = $1.traducao + $3.traducao;
-				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
-				
-				string label_old = $$.label;
-				string operador = $2.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, $2.label};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
-				{
-							
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					
-					
-					varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$3.label = varConvert;
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-					
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-				
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					$1.label = varConvert;
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == resultado)
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$3.label = varConvert;
-
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-				}
-				
-				//$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label + " " + $2.label + " " + $3.label + ";\n";
-				$$.tipo = constante_tipo_booleano;
-			
-				
+				$$ = tratarExpressaoRelacional($2.label,$1,$3);			
 				
 			}
 			|
 			TERMO_REL TK_MENOR_IGUAL TERMO_REL
 			{
 
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-				$$.traducao = $1.traducao + $3.traducao;
-				
-				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
-				
-				string label_old = $$.label;
-				string operador = $2.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, $2.label};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
-				{
-							
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					
-					varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$3.label = varConvert;
-					
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-					
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";					
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$1.label = varConvert;
-					
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == resultado)
-				{
-					string varConvert = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-					
-					$$.traducao = $$.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$3.label = varConvert;
-
-					$$.traducao = $$.traducao + "\t\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-					
-				}
-				$$.tipo = constante_tipo_booleano;
+				$$ = tratarExpressaoRelacional($2.label,$1,$3);
 				
 
 			}
@@ -764,76 +448,6 @@ E_REL_MAIOR_PREC	: TERMO_REL TK_OP_RELACIONAL_MENOR_MAIOR TERMO_REL
 				$$ = $2;
 			}
 			; 
-
-			/*
-			TERMO_REL TK_OP_RELACIONAL TERMO_REL
-			{
-				//o tipo resultante deve ser constante_tipo_booleano
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
-				$$.traducao = $1.traducao + $3.traducao;
-				
-				string resultado = getTipoResultante($1.tipo, $3.tipo,$2.label);
-				
-				string label_old = $$.label;
-				string operador = $2.label;
-				
-				if(resultado == constante_erro)
-				{
-					string params[3] = {$1.tipo, $3.tipo, $2.label};
-					yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
-				}
-					
-				else if($1.tipo == $3.tipo && $1.tipo != constante_tipo_caracter)//se char,ambos são convertidos pra int
-				{
-							
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ $2.label +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == $3.tipo && ($1.tipo == constante_tipo_caracter))
-				{
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$$.label = gerarNovaVariavel();
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					string label_old2 = $$.label;
-					$$.label = gerarNovaVariavel();
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ label_old2 + ";\n";
-					
-					
-				}
-				
-				
-				else if($3.tipo == resultado)
-				{
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $1.label + ";\n";
-					
-					$$.label = gerarNovaVariavel();
-					
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + label_old +" "+ operador +" "+ $3.label + ";\n";
-				}
-				
-				else if($1.tipo == resultado)
-				{
-						
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " +"(" + resultado + ")" + $3.label + ";\n";							
-					$$.label = gerarNovaVariavel();
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label +" "+ operador +" "+ label_old + ";\n";
-					
-				}
-				
-
-				$$.tipo = constante_tipo_booleano;
-			}
-			|
-			'(' E_REL ')'
-			{
-				$$ = $2; 
-			}
-			;
-			*/
 			
 /*
 
@@ -875,7 +489,8 @@ int main( int argc, char* argv[] )
 	return 0;
 }
 
-ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3){
+ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
+{
 	ATRIBUTOS dolarDolar;
 	
 	dolarDolar.label = gerarNovaVariavel();
@@ -893,14 +508,14 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
 	}
 		
-	else if(dolar1.tipo == dolar3.tipo && dolar1.tipo == resultado && dolar3.tipo == resultado)
+	else if(dolar1.tipo == dolar3.tipo && (dolar1.tipo == resultado)) //se não houver necessidade de conversão
 	{
 				
 		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
 	}
 	
 	
-	else if(dolar3.tipo == resultado)
+	else if(dolar3.tipo == resultado) 
 	{
 		
 		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
@@ -923,6 +538,69 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	dolarDolar.tipo = resultado;
 	return dolarDolar;	
 }
+
+
+
+ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
+{
+	ATRIBUTOS dolarDolar;
+	dolarDolar.label = gerarNovaVariavel();
+	dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
+	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + dolarDolar.label + ";\n";
+	
+	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
+	
+	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo,op);
+	
+	string label_old = dolarDolar.label;
+	string operador = op;
+	
+	string varConvert = gerarNovaVariavel();
+	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
+	
+	if(resultado == constante_erro)
+	{
+		string params[3] = {dolar1.tipo, dolar3.tipo, op};
+		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+	}
+		
+	else if(dolar1.tipo == dolar3.tipo && (dolar1.tipo == constante_tipo_caracter))  //se char,ambos são convertidos pra int
+	{	
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
+	
+		dolar1.label = varConvert;
+		varConvert = gerarNovaVariavel();
+	
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
+		dolar3.label = varConvert;
+							
+	}
+	
+	
+	else if(dolar3.tipo == resultado)
+	{
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
+		
+		dolar1.label = varConvert;
+	}
+	
+	else if(dolar1.tipo == resultado)
+	{
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
+		dolar3.label = varConvert;
+		
+	}
+	
+	dolarDolar.traducao = dolarDolar.traducao + "\t\t" + dolarDolar.label + " = " + dolar1.label +" "+ op +" "+ dolar3.label + ";\n";
+	
+	dolarDolar.tipo = constante_tipo_booleano;
+	
+	
+	return dolarDolar;
+	
+}
+
 
 string constroiPrint(string tipo, string label){
 	string print = "printf(\"\%";
