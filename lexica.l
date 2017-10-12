@@ -29,11 +29,11 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 "int"		{return TK_TIPO_INT;}
 "var"		{return TK_PALAVRA_VAR;}
 
-
-"//"		{return TK_COMENTARIO_1L;}
-"/*"		{return TK_ABRE_COMENTARIO_NL;}
-"*/"		{return TK_FECHA_COMENTARIO_NL;}
-
+"//".*		{/*Não faça nada. 
+			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}
+[/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]		{/*Não faça nada.*/}
+[/][*]                                    { string vazio[1] = {""};
+											yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO, vazio, 0));}
 
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
 "(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}

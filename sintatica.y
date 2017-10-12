@@ -48,7 +48,6 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 %token TK_OP_RELACIONAL
 %token TK_MAIN TK_ID TK_TIPO_INT TK_PALAVRA_VAR
 %token TK_FIM TK_ERROR
-%token TK_COMENTARIO_1L TK_ABRE_COMENTARIO_NL TK_FECHA_COMENTARIO_NL
 %token TK_CONVERSAO_EXPLICITA
 %token TK_TEXTO
 
@@ -87,16 +86,6 @@ COMANDOS	: COMANDO COMANDOS
 				$$.traducao = $$.traducao + $2.traducao;
 			}
 			|
-			COMANDOS TK_ABRE_COMENTARIO_NL COMANDOS TK_FECHA_COMENTARIO_NL COMANDOS
-			{
-				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis;
-				if($1.traducao != "")
-					$$.traducao = $1.traducao + "\n";
-				if($5.traducao != "")
-					$$.traducao = $$.traducao + $5.traducao;
-				$3.traducao = "";
-			}
-			|
 			;
 
 COMANDO 	: E ';'
@@ -106,11 +95,6 @@ COMANDO 	: E ';'
 			E_REL ';'
 			|
 			E_LOGICA ';'
-			|
-			TK_COMENTARIO_1L COMANDO
-			{
-			
-			}
 			|
 			TK_PALAVRA_VAR TK_ID ';'
 			{
