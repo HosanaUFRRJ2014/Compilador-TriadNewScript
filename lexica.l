@@ -14,7 +14,7 @@ NUM {DIGITO}+
 REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 BOOLEAN "true"|"false"
-OP_RELACIONAL_MENOR_MAIOR "<"|">"
+OP_RELACIONAL "=="|"!="|"<"|">"|">="|"<=" 
 ID {LETRA}({LETRA}|{NUM})*
 TEXTO ({LETRA}{DIGITO}{ESPACO})*
 
@@ -48,12 +48,7 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 "or"		{ yylval.label = "||"; return TK_OP_LOGICO_BIN;}
 "not"		{ yylval.label = "!"; return TK_OP_LOGICO_UNA;}
 
-{OP_RELACIONAL_MENOR_MAIOR} { yylval.label = yytext ; return TK_OP_RELACIONAL_MENOR_MAIOR; }
-
-"<="					{ yylval.label = yytext ; return TK_MENOR_IGUAL; }
-">="					{ yylval.label = yytext ; return TK_MAIOR_IGUAL; }
-"=="					{ yylval.label = yytext ; return TK_IGUAL_IGUAL; }
-"!="					{ yylval.label = yytext ; return TK_DIFERENTE; }
+{OP_RELACIONAL} { yylval.label = yytext ; return TK_OP_RELACIONAL; }
 
 {NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
 "-"{NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }

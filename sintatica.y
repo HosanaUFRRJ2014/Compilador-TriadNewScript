@@ -45,11 +45,7 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 %token TK_CHAR
 %token TK_OP_LOGICO_BIN
 %token TK_OP_LOGICO_UNA
-//%token TK_OP_RELACIONAL
-%token TK_OP_RELACIONAL_MENOR_MAIOR
-%token TK_IGUAL_IGUAL TK_DIFERENTE
-%token TK_MAIOR_IGUAL TK_MENOR_IGUAL
-
+%token TK_OP_RELACIONAL
 %token TK_MAIN TK_ID TK_TIPO_INT TK_PALAVRA_VAR
 %token TK_FIM TK_ERROR
 %token TK_COMENTARIO_1L TK_ABRE_COMENTARIO_NL TK_FECHA_COMENTARIO_NL
@@ -61,10 +57,8 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 %left TK_OP_LOGICO_UNA
 %left TK_OP_LOGICO_BIN
 %right '='
-%nonassoc TK_IGUAL_IGUAL TK_DIFERENTE
-%nonassoc '<' '>' TK_MAIOR_IGUAL TK_MENOR_IGUAL 
-//%nonassoc "==" "!="
-//%nonassoc '<' '>' "<=" ">="
+%nonassoc "==" "!=" //Confiando precedência ao yacc. Como isso é feito para os aritméticos, o mesmo deve valer para os relacionais.
+%nonassoc '<' '>' "<=" ">="
 %left '+' '-'
 %left '*' '/'
 
@@ -109,7 +103,7 @@ COMANDO 	: E ';'
 			|
 			E_UNARIA ';'
 			|
-			E_REL_MENOR_PREC ';'
+			E_REL ';'
 			|
 			E_LOGICA ';'
 			|
@@ -390,83 +384,23 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 				$$ = $2;
 			}
 			|
-			//E_REL
-			E_REL_MENOR_PREC
+			E_REL
 			;
 
-TERMO_REL	: E
+TERMO_REL	: E //------> Isso é uma regra inútil. Mas se quiser colocar pra legibilidade do código, que seja...
 			;
 
-E_REL_MENOR_PREC	: TERMO_REL TK_IGUAL_IGUAL TERMO_REL
+E_REL	: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 			{
-
 				$$ = tratarExpressaoRelacional($2.label,$1,$3);	
-			
-
 			}
 			|
-			TERMO_REL TK_DIFERENTE TERMO_REL
-			{
-
-				$$ = tratarExpressaoRelacional($2.label,$1,$3);
-		
-			}
-			|
-			E_REL_MAIOR_PREC
-			;
-
-E_REL_MAIOR_PREC	: TERMO_REL TK_OP_RELACIONAL_MENOR_MAIOR TERMO_REL
-			{
-
-				$$ = tratarExpressaoRelacional($2.label,$1,$3);
-				
-
-			}
-			|
-			TERMO_REL TK_MAIOR_IGUAL TERMO_REL
-			{
-
-				$$ = tratarExpressaoRelacional($2.label,$1,$3);			
-				
-			}
-			|
-			TERMO_REL TK_MENOR_IGUAL TERMO_REL
-			{
-
-				$$ = tratarExpressaoRelacional($2.label,$1,$3);
-				
-
-			}
-			|
-			'(' E_REL_MENOR_PREC ')'
-			{
-				$$ = $2;
-			}
-			|
-			'(' E_REL_MAIOR_PREC ')'
+			'(' E_REL ')'
 			{
 				$$ = $2;
 			}
 			; 
 			
-/*
-
-%nonassoc TK_IGUAL_IGUAL TK_DIFERENTE
-%nonassoc '<' '>' TK_MAIOR_IGUAL TK_MENOR_IGUAL 
-
-%token TK_OP_RELACIONAL_MENOR_MAIOR
-%token TK_IGUAL_IGUAL TK_DIFERENTE
-%token TK_MAIOR_IGUAL TK_MENOR_IGUAL
-
-{OP_RELACIONAL_MENOR_MAIOR} { yylval.label = yytext ; return TK_OP_RELACIONAL_MENOR_MAIOR; }
-
-"<="					{ yylval.label = yytext ; return TK_MENOR_IGUAL; }
-">="					{ yylval.label = yytext ; return TK_MAIOR_IGUAL; }
-"=="					{ yylval.label = yytext ; return TK_IGUAL_IGUAL; }
-"!="					{ yylval.label = yytext ; return TK_DIFERENTE; }
-*/
-
-
 %%
 
 #include "lex.yy.c"
@@ -564,16 +498,19 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 	}
 		
-	else if(dolar1.tipo == dolar3.tipo && (dolar1.tipo == constante_tipo_caracter))  //se char,ambos são convertidos pra int
+	else if(dolar1.tipo == dolar3.tipo)
 	{	
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
+		if(dolar1.tipo == constante_tipo_caracter) //se char,ambos são convertidos pra int
+		{
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
 	
-		dolar1.label = varConvert;
-		varConvert = gerarNovaVariavel();
+			dolar1.label = varConvert;
+			varConvert = gerarNovaVariavel();
 	
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
-		dolar3.label = varConvert;
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
+			dolar3.label = varConvert;
+		}
 							
 	}
 	
