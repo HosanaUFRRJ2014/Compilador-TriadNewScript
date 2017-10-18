@@ -14,12 +14,14 @@ NUM {DIGITO}+
 REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 BOOLEAN "true"|"false"
-OP_RELACIONAL_MENOR_MAIOR "<"|">"
+OP_RELACIONAL "=="|"!="|"<"|">"|">="|"<=" 
 ID {LETRA}({LETRA}|{NUM})*
-TEXTO ({LETRA}{DIGITO}{ESPACO})*
+STRING \"([^\"\n]|\\\")*\"
 
 
 %%
+
+{STRING}	{yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_STRING;}
 
 "\n"		{}
 
@@ -27,18 +29,18 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 
 "main"		{return TK_MAIN;}
 "int"		{return TK_TIPO_INT;}
-
 "var"		{return TK_PALAVRA_VAR;}
 
-
-"//"		{return TK_COMENTARIO_1L;}
-"/*"		{return TK_ABRE_COMENTARIO_NL;}
-"*/"		{return TK_FECHA_COMENTARIO_NL;}
-
+"//".*		{/*Não faça nada. 
+			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}
+[/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]		{/*Não faça nada.*/}
+[/][*]                                    { string vazio[1] = {""};
+											yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO, vazio, 0));}
 
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
 "(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}
 "(char)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CONVERSAO_EXPLICITA;}
+"(string)"  { yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_CONVERSAO_EXPLICITA;}
 
 
 [(){}[\];,]	{ return *yytext; }
@@ -48,12 +50,7 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 "or"		{ yylval.label = "||"; return TK_OP_LOGICO_BIN;}
 "not"		{ yylval.label = "!"; return TK_OP_LOGICO_UNA;}
 
-{OP_RELACIONAL_MENOR_MAIOR} { yylval.label = yytext ; return TK_OP_RELACIONAL_MENOR_MAIOR; }
-
-"<="					{ yylval.label = yytext ; return TK_MENOR_IGUAL; }
-">="					{ yylval.label = yytext ; return TK_MAIOR_IGUAL; }
-"=="					{ yylval.label = yytext ; return TK_IGUAL_IGUAL; }
-"!="					{ yylval.label = yytext ; return TK_DIFERENTE; }
+{OP_RELACIONAL} { yylval.label = yytext ; return TK_OP_RELACIONAL; }
 
 {NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
 "-"{NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
@@ -62,7 +59,7 @@ TEXTO ({LETRA}{DIGITO}{ESPACO})*
 {CHAR}		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CHAR; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
 
-\"{TEXTO}\""\n"	{ yylval.label = yytext; return TK_TEXTO; }
+
 
 .			{ *yytext; }
 
