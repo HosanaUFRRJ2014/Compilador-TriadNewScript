@@ -1,6 +1,8 @@
+var abc;
+
 int main()
 {
-	var conversao_explicita = (float) 2 * 3;
+	/*var conversao_explicita = (float) 2 * 3;
 	var conversao_implicita = 32 + conversao_explicita;
 	
 	var expressao_logica_atribuida = true and false or true and not false;
@@ -14,9 +16,18 @@ int main()
 												 (conversao_explicita != conversao_implicita) and
 												 (conversao_explicita == conversao_implicita) and
 										 		 false;
-										 		 
 	var convert = 1 + 2 * (float) 3;
+										 		*/
+	abc = 109;
 	
-	(1 - 3 * (10 + 50) / 2) * -1;
+	var a;
+	a = 10;	
+	{
+		var a = 'O';
+		abc = 10;
+//		a = 10;
+	}
+	
+	(1 - 3 * (10 + 50) / 2) * -1.0;
 	
 }

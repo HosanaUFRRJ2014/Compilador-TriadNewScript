@@ -22,8 +22,7 @@ namespace MensagensDeErro{
 
 	string SEP_PARAMS = "\t";
 
-
-	string montarMensagemDeErro(string mensagem, string* parametros, int qtdParametros){
+	string montarMensagemDeErro(string mensagem, string* parametros = NULL, int qtdParametros = 0){
 		int pos;
 		for(int i = 0; i < qtdParametros; i++){
 			pos = mensagem.find(SEP_PARAMS);
