@@ -122,11 +122,15 @@ COMANDO 	: E ';'
 			
 DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 			{
-				if(variavelJaDeclarada($2.label, false)){
+				if(variavelJaDeclarada($2.label, false))
+				{
 					//mensagem de erro dupla declaração
 					string params[1] = {$2.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
-				}else{
+				}
+				
+				else
+				{
 					$$.traducaoDeclaracaoDeVariaveis = "\t" + construirDeclaracaoProvisoriaDeInferenciaDeTipo($2.label);
 					incluirNoMapa($2.label);
 				}
@@ -134,15 +138,25 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 			|
 			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO ';'
 			{	
-				if(variavelJaDeclarada($2.label, false)){
+				if(variavelJaDeclarada($2.label, false))
+				{
 					//mensagem de erro dupla declaração
 					string params[1] = {$2.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
-				}else{
+				}
+				else
+				{
 					string tipo = $4.tipo;
-					if(tipo == constante_tipo_booleano){
+					if(tipo == constante_tipo_booleano)
+					{
 						tipo = constante_tipo_inteiro;
 						tipo = "\t" + tipo;
+					}
+					
+					if(tipo == constante_tipo_string)
+					{
+						tipo = constante_tipo_caracter;
+						tipo = "\t" + tipo + " [" + to_string($4.tamanho) + "] ";
 					}
 					$2.label = prefixo_variavel_usuario + $2.label;
 					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + ";\n";
@@ -156,26 +170,36 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 			|
 			ID '=' VALOR_ATRIBUICAO ';'
 			{				
-				if($1.label != $3.label){
+				if($1.label != $3.label)
+				{
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
-					if(metaData.tipo == ""){
-//isso aqui também pode causar problema no futuro devido as lacunas
+					if(metaData.tipo == "")
+					{
+						//isso aqui também pode causar problema no futuro devido as lacunas
 						metaData.tipo = $3.tipo;
 						atualizarNoMapa(metaData);
 						string tipo = metaData.tipo;
-						if(tipo == constante_tipo_booleano){
+						if(tipo == constante_tipo_booleano)
+						{
 							tipo = constante_tipo_inteiro;
 							tipo = "\t" + tipo;
 						}
-						adcionarDefinicaoDeTipo($1.label, tipo);
+						if(tipo == constante_tipo_string)
+						{
+							tipo = constante_tipo_caracter;
+							tipo = "\t" + tipo + " [" + to_string($4.tamanho) + "] ";
+						}
+						adicionarDefinicaoDeTipo($1.label, tipo);
 					}
 					$1.tipo = metaData.tipo;
-//provavelmente ainda há lacunas, mas vamos ignorar por enquanto
-					if(metaData.tipo == $3.tipo){
+					//provavelmente ainda há lacunas, mas vamos ignorar por enquanto
+					if(metaData.tipo == $3.tipo)
+					{
 						$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 						$$.traducao = $$.traducao + $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
-					else{
+					else
+					{
 						string strPrefixoVarUsuario = prefixo_variavel_usuario;
 						string params[3] = {$1.label.replace(0, strPrefixoVarUsuario.length(), ""), $1.tipo, $3.tipo};
 						yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
@@ -183,41 +207,31 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 					$$.label = $1.label;
 					$$.tipo = $1.tipo;
 				}
-				else{
+				else
+				{
 					$$ = $3;
 				}
 			}
 			|
-			STRING
 			;
 
 //REGRA CRIADA PRA DIMINUIR A QUANTIDADE DE REPETIÇÕES DAS VERIFICAÇÕES DE EXISTENCIA DE VARIAVEL
 ID		: TK_ID
 			{
-				if(variavelJaDeclarada($1.label)){
+				if(variavelJaDeclarada($1.label))
+				{
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
 					$$.label = metaData.nome;
 					$$.tipo = metaData.tipo;
-				}else{
+				}
+				else
+				{
 					string params[1] = {$1.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_NAO_DECLARADA ,params, 1));
 				}
 			}
 			;
 			
-STRING		: TK_STRING
-			{
-				//TODO
-				//tratar o valor de atribuição na regra VALOR_ATRIBUICAO 
-				$$.label = gerarNovaVariavel();
-				$$.tamanho = $1.label.length() +1 -2; //-2 exclui o tamanho das aspas
-				$$.traducaoDeclaracaoDeVariaveis = "\tchar " + $$.label + "[" + to_string($$.tamanho) + "];\n";
-				
-				$$.traducao = geraDeclaracaoString($$.label, $1.label);
-				
-				$$.tipo = $1.tipo;
-				
-			}
 
 TERMO		: TK_NUM
 			{
@@ -270,6 +284,7 @@ VALOR_ATRIBUICAO: E
 					yyerror(montarMensagemDeErro(MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA, params, 2));
 				}
 			}
+			
 			;
 
 E 			: E '+' E
@@ -333,7 +348,23 @@ E1 			: E1 '*' E1
 				}	
 			}
 			
-
+			|
+			TK_STRING
+			{
+				$$.label = gerarNovaVariavel();
+				//$$.tamanho = $1.label.length() +1 -2; //-2 exclui o tamanho das aspas
+				string codigoTraduzido = geraDeclaracaoString($$.label, $1.label);
+				$$.tamanho = $1.label.length() +1 -2 - global_numCaracteresEspeciais; //-2 exclui o tamanho das aspas a global vem do namespace TratamentoString
+				$$.traducaoDeclaracaoDeVariaveis = "\tchar " + $$.label + "[" + to_string($$.tamanho) + "];\n";
+				$$.traducao = codigoTraduzido;
+				
+				
+				$$.tipo = $1.tipo;
+				
+				global_numCaracteresEspeciais = 0;
+				
+				
+			}
 			;
 E_UNARIA	: '-' TERMO
 			{

@@ -67,7 +67,7 @@ namespace ControleDeVariaveis
 			numeroEscopoAtual = numeroEscopoAtual-1;
 		}
 		
-		string adcionaPrefixo(string nome)
+		string adicionaPrefixo(string nome)
 		{
 			if(nome.find(prefixo_variavel_usuario) != 0)
 				nome = prefixo_variavel_usuario + nome;
@@ -76,7 +76,7 @@ namespace ControleDeVariaveis
 				
 		bool incluirNoMapa(string nome, string tipo = "", int escopo)
 		{
-			nome = adcionaPrefixo(nome);
+			nome = adicionaPrefixo(nome);
 			
 			if(!variavelJaDeclarada(nome, false))
 			{
@@ -111,7 +111,7 @@ namespace ControleDeVariaveis
 				if(escopo < 0)
 					return false;
 
-				nome = adcionaPrefixo(nome);
+				nome = adicionaPrefixo(nome);
 				//variavel que vai manter qual foi o ultimo mapa acessado
 				mapaDeContexto = pilhaDeMapas[escopo];
 				//operador curto circuitado para buscar a variavel nos mapas recursivamente
@@ -119,14 +119,14 @@ namespace ControleDeVariaveis
 			}
 			else
 			{
-				nome = adcionaPrefixo(nome);
+				nome = adicionaPrefixo(nome);
 				return pilhaDeMapas[escopo].find(nome) != pilhaDeMapas[escopo].end();
 			}
 		}
 		
 		DADOS_VARIAVEL recuperarDadosVariavel(string nome, int escopo)
 		{
-			nome = adcionaPrefixo(nome);
+			nome = adicionaPrefixo(nome);
 			if(variavelJaDeclarada(nome))
 			{
 				return mapaDeContexto[nome];
@@ -142,10 +142,10 @@ namespace ControleDeVariaveis
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
 		
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
-		void adcionarDefinicaoDeTipo(string, string);
+		void adicionarDefinicaoDeTipo(string, string);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		
-		string adcionaPrefixo(string id)
+		string adicionaPrefixo(string id)
 		{
 			if(id.find(prefixo_variavel_usuario) != 0)
 				id = prefixo_variavel_usuario + id;
@@ -157,16 +157,16 @@ namespace ControleDeVariaveis
 			
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string separador = slotIdVar;
-			string idPrefixado = adcionaPrefixo(id);
+			string idPrefixado = adicionaPrefixo(id);
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = " ";
 			return tipoProvisorio + " " + idPrefixado + ";\n";
 		}
 			
-		void adcionarDefinicaoDeTipo(string id, string tipo)
+		void adicionarDefinicaoDeTipo(string id, string tipo)
 		{
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
-			string idPrefixado = adcionaPrefixo(id);
+			string idPrefixado = adicionaPrefixo(id);
 			string separador = slotIdVar;
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			
