@@ -54,9 +54,6 @@ STRING \"([^\"\n]|\\\")*\"
 
 {INT}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
 {FLOAT}		{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_NUM; }
-{NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
-"-"{NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
-{REAL}		{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_NUM; }
 {BOOLEAN}	{ yylval.label = yytext; yylval.tipo = constante_tipo_booleano; return TK_BOOL; }
 {CHAR}		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CHAR; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
