@@ -13,6 +13,7 @@
 #include "MensagensDeErro.h"
 
 #include "TratamentoString.h"
+#define YYSTYPE ATRIBUTOS
 
 #define YYSTYPE ATRIBUTOS
 
@@ -70,23 +71,31 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 
 %%
 
-S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
+
+S	 		: DECLARACOES TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include<string.h>\n#include<stdio.h>\n\n#define TRUE 1\n#define FALSE 0\n\nint main(void)\n{\n" << $5.traducao << "\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include<string.h>\n#include<stdio.h>\n\n#define TRUE 1\n#define FALSE 0\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "\treturn 0;\n}" << endl;
 			}
 			;
 
-BLOCO		: '{' COMANDOS '}'
+UP_S		:
 			{
-				$$.traducao = $2.traducaoDeclaracaoDeVariaveis;
-				$$.traducao =  $$.traducao + "\n" + $2.traducao;
+				aumentarEscopo();
+			}
+			;
+
+BLOCO		: UP_S '{' COMANDOS '}'
+			{
+				$$.traducao =  substituirTodasAsDeclaracoesProvisorias($3.traducaoDeclaracaoDeVariaveis);
+				$$.traducao =  $$.traducao + "\n" + $3.traducao;
+				diminuirEscopo();
 			}
 			;
 
 COMANDOS	: COMANDO COMANDOS
 			{
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
-				if($1.traducao != ""){
+				if($1.traducao != "" && $1.tipo != constante_tipo_bloco){
 					$$.traducao = $1.traducao + "\n" + constroiPrint($1.tipo, $1.label);
 				}
 				$$.traducao = $$.traducao + $2.traducao;
@@ -102,20 +111,30 @@ COMANDO 	: E ';'
 			|
 			E_LOGICA ';'
 			|
-			TK_PALAVRA_VAR TK_ID ';'
+			DECLARACOES
+			|
+			BLOCO
 			{
-				if(variavelJaDeclarada(prefixo_variavel_usuario + $2.label)){
+				$$.traducao = "\t{\n" + $1.traducao + "\t}\n";
+				$$.tipo = constante_tipo_bloco;
+			}
+			;
+			
+DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
+			{
+				if(variavelJaDeclarada($2.label, false)){
 					//mensagem de erro dupla declaração
 					string params[1] = {$2.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
 				}else{
-					incluirNoMapa(prefixo_variavel_usuario + $2.label);
+					$$.traducaoDeclaracaoDeVariaveis = "\t" + construirDeclaracaoProvisoriaDeInferenciaDeTipo($2.label);
+					incluirNoMapa($2.label);
 				}
 			}
 			|
 			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO ';'
 			{	
-				if(variavelJaDeclarada(prefixo_variavel_usuario + $2.label)){
+				if(variavelJaDeclarada($2.label, false)){
 					//mensagem de erro dupla declaração
 					string params[1] = {$2.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
@@ -125,11 +144,11 @@ COMANDO 	: E ';'
 						tipo = constante_tipo_inteiro;
 						tipo = "\t" + tipo;
 					}
-					
-					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + prefixo_variavel_usuario + $2.label + ";\n";
-					$$.traducao = $4.traducao + "\t" + prefixo_variavel_usuario + $2.label + " = " + $4.label + ";\n";
-					incluirNoMapa(prefixo_variavel_usuario + $2.label, $4.tipo);
-					$$.label = prefixo_variavel_usuario + $2.label;
+					$2.label = prefixo_variavel_usuario + $2.label;
+					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + ";\n";
+					$$.traducao = $4.traducao + "\t" + $2.label + " = " + $4.label + ";\n";
+					incluirNoMapa($2.label, $4.tipo);
+					$$.label = $2.label;
 					$$.tipo = $4.tipo;
 				}
 				
@@ -148,21 +167,21 @@ COMANDO 	: E ';'
 							tipo = constante_tipo_inteiro;
 							tipo = "\t" + tipo;
 						}
-						$$.traducaoDeclaracaoDeVariaveis = "\t" + tipo + " " + metaData.nome + ";\n";
+						adcionarDefinicaoDeTipo($1.label, tipo);
 					}
-				
 					$1.tipo = metaData.tipo;
 //provavelmente ainda há lacunas, mas vamos ignorar por enquanto
 					if(metaData.tipo == $3.tipo){
 						$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
+						$$.traducao = $$.traducao + $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
 					else{
 						string strPrefixoVarUsuario = prefixo_variavel_usuario;
 						string params[3] = {$1.label.replace(0, strPrefixoVarUsuario.length(), ""), $1.tipo, $3.tipo};
 						yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
 					}
-					$$ = $1;
+					$$.label = $1.label;
+					$$.tipo = $1.tipo;
 				}
 				else{
 					$$ = $3;
@@ -175,11 +194,11 @@ COMANDO 	: E ';'
 //REGRA CRIADA PRA DIMINUIR A QUANTIDADE DE REPETIÇÕES DAS VERIFICAÇÕES DE EXISTENCIA DE VARIAVEL
 ID		: TK_ID
 			{
-				if(variavelJaDeclarada(prefixo_variavel_usuario + $1.label)){
-					$$.label = prefixo_variavel_usuario + $1.label;
-					$$.tipo = recuperarDadosVariavel(prefixo_variavel_usuario + $1.label).tipo;
+				if(variavelJaDeclarada($1.label)){
+					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
+					$$.label = metaData.nome;
+					$$.tipo = metaData.tipo;
 				}else{
-					string strPrefixoVarUsuario = prefixo_variavel_usuario;
 					string params[1] = {$1.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_NAO_DECLARADA ,params, 1));
 				}
@@ -422,6 +441,7 @@ int main( int argc, char* argv[] )
 {
 	
 	mapaTipos = criarMapa();
+	inicializarMapaDeContexto();
 	yyparse();
 	
 	

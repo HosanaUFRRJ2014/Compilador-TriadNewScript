@@ -14,6 +14,8 @@ NUM {DIGITO}+
 REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 BOOLEAN "true"|"false"
+INT {NUM}|"-"{NUM}	
+FLOAT {REAL}|"-"{REAL}
 OP_RELACIONAL "=="|"!="|"<"|">"|">="|"<=" 
 ID {LETRA}({LETRA}|{NUM})*
 STRING \"([^\"\n]|\\\")*\"
@@ -34,14 +36,12 @@ STRING \"([^\"\n]|\\\")*\"
 "//".*		{/*Não faça nada. 
 			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}
 [/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]		{/*Não faça nada.*/}
-[/][*]                                    { string vazio[1] = {""};
-											yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO, vazio, 0));}
+[/][*]                                    {yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO));}
 
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
 "(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}
 "(char)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CONVERSAO_EXPLICITA;}
 "(string)"  { yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_CONVERSAO_EXPLICITA;}
-
 
 [(){}[\];,]	{ return *yytext; }
 [+\-*/=]	{ return *yytext; }
@@ -52,6 +52,8 @@ STRING \"([^\"\n]|\\\")*\"
 
 {OP_RELACIONAL} { yylval.label = yytext ; return TK_OP_RELACIONAL; }
 
+{INT}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
+{FLOAT}		{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_NUM; }
 {NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
 "-"{NUM}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }
 {REAL}		{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_NUM; }
