@@ -1,8 +1,5 @@
 int main()
 {
-	//var h;
-	//h = "d" + "1"; //bugado!
-	var a = "doctor";
-	var b = "\"who\"";
-	var c = "s\"s";
+	var h;
+	h = "d" + "u"; //bugado!
 }
