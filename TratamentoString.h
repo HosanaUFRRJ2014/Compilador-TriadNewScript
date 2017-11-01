@@ -5,6 +5,11 @@
 #include <utility>
 
 
+
+using namespace Atributos;
+using namespace MapaTipos;
+
+
 namespace TratamentoString
 {
 
@@ -15,6 +20,7 @@ namespace TratamentoString
 
 	string tratarCaracteresEspeciais(string, string, long *);
 	string geraDeclaracaoString(string, string);
+	ATRIBUTOS tratarConversaoImplicitaString(string , ATRIBUTOS , ATRIBUTOS );
 	
 	
 		
@@ -63,10 +69,97 @@ namespace TratamentoString
 		
 		retorno = retorno + "\t" + nomeVar + "[" + to_string(tamString-2-global_numCaracteresEspeciais) + "] = \'" + "\\"+ "0" + "\';\n";
 	
-		
+	//	cout << retorno << "        ********\n\n";
 		return retorno;
 		
 	}
+	
+	
+	
+	//TODO - fazer com que a variável seja convertida, caso possível. Se impossível, setar o tipo como errado
+	//FIXME - Converter para array char, ao invés de para uma string
+	ATRIBUTOS converterVariavelParaString(ATRIBUTOS dolar1, ATRIBUTOS dolar3, string operador)
+	{
+		if(getTipoResultante(dolar1.tipo, dolar3.tipo, operador) != constante_erro)
+		{
+			dolar1.tipo = constante_tipo_string;
+			dolar1.tamanho = (dolar1.traducao).length(); //verificar isso, pois pode estar muito errado
+			dolar1.traducao = "\"" + dolar1.traducao + "\""; //verificar isso, pois pode estar muito errado
+			
+			cout << "Tamanho: \n" << dolar1.tamanho << "\n**********\n\n";
+			cout << "Traducao: \n" << dolar1.traducao << "\n**********\n\n";
+			
+			
+			dolar3.tipo = constante_tipo_string;
+			dolar3.tamanho = (dolar3.traducao).length(); //verificar isso, pois pode estar muito errado
+			dolar3.traducao = "\"" + dolar3.traducao + "\""; //verificar isso, pois pode estar muito errado
+			
+			cout << "Tamanho: \n" << dolar3.tamanho << "\n**********\n\n";
+			cout << "Traducao: \n" << dolar3.traducao << "\n**********\n\n";
+			
+		}
+	
+		return dolar1;
+	}
+	
+	
+	ATRIBUTOS realizarConversaoImplicitaString(ATRIBUTOS dolar1, ATRIBUTOS dolar3, string op)
+	{
+		string dolarConvertido = "";
+	
+		
+		/*Conversões, caso necessárias e possíveis*/
+		if(dolar1.tipo != constante_tipo_string)
+			dolar1 = converterVariavelParaString(dolar1, dolar3, op); //acho que não precisa fazer retornar, creio que vá alterar lá dentro
+		
+		if(dolar3.tipo != constante_tipo_string)
+			dolar3 = converterVariavelParaString(dolar1, dolar3, op);	
+			
+		/*if(dolar1.tipo == constante_erro)
+		{
+			//disparar erro ou sinalizar erro para o sintática
+			return NULL;
+		}*/
+		
+		return dolar1;
+	}
+	
+	
+	/*ATRIBUTOS realizarOperacaoAritmeticaString(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
+	{
+		ATRIBUTOS retorno;
+		
+	
+		if(op == "+")
+		{
+			retorno.label = gerarNovaVariavel();
+			
+			
+		}
+		
+	
+	}*/
+	
+	
+	/*ATRIBUTOS tratarConversaoImplicitaString(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
+	{
+		string dolar1Convertido = "";
+		string dolar3Convertido = "";
+		
+		if(dolar1.tipo != constante_tipo_string)
+			dolar1 = converterVariavelParaString(dolar1); //acho que não precisa fazer retornar, creio que vá alterar lá dentro
+			
+		if(dolar3.tipo != constante_tipo_string)
+			dolar3 = converterVariavelParaString(dolar3);
+			
+		if(dolar1.tipo == constante_erro || dolar3.tipo == constante_erro)
+		{
+			//disparar erro ou sinalizar erro para o sintática
+			return NULL;
+		}
+		
+		return dolar1;
+	}*/
 	
 
 }

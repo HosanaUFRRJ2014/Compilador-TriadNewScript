@@ -6,34 +6,30 @@
 #include <map>
 #include <vector>
 
+
+
 #include "MapaTipos.h"
 
 #include "controleDeVariaveis.h"
 
 #include "MensagensDeErro.h"
 
-#include "TratamentoString.h"
-#define YYSTYPE ATRIBUTOS
+#include "Atributos.h"
 
-#define YYSTYPE ATRIBUTOS
+#include "TratamentoString.h"
+
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo booelan"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
 
 using namespace std;
-using namespace MapaTiposLib;
+
+using namespace MapaTipos;
 using namespace ControleDeVariaveis;
 using namespace MensagensDeErro;
+using namespace Atributos;
 using namespace TratamentoString;
 
-struct ATRIBUTOS
-{
-	string label;
-	string traducaoDeclaracaoDeVariaveis;
-	string traducao;
-	string tipo;
-	int tamanho;
-};
 
 int yylex(void);
 void yyerror(string);
@@ -498,12 +494,49 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		string params[3] = {dolar1.tipo, dolar3.tipo, op};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
 	}
+	
+	/*
+	*TODO	
+	*Tratar caso de ser do tipo String
+	*
+	*/
+	//else if(dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string)
+	//{
+	//	realizarConversaoImplicitaString(dolar1,dolar3,op);
+		/*string retorno = "";
+		if(dolar1.tipo == constante_tipo_string)
+		{
+			retorno = geraDeclaracaoString(dolar1.label, dolar1.traducao);
+		//	cout << retorno << " EEEEEEEEE \n";
+			cout << "Label: \n" << dolar1.label << "\n*******Dolar 1.label\n*************\n";
+			cout << "Traducao: \n" << dolar1.traducao << " *******Dolar 1.trad\n***********";
+		
+		}
+		
+		if(dolar3.tipo == constante_tipo_string)
+		{
+			retorno = retorno + geraDeclaracaoString(dolar3.label, dolar3.traducao);
+		
+		}*/
+		
+	//	dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
+		//return dolarDolar;
+	//}
 		
 	else if((dolar1.tipo == dolar3.tipo) && (dolar1.tipo == resultado)) //se não houver necessidade de conversão
 	{
-		cout << "Entrou aqui\n";
-				
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
+		//cout << resultado << " ***************************\n";
+		if(resultado == constante_tipo_string)
+		{
+		//	cout << "+++++++++++++++++++++++++++++++++++++++++++++\n";
+			dolarDolar.label = gerarNovaVariavel();
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + "char[" +  to_string(dolar1.tamanho + dolar3.tamanho + 1) + "] " + dolarDolar.label + ";\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + "strcat(" + dolarDolar.label + "," + dolar1.label + ");\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + "strcat(" + dolarDolar.label + "," + dolar3.label + ");\n";
+		}
+			
+		else		
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
 	}
 	
 	
