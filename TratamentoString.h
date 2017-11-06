@@ -12,27 +12,89 @@ using namespace MapaTipos;
 
 namespace TratamentoString
 {
+	#define constante_TamanhoInicialPilhaString 1
+	#define constante_TamanhoDeAumentoDaPilhaString 5
 
-	
+	//FIXME - Remover essa global do código
 	long global_numCaracteresEspeciais = 0;
-
-
-
+	long global_tamanhoStringConcatenada = 0;
+	
+	struct STRING
+	{
+		string label;
+		string valor;
+		int tamanho;
+		
+	};
+	
+	
+	STRING criarString(string,string,int);
+	string montarCopiarString(string, string);
+	string montarConcatenarString(string, string);
 	string tratarCaracteresEspeciais(string, string, long *);
 	string geraDeclaracaoString(string, string);
+	string realizarTraducaoDeclaracaoDeString(string, ATRIBUTOS, ATRIBUTOS, ATRIBUTOS);
+	string realizarOperacaoAritmeticaString(string, ATRIBUTOS, ATRIBUTOS, ATRIBUTOS);
 	ATRIBUTOS tratarConversaoImplicitaString(string , ATRIBUTOS , ATRIBUTOS );
 	
 	
+	
+	
+	
+	void inicializarMapaDeStrings();
+	bool incluirNoMapaStrings(string, string, int tamanho);
+	bool atualizarNoMapaStrigs(STRING);
+	STRING recuperarString(string);
+	
+	//escopo
+	//void aumentarEscopo();
+	void empilharString(map<string, STRING> * );
+	map<string, STRING> recuperarMapaStrings(int);
+	bool desempilarString();
+	vector<map<string, STRING>> pilhaDeMapasString(constante_TamanhoInicialPilhaString);
 		
+
+
+	map<string, STRING> mapaStrings;
 	
 	
+	
+	
+	STRING criarString(string label,string valor,int tamanho)
+	{
+		STRING nova;
+		
+		nova.label = label;
+		nova.valor = valor;
+		nova.tamanho = tamanho;
+		
+		
+		return nova;
+	
+	}
+	
+		
+	string montarCopiarString(string str1, string str2)
+	{
+		string retorno = "\tstrcpy(" + str1 + "," + str2 + ")";
+		
+		return retorno;
+	}
+	
+	string montarConcatenarString(string str1, string str2)
+	{
+		string retorno = "\tstrcat(" + str1 + "," + str2 + ")";
+		
+		return retorno;
+	
+	}
 	string tratarCaracteresEspeciais(string nomeVar, string valor, long *i) 
 	{
 		string retorno = "";
 		
-		if(valor[*i] == '\\' && valor[*i+1] == '\"') //Pode ser que dê segmentation fault se já estiver na posição final.
+		if(valor[*i] == '\\' && (valor[*i+1] == '\"'|| valor[*i+1] == 'n' || valor[*i+1] == 't' || valor[*i+1] == '0')) 
 		{
-			retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\" + "\"" + "\';\n";
+			retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\" + valor[*i+1] + "\';\n";
 			*i = *i + 1;
 			global_numCaracteresEspeciais = global_numCaracteresEspeciais + 1;
 			//incrementarglobal_numCaracteresEspeciais(1);
@@ -41,7 +103,7 @@ namespace TratamentoString
 		}	
 		else if(valor[*i] == '\'')
 		{
-			retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\" + "\'" + "\';\n";
+			retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\" + valor[*i] + "\';\n";
 			
 		}
 		
@@ -60,69 +122,193 @@ namespace TratamentoString
 		string retorno = "";
 		long tamString = valor.length();
 		
+		
+		STRING novaString = criarString(nomeVar,valor,valor.length());		
+		mapaStrings.insert(make_pair(nomeVar, novaString));
+
+		
 		for(long i = 1; i < tamString-1; i++)
 		{
-			retorno = retorno + tratarCaracteresEspeciais(nomeVar,valor,&i);
+			retorno = retorno + tratarCaracteresEspeciais(nomeVar,valor,&i);		
 			
 		}
 		
 		
 		retorno = retorno + "\t" + nomeVar + "[" + to_string(tamString-2-global_numCaracteresEspeciais) + "] = \'" + "\\"+ "0" + "\';\n";
 	
-	//	cout << retorno << "        ********\n\n";
+	
 		return retorno;
 		
 	}
 	
 	
-	
-	//TODO - fazer com que a variável seja convertida, caso possível. Se impossível, setar o tipo como errado
-	//FIXME - Converter para array char, ao invés de para uma string
-	ATRIBUTOS converterVariavelParaString(ATRIBUTOS dolar1, ATRIBUTOS dolar3, string operador)
+	string realizarTraducaoDeclaracaoDeString(string operacao, ATRIBUTOS dolarDolar, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 	{
-		if(getTipoResultante(dolar1.tipo, dolar3.tipo, operador) != constante_erro)
+	
+		string retorno = "";
+		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
+		if (operacao == "+")
 		{
-			dolar1.tipo = constante_tipo_string;
-			dolar1.tamanho = (dolar1.traducao).length(); //verificar isso, pois pode estar muito errado
-			dolar1.traducao = "\"" + dolar1.traducao + "\""; //verificar isso, pois pode estar muito errado
+			global_tamanhoStringConcatenada = dolar1.tamanho + dolar3.tamanho + 1;
+			retorno = "\tchar " + dolarDolar.label + "[" +  to_string(global_tamanhoStringConcatenada) + "]" + ";\n";
 			
-			cout << "Tamanho: \n" << dolar1.tamanho << "\n**********\n\n";
-			cout << "Traducao: \n" << dolar1.traducao << "\n**********\n\n";
-			
-			
-			dolar3.tipo = constante_tipo_string;
-			dolar3.tamanho = (dolar3.traducao).length(); //verificar isso, pois pode estar muito errado
-			dolar3.traducao = "\"" + dolar3.traducao + "\""; //verificar isso, pois pode estar muito errado
-			
-			cout << "Tamanho: \n" << dolar3.tamanho << "\n**********\n\n";
-			cout << "Traducao: \n" << dolar3.traducao << "\n**********\n\n";
-			
+		
+		
 		}
+		
+		//fazer para outras operações aritméticas
+		
+		
+		return retorno;
 	
-		return dolar1;
+	
 	}
 	
-	
-	ATRIBUTOS realizarConversaoImplicitaString(ATRIBUTOS dolar1, ATRIBUTOS dolar3, string op)
+	string realizarOperacaoAritmeticaString(string operacao,ATRIBUTOS dolarDolar, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 	{
-		string dolarConvertido = "";
+		string retorno = "";
+		
+		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
+		if (operacao == "+")
+		{
+			retorno = montarConcatenarString(dolarDolar.label, dolar1.label) + ";\n";
+			retorno = retorno + montarConcatenarString(dolarDolar.label, dolar3.label) + ";\n";
+		
+		
+		}
+		//fazer para outras operações aritméticas
+		
+		return retorno;
+	
+	
+	}
 	
 		
-		/*Conversões, caso necessárias e possíveis*/
-		if(dolar1.tipo != constante_tipo_string)
-			dolar1 = converterVariavelParaString(dolar1, dolar3, op); //acho que não precisa fazer retornar, creio que vá alterar lá dentro
 		
-		if(dolar3.tipo != constante_tipo_string)
-			dolar3 = converterVariavelParaString(dolar1, dolar3, op);	
-			
-		/*if(dolar1.tipo == constante_erro)
+	//CóDIGO INúTIL DAQUI POR DIANTE - Não apaguei porque pode ainda se tornar útil	
+	string realizarConversaoImplicitaString(ATRIBUTOS dolar)
+	{
+		string retorno;
+		
+		STRING novaString;
+
+		/*Conversões, caso necessárias*/
+		if(dolar.tipo != constante_tipo_string)
 		{
-			//disparar erro ou sinalizar erro para o sintática
-			return NULL;
-		}*/
+			novaString.label = dolar.label;
+			novaString.valor = dolar.traducao;
+			novaString.tamanho = (dolar.traducao).length(); 
 		
-		return dolar1;
+			retorno = geraDeclaracaoString(novaString.label, novaString.valor);
+		}
+
+		
+		return retorno;
 	}
+	
+	
+	
+	
+	void inicializarMapaDeStrings()
+	{
+		empilharString(&mapaStrings);
+		//numeroEscopoAtual = numeroEscopoAtual-1;
+		
+	
+	}
+	
+	/*bool incluirNoMapaStrings(string, string, int tamanho)
+	{
+	
+		return false;
+	}
+	
+	bool atualizarNoMapaStrigs(STRING)
+	{
+		return false;
+	}
+	
+	STRING recuperarString(string id)
+	{
+		
+		return mapaString[id];
+	
+	}*/
+	
+		
+
+
+
+	void empilharString(map<string, STRING> * novoMapaString)
+	{
+		if(pilhaDeMapasString.size() + 1 > pilhaDeMapasString.capacity())
+			pilhaDeMapasString.reserve(pilhaDeMapasString.size() + constante_TamanhoDeAumentoDaPilhaString);
+			
+		//numeroEscopoAtual = numeroEscopoAtual+1;
+		pilhaDeMapasString.push_back(*novoMapaString);
+	
+	}
+	
+	
+	/*map<string, STRING> recuperarMapaStrings(int)
+	{
+		map<string, STRING> mapa;
+	
+		return mapa;
+	}
+	
+	
+	bool desempilarString()
+	{
+	
+		return false;
+	
+	}*/
+	
+	/*vector<map<string, STRING>> pilhaDeMapasString(constante_TamanhoInicialPilhaString)
+	{
+		vector<map<string, STRING>> vetor;
+	
+		return vetor;
+	
+	}*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	/*ATRIBUTOS realizarOperacaoAritmeticaString(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)

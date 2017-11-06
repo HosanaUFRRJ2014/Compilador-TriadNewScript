@@ -19,7 +19,7 @@
 #include "TratamentoString.h"
 
 
-#define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo booelan"
+#define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
 
 using namespace std;
@@ -134,6 +134,7 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 			|
 			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO ';'
 			{	
+				//cout << "Entrou em TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO ';': \n\n\n";
 				if(variavelJaDeclarada($2.label, false))
 				{
 					//mensagem de erro dupla declaração
@@ -142,6 +143,7 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 				}
 				else
 				{
+					//cout << "Entrou no else: \n\n\n";
 					string tipo = $4.tipo;
 					if(tipo == constante_tipo_booleano)
 					{
@@ -152,11 +154,22 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 					if(tipo == constante_tipo_string)
 					{
 						tipo = constante_tipo_caracter;
-						tipo = "\t" + tipo + " [" + to_string($4.tamanho) + "] ";
+						tipo = "\t" + tipo;
+						//cout << "Tamanho: " << $4.tamanho << "\n\n\n";
+					
+						$2.label = prefixo_variavel_usuario + $2.label;
+						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + "[" + to_string($4.tamanho) + "];\n";
+						$$.traducao = $4.traducao + montarCopiarString($2.label, $4.label) + ";\n";
+					
 					}
-					$2.label = prefixo_variavel_usuario + $2.label;
-					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + ";\n";
-					$$.traducao = $4.traducao + "\t" + $2.label + " = " + $4.label + ";\n";
+					
+					else
+					{
+						$2.label = prefixo_variavel_usuario + $2.label;
+						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + ";\n";
+						$$.traducao = $4.traducao + "\t" + $2.label + " = " + $4.label + ";\n";
+					}
+					
 					incluirNoMapa($2.label, $4.tipo);
 					$$.label = $2.label;
 					$$.tipo = $4.tipo;
@@ -165,7 +178,9 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 			}
 			|
 			ID '=' VALOR_ATRIBUICAO ';'
-			{				
+			{
+				//cout << "Entrou em ID '=' VALOR_ATRIBUICAO ';': \n\n\n";			
+				string tipo = "";	
 				if($1.label != $3.label)
 				{
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
@@ -174,28 +189,32 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 						//isso aqui também pode causar problema no futuro devido as lacunas
 						metaData.tipo = $3.tipo;
 						atualizarNoMapa(metaData);
-						string tipo = metaData.tipo;
+						tipo = metaData.tipo;
 						if(tipo == constante_tipo_booleano)
 						{
 							tipo = constante_tipo_inteiro;
 							tipo = "\t" + tipo;
 						}
-						if(tipo == constante_tipo_string)
-						{
-							tipo = constante_tipo_caracter;
-							tipo = "\t" + tipo + " [" + to_string($4.tamanho) + "] ";
-						}
-						adicionarDefinicaoDeTipo($1.label, tipo);
+						
+						adicionarDefinicaoDeTipo($1.label, tipo, global_tamanhoStringConcatenada);
+						global_tamanhoStringConcatenada = 0; //perdão a global. :( Podem mudar se tiverem ideia melhor
+						
 					}
+
 					$1.tipo = metaData.tipo;
 					//provavelmente ainda há lacunas, mas vamos ignorar por enquanto
 					if(metaData.tipo == $3.tipo)
 					{
 						$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-						$$.traducao = $$.traducao + $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
+						
+						if($3.tipo == constante_tipo_string)
+							$$.traducao = $$.traducao + $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
+						else
+							$$.traducao = $$.traducao + $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
 					else
 					{
+						
 						string strPrefixoVarUsuario = prefixo_variavel_usuario;
 						string params[3] = {$1.label.replace(0, strPrefixoVarUsuario.length(), ""), $1.tipo, $3.tipo};
 						yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
@@ -250,6 +269,7 @@ TERMO		: TK_NUM
 			
 VALOR_ATRIBUICAO: E
 			{
+				//cout << "Entrou em E: \n\n\n";
 				//se for variavel aqui sempre vai existir, pq vai ter que ter passado pela verificação da regra TERMO: TK_ID
 				//e por passar nessa regra terá o tipo já buscado
 				if($1.label.find(prefixo_variavel_usuario) == 0 && $1.tipo == ""){
@@ -258,6 +278,9 @@ VALOR_ATRIBUICAO: E
 					//mensagem variavel precisa ter recebido um valor para ter seu tipo definido e atribuido o valor
 					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_UTILIZADA_PRECISA_TER_RECEBIDO_UM_VALOR, params, 1));
 				}
+				
+				
+				
 				$$ = $1;
 			}
 			|
@@ -285,6 +308,7 @@ VALOR_ATRIBUICAO: E
 
 E 			: E '+' E
 			{
+				//cout << "Entrou em E+E: \n\n\n";
 				$$ = tratarExpressaoAritmetica("+", $1, $3);							
 			}
 			|
@@ -354,6 +378,7 @@ E1 			: E1 '*' E1
 				$$.traducaoDeclaracaoDeVariaveis = "\tchar " + $$.label + "[" + to_string($$.tamanho) + "];\n";
 				$$.traducao = codigoTraduzido;
 				
+				//cout << mapaStrings[$$.label].valor << "\n";
 				
 				$$.tipo = $1.tipo;
 				
@@ -469,6 +494,7 @@ int main( int argc, char* argv[] )
 	
 	mapaTipos = criarMapa();
 	inicializarMapaDeContexto();
+	//inicializarMapaDeStrings();
 	yyparse();
 	
 	
@@ -481,17 +507,20 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	ATRIBUTOS dolarDolar;
 	
 	dolarDolar.label = gerarNovaVariavel();
+	
 	dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
 	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;				
 	
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
-	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";
+	
+	if(!(dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string))
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";
 	
 	string label_old = dolarDolar.label;
 	
 	if(resultado == constante_erro)
 	{
-		string params[3] = {dolar1.tipo, dolar3.tipo, op};
+		string params[3] = {op,dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
 	}
 	
@@ -500,43 +529,30 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	*Tratar caso de ser do tipo String
 	*
 	*/
-	//else if(dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string)
-	//{
-	//	realizarConversaoImplicitaString(dolar1,dolar3,op);
-		/*string retorno = "";
-		if(dolar1.tipo == constante_tipo_string)
+	else if(dolar1.tipo == constante_tipo_string && dolar3.tipo == constante_tipo_string)
+	{
+		//realizando a soma das traduções fora das funções
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoDeString(op, dolarDolar, dolar1,dolar3);
+		
+		string traducao = realizarOperacaoAritmeticaString(op, dolarDolar,dolar1,dolar3);
+		
+		if(traducao == "") //o operador ainda não está implementado.
 		{
-			retorno = geraDeclaracaoString(dolar1.label, dolar1.traducao);
-		//	cout << retorno << " EEEEEEEEE \n";
-			cout << "Label: \n" << dolar1.label << "\n*******Dolar 1.label\n*************\n";
-			cout << "Traducao: \n" << dolar1.traducao << " *******Dolar 1.trad\n***********";
+			string params[3] = {op,dolar1.tipo, dolar3.tipo};
+			yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
 		
 		}
+			
 		
-		if(dolar3.tipo == constante_tipo_string)
-		{
-			retorno = retorno + geraDeclaracaoString(dolar3.label, dolar3.traducao);
-		
-		}*/
-		
-	//	dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
-		//return dolarDolar;
-	//}
+		dolarDolar.traducao = dolarDolar.traducao + traducao;
+			
+	
+	}
 		
 	else if((dolar1.tipo == dolar3.tipo) && (dolar1.tipo == resultado)) //se não houver necessidade de conversão
 	{
-		//cout << resultado << " ***************************\n";
-		if(resultado == constante_tipo_string)
-		{
-		//	cout << "+++++++++++++++++++++++++++++++++++++++++++++\n";
-			dolarDolar.label = gerarNovaVariavel();
-			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + "char[" +  to_string(dolar1.tamanho + dolar3.tamanho + 1) + "] " + dolarDolar.label + ";\n";
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + "strcat(" + dolarDolar.label + "," + dolar1.label + ");\n";
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + "strcat(" + dolarDolar.label + "," + dolar3.label + ");\n";
-		}
-			
-		else		
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
+	
+		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
 	}
 	
 	

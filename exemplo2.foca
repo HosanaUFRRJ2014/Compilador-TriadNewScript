@@ -1,5 +1,14 @@
 int main()
 {
-	var h;
-	h = "d" + "u"; //bugado!
+	/*var h;
+	h = "doctor";
+	var cabra;
+	cabra = "who";
+	
+	var ornitorinco;
+	ornitorinco = "tra";*/
+	
+	
+	var h = "aloha";
+	h = "doc\tor" + "who"; //bugado!
 }

@@ -151,7 +151,7 @@ namespace ControleDeVariaveis
 				id = prefixo_variavel_usuario + id;
 			return id;
 		}
-		
+	
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string id)
 		{
 			
@@ -163,26 +163,51 @@ namespace ControleDeVariaveis
 			return tipoProvisorio + " " + idPrefixado + ";\n";
 		}
 			
-		void adicionarDefinicaoDeTipo(string id, string tipo)
+		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho)
 		{
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string idPrefixado = adicionaPrefixo(id);
 			string separador = slotIdVar;
+			
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			
-			mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
+			
+			if(tipo != constante_tipo_string)
+			{
+				
+				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
+			}
+				
+			else
+			{
+				string charArray = "char " + idPrefixado + "[" + to_string(tamanho) + "]";
+
+				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
+			}
 		}
 		
 		string substituirTodasAsDeclaracoesProvisorias(string declaracoes)
 		{
+			//string separador = slotIdVar;
 			for(map<string, string>::iterator it=mapaSubstituicaoDeTipoProvisorio.begin();it!=mapaSubstituicaoDeTipoProvisorio.end(); ++it)
 			{
 				string key = it->first;
 				string value = it->second;
-						
+					
+				
 				int pos = declaracoes.find(key);
 				if(pos >= 0)
-					declaracoes.replace(pos, key.length(), value);
+				{	
+					
+					if(key.find("[") && key.find("char"))
+					{
+						//-8 para eliminar o char    [*];
+						declaracoes.replace(pos, key.length() + value.length() -8  + 1, value);
+					}
+					
+					else
+						declaracoes.replace(pos, key.length(), value);
+				}
 			}
 			
 			return declaracoes;
