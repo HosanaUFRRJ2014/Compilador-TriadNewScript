@@ -10,7 +10,7 @@ using namespace std;
 using namespace ConstanteTipos;
 
 
-namespace MapaTiposLib
+namespace MapaTipos
 {
 	
 
@@ -99,7 +99,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 
@@ -131,7 +131,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//booleano + booleano
@@ -169,7 +169,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -216,7 +216,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 
@@ -248,7 +248,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//booleano + booleano
@@ -286,7 +286,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -336,7 +336,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 
@@ -368,7 +368,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//booleano + booleano
@@ -406,7 +406,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -578,7 +578,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//flutuante + flutuante
@@ -610,7 +610,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				
 				//booleano + booleano
@@ -648,7 +648,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -694,7 +694,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal,constante_erro));
 
 
 				//flutuante + flutuante
@@ -726,7 +726,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				
 				//booleano + booleano
@@ -764,7 +764,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -812,7 +812,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//flutuante + flutuante
@@ -844,7 +844,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				
 				//booleano + booleano
@@ -882,7 +882,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -929,7 +929,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//flutuante + flutuante
@@ -961,7 +961,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				
 				//booleano + booleano
@@ -999,7 +999,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -1047,7 +1047,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//flutuante + flutuante
@@ -1079,7 +1079,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				
 				//booleano + booleano
@@ -1117,7 +1117,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
@@ -1165,7 +1165,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 
 
 				//flutuante + flutuante
@@ -1197,7 +1197,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				
 				//booleano + booleano
@@ -1235,7 +1235,7 @@ namespace MapaTiposLib
 				tipo2 = constante_tipo_string;
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
-				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
+				mapaTipos.insert(make_pair(chaveFinal, constante_erro));
 				
 				//string + string
 				tipo1 = constante_tipo_string;
