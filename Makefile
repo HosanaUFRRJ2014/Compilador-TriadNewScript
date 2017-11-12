@@ -30,6 +30,9 @@ all-no-code:
 		./glf < exemplo.foca
 
 
+clear-all:
+		rm y.tab.c y.tab.h lex.yy.c cod glf y.output
+
 
 #Makefile para o exemplo2.foca
 all2:
