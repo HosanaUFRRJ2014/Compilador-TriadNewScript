@@ -9,6 +9,9 @@ int main()
 	ornitorinco = "tra";*/
 	
 	
-	var h = "aloha";
-	h = "doc\tor" + "who"; //bugado!
+	//var h = "aloha";
+	//h = "doctor " + "who"; //bugado. (lixo de memória do strcat)
+	//show("I love " + h);
+	//concatenação de strings
+show(1 < 2);
 }

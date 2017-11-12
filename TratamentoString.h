@@ -15,7 +15,7 @@ namespace TratamentoString
 	#define constante_TamanhoInicialPilhaString 1
 	#define constante_TamanhoDeAumentoDaPilhaString 5
 
-	//FIXME - Remover essa global do código
+	//FIXME - Remover essas globais do código
 	long global_numCaracteresEspeciais = 0;
 	long global_tamanhoStringConcatenada = 0;
 	
@@ -92,7 +92,7 @@ namespace TratamentoString
 	{
 		string retorno = "";
 		
-		if(valor[*i] == '\\' && (valor[*i+1] == '\"'|| valor[*i+1] == 'n' || valor[*i+1] == 't' || valor[*i+1] == '0')) 
+		if(valor[*i] == '\\' && (valor[*i+1] == '\\'|| valor[*i+1] == '\"'|| valor[*i+1] == 'n' || valor[*i+1] == 't' || valor[*i+1] == '0')) 
 		{
 			retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\" + valor[*i+1] + "\';\n";
 			*i = *i + 1;
@@ -183,6 +183,30 @@ namespace TratamentoString
 	
 	}
 	
+		
+		
+		
+		
+		
+		
+		
+		
+//*********************************************************************************************************************************	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 	//CóDIGO INúTIL DAQUI POR DIANTE - Não apaguei porque pode ainda se tornar útil	

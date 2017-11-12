@@ -1243,10 +1243,7 @@ namespace MapaTipos
 				chaveFinal = gerarChaveFinal(tipo1,tipo2,operador);
 				
 				mapaTipos.insert(make_pair(chaveFinal, constante_tipo_string));
-			
-			
-
-
+				
 
 		return mapaTipos;
 
