@@ -16,12 +16,14 @@ namespace MensagensDeErro{
 	#define MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS "Erro: Não é possível efetuar operação com o operador \"\t\" entre os tipos \"\t\" e \"\t\"."
 	
 	#define MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA "Erro: Não é possível efetuar conversão explicita do tipo \"\t\" para o tipo \"\t\". Operação indevida"
+	//LÍVIA HERE!	
+	#define MSG_ERRO_COMENTARIO "Erro: '*/' não encontrado para fechar comentário."
+	#define MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO "Erro: Variável tipo 'string' ou 'float' não permitida no comando switch-case."
 	
 
 	string SEP_PARAMS = "\t";
 
-
-	string montarMensagemDeErro(string mensagem, string* parametros, int qtdParametros){
+	string montarMensagemDeErro(string mensagem, string* parametros = NULL, int qtdParametros = 0){
 		int pos;
 		for(int i = 0; i < qtdParametros; i++){
 			pos = mensagem.find(SEP_PARAMS);

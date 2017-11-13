@@ -1,4 +1,4 @@
-#include<iostream>
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <map>
@@ -6,58 +6,192 @@
 
 using namespace std;
 
-namespace ControleDeVariaveis{
+namespace ControleDeVariaveis
+{
 	struct DADOS_VARIAVEL
 	{
 		string tipo;
 		string nome;
-		bool variavelReservadaDoSistema;
+		int tamanho;
 	};
 	
-	namespace MapaDeContexto{
+	namespace MapaDeContexto
+	{
 		#define prefixo_variavel_usuario "USER_"
+		#define constante_TamanhoInicialPilha 1
+		#define constante_TamanhoDeAumentoDaPilha 5
+		int numeroEscopoAtual = 0;
+		vector<map<string, DADOS_VARIAVEL>> pilhaDeMapas(constante_TamanhoInicialPilha);
 		map<string, DADOS_VARIAVEL> mapaDeContexto;
 		
-		bool incluirNoMapa(string, string, bool);
-		bool atualizarNoMapa(DADOS_VARIAVEL);
-		bool variavelJaDeclarada(string);
-		DADOS_VARIAVEL recuperarDadosVariavel(string);
+		void inicializarMapaDeContexto();
+		bool incluirNoMapa(string, string, int escopo = numeroEscopoAtual);
+		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
+		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
+		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
 		
-		bool incluirNoMapa(string nome, string tipo = "", bool variavelReservadaDoSistema = false){
-			if(!variavelJaDeclarada(nome)){
+		//escopo
+		void aumentarEscopo();
+		void empilha(map<string, DADOS_VARIAVEL>*);
+		void diminuirEscopo();
+		map<string, DADOS_VARIAVEL> recuperarMapa(int);
+		
+		
+		
+		void aumentarEscopo(){
+			map<string, DADOS_VARIAVEL> novoMapa;
+			empilha(&novoMapa);
+			pilhaDeMapas[numeroEscopoAtual].clear();
+		}
+		
+		//ALERT!!!!!
+		void empilha(map<string, DADOS_VARIAVEL>* novoMapa){ 	
+			if(pilhaDeMapas.size() + 1 > pilhaDeMapas.capacity())
+				pilhaDeMapas.reserve(pilhaDeMapas.size() + constante_TamanhoDeAumentoDaPilha);
+				
+			numeroEscopoAtual = numeroEscopoAtual+1;
+			pilhaDeMapas.push_back(*novoMapa);
+		}
+		
+		void diminuirEscopo(){
+			numeroEscopoAtual = numeroEscopoAtual-1;
+			if(numeroEscopoAtual == -1) 
+				numeroEscopoAtual = 0;
+				//dispara erro e retorna
+			pilhaDeMapas.pop_back();//desempilha
+			
+		}
+
+		void inicializarMapaDeContexto()
+		{
+			empilha(&mapaDeContexto);
+			numeroEscopoAtual = numeroEscopoAtual-1;
+		}
+		
+		string adcionaPrefixo(string nome)
+		{
+			if(nome.find(prefixo_variavel_usuario) != 0)
+				nome = prefixo_variavel_usuario + nome;
+			return nome;
+		}
+				
+		bool incluirNoMapa(string nome, string tipo = "", int escopo)
+		{
+			nome = adcionaPrefixo(nome);
+			
+			if(!variavelJaDeclarada(nome, false))
+			{
 				DADOS_VARIAVEL variavel;
 				variavel.nome = nome;
 				variavel.tipo = tipo;
-				variavel.variavelReservadaDoSistema = variavelReservadaDoSistema;
-				mapaDeContexto[variavel.nome] = variavel;
+				pilhaDeMapas[escopo][variavel.nome] = variavel;
 				return true;
 			}
 			return false;
 		}
 		
-		bool atualizarNoMapa(DADOS_VARIAVEL variavel){
-			if(variavelJaDeclarada(variavel.nome)){
+		bool atualizarNoMapa(DADOS_VARIAVEL variavel, int escopo)
+		{
+			
+			if(variavelJaDeclarada(variavel.nome))
+			{
 				if(mapaDeContexto[variavel.nome].tipo == "")
+				{
 					mapaDeContexto[variavel.nome].tipo = variavel.tipo;
 					return true;
-				return false;
+				}
 			}
 			return false;
 		}
-		bool variavelJaDeclarada(string nome){
-			return mapaDeContexto.find(nome) != mapaDeContexto.end();
+		
+		bool variavelJaDeclarada(string nome, bool varrerEscopo, int escopo)
+		{
+			if(varrerEscopo)
+			{
+				//ponto de parada
+				if(escopo < 0)
+					return false;
+
+				nome = adcionaPrefixo(nome);
+				//variavel que vai manter qual foi o ultimo mapa acessado
+				mapaDeContexto = pilhaDeMapas[escopo];
+				//operador curto circuitado para buscar a variavel nos mapas recursivamente
+				return (mapaDeContexto.find(nome) != mapaDeContexto.end()) || variavelJaDeclarada(nome, varrerEscopo, escopo - 1);
+			}
+			else
+			{
+				nome = adcionaPrefixo(nome);
+				return pilhaDeMapas[escopo].find(nome) != pilhaDeMapas[escopo].end();
+			}
 		}
-		DADOS_VARIAVEL recuperarDadosVariavel(string nome){
-			if(variavelJaDeclarada(nome)){
+		
+		DADOS_VARIAVEL recuperarDadosVariavel(string nome, int escopo)
+		{
+			nome = adcionaPrefixo(nome);
+			if(variavelJaDeclarada(nome))
+			{
 				return mapaDeContexto[nome];
 			}
 		}
 		
 	}
 	
+	namespace declaracaoProvisoriaInferenciaTipo
+	{
+		#define constante_subst_tipo_declaracao_variavel "//#TIPOP_VAR_\t_#"
+		#define slotIdVar "\t"
+		map<string, string> mapaSubstituicaoDeTipoProvisorio;
+		
+		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
+		void adcionarDefinicaoDeTipo(string, string);
+		string substituirTodasAsDeclaracoesProvisorias(string);
+		
+		string adcionaPrefixo(string id)
+		{
+			if(id.find(prefixo_variavel_usuario) != 0)
+				id = prefixo_variavel_usuario + id;
+			return id;
+		}
+		
+		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string id)
+		{
+			
+			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
+			string separador = slotIdVar;
+			string idPrefixado = adcionaPrefixo(id);
+			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
+			mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = " ";
+			return tipoProvisorio + " " + idPrefixado + ";\n";
+		}
+			
+		void adcionarDefinicaoDeTipo(string id, string tipo)
+		{
+			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
+			string idPrefixado = adcionaPrefixo(id);
+			string separador = slotIdVar;
+			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
+			
+			mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
+		}
+		
+		string substituirTodasAsDeclaracoesProvisorias(string declaracoes)
+		{
+			for(map<string, string>::iterator it=mapaSubstituicaoDeTipoProvisorio.begin();it!=mapaSubstituicaoDeTipoProvisorio.end(); ++it)
+			{
+				string key = it->first;
+				string value = it->second;
+						
+				int pos = declaracoes.find(key);
+				if(pos >= 0)
+					declaracoes.replace(pos, key.length(), value);
+			}
+			
+			return declaracoes;
+		}
+		
+	}
+	
 	namespace VariaveisTemporarias{
-		// a principio esse namespace não esta sendo usado aqui dentro, mas deixei aqui pra importar pro sintatico junto com esse e pq acho que pode ser interessante ter umas variaveis temporarias salvas na tabela (tipo uma com valor true e uma com false, por exemplo)
-		using namespace MapaDeContexto;
 		#define prefixo_variavel_sistema "temp"
 		
 		string gerarNovaVariavel();
@@ -66,7 +200,7 @@ namespace ControleDeVariaveis{
 		string gerarNovaVariavel(){
 			static int num = 0;
 			num++;
-			string temp = "temp";
+			string temp = prefixo_variavel_sistema;
 	
 			string numInt = to_string(num);
 			return temp + numInt;
@@ -75,6 +209,8 @@ namespace ControleDeVariaveis{
 	
 	
 	using namespace VariaveisTemporarias;
+	using namespace MapaDeContexto;
+	using namespace declaracaoProvisoriaInferenciaTipo;
 
 }
 
