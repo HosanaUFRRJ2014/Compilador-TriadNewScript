@@ -13,19 +13,20 @@ namespace ControleDeVariaveis
 		string tipo;
 		string nome;
 		int tamanho;
+		int escopo;
 	};
+	
 	
 	namespace MapaDeContexto
 	{
-		#define prefixo_variavel_usuario "USER_"
-		#define constante_TamanhoInicialPilha 1
-		#define constante_TamanhoDeAumentoDaPilha 5
+		#define prefixo_variavel_usuario "VARUSER_"
+//		#define constante_TamanhoInicialPilha 5
 		int numeroEscopoAtual = 0;
-		vector<map<string, DADOS_VARIAVEL>> pilhaDeMapas(constante_TamanhoInicialPilha);
-		map<string, DADOS_VARIAVEL> mapaDeContexto;
+		vector<map<string, DADOS_VARIAVEL>*> pilhaDeMapas(0);
+		map<string, DADOS_VARIAVEL> *mapaDeContexto;
 		
 		void inicializarMapaDeContexto();
-		bool incluirNoMapa(string, string, int escopo = numeroEscopoAtual);
+		bool incluirNoMapa(string, string);
 		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
 		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
@@ -34,56 +35,60 @@ namespace ControleDeVariaveis
 		void aumentarEscopo();
 		void empilha(map<string, DADOS_VARIAVEL>*);
 		void diminuirEscopo();
-		map<string, DADOS_VARIAVEL> recuperarMapa(int);
+		bool ehMaiorIgualQueEscopoAtual(int);
+		int escopoResultante(int);
 		
-		
-		
-		void aumentarEscopo(){
-			map<string, DADOS_VARIAVEL> novoMapa;
-			empilha(&novoMapa);
-			pilhaDeMapas[numeroEscopoAtual].clear();
+
+		bool ehMaiorIgualQueEscopoAtual(int qtdRetornoEscopo)
+		{
+			return qtdRetornoEscopo >= numeroEscopoAtual;
 		}
 		
-		void empilha(map<string, DADOS_VARIAVEL>* novoMapa){	
-			if(pilhaDeMapas.size() + 1 > pilhaDeMapas.capacity())
-				pilhaDeMapas.reserve(pilhaDeMapas.size() + constante_TamanhoDeAumentoDaPilha);
-				
+		int escopoResultante(int qtdRetornoEscopo)
+		{
+			return numeroEscopoAtual - qtdRetornoEscopo;
+		}
+		
+		
+		void inicializarMapaDeContexto()
+		{
+			map<string, DADOS_VARIAVEL> *mapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
+			mapa->clear();
+			pilhaDeMapas.push_back(mapa);
+		}
+		
+		void aumentarEscopo(){
+			map<string, DADOS_VARIAVEL> *novoMapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
 			numeroEscopoAtual = numeroEscopoAtual+1;
-			pilhaDeMapas.push_back(*novoMapa);
+			novoMapa->clear();
+			pilhaDeMapas.push_back(novoMapa);
+			
 		}
 		
 		void diminuirEscopo(){
 			numeroEscopoAtual = numeroEscopoAtual-1;
-			if(numeroEscopoAtual == -1) 
-				numeroEscopoAtual = 0;
-				//dispara erro e retorna
 			pilhaDeMapas.pop_back();//desempilha
 			
 		}
-
-		void inicializarMapaDeContexto()
-		{
-			empilha(&mapaDeContexto);
-			numeroEscopoAtual = numeroEscopoAtual-1;
-		}
 		
-		string adicionaPrefixo(string nome)
+		string adcionaPrefixo(string nome)
 		{
 			if(nome.find(prefixo_variavel_usuario) != 0)
 				nome = prefixo_variavel_usuario + nome;
 			return nome;
 		}
 				
-		bool incluirNoMapa(string nome, string tipo = "", int escopo)
+		bool incluirNoMapa(string nome, string tipo = "")
 		{
-			nome = adicionaPrefixo(nome);
-			
+			nome = adcionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
 				DADOS_VARIAVEL variavel;
 				variavel.nome = nome;
 				variavel.tipo = tipo;
-				pilhaDeMapas[escopo][variavel.nome] = variavel;
+				variavel.escopo = numeroEscopoAtual;
+				
+				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
 				return true;
 			}
 			return false;
@@ -92,11 +97,11 @@ namespace ControleDeVariaveis
 		bool atualizarNoMapa(DADOS_VARIAVEL variavel, int escopo)
 		{
 			
-			if(variavelJaDeclarada(variavel.nome))
+			if(variavelJaDeclarada(variavel.nome, true, escopo))
 			{
-				if(mapaDeContexto[variavel.nome].tipo == "")
+				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
-					mapaDeContexto[variavel.nome].tipo = variavel.tipo;
+					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
 					return true;
 				}
 			}
@@ -105,75 +110,90 @@ namespace ControleDeVariaveis
 		
 		bool variavelJaDeclarada(string nome, bool varrerEscopo, int escopo)
 		{
+			//ponto de parada
+			if(escopo < 0)
+				return false;
+			//variavel que vai manter qual foi o ultimo mapa acessado
+			mapaDeContexto = pilhaDeMapas[escopo];
 			if(varrerEscopo)
 			{
-				//ponto de parada
-				if(escopo < 0)
-					return false;
+				nome = adcionaPrefixo(nome);
 
-				nome = adicionaPrefixo(nome);
-				//variavel que vai manter qual foi o ultimo mapa acessado
-				mapaDeContexto = pilhaDeMapas[escopo];
 				//operador curto circuitado para buscar a variavel nos mapas recursivamente
-				return (mapaDeContexto.find(nome) != mapaDeContexto.end()) || variavelJaDeclarada(nome, varrerEscopo, escopo - 1);
+				return (mapaDeContexto->count(nome) > 0) || variavelJaDeclarada(nome, varrerEscopo, escopo - 1);
 			}
 			else
 			{
-				nome = adicionaPrefixo(nome);
-				return pilhaDeMapas[escopo].find(nome) != pilhaDeMapas[escopo].end();
+				nome = adcionaPrefixo(nome);
+				return mapaDeContexto->count(nome) > 0;
 			}
 		}
 		
 		DADOS_VARIAVEL recuperarDadosVariavel(string nome, int escopo)
 		{
-			nome = adicionaPrefixo(nome);
-			if(variavelJaDeclarada(nome))
+			DADOS_VARIAVEL retorno;
+			nome = adcionaPrefixo(nome);
+			if(variavelJaDeclarada(nome, true, escopo))
 			{
-				return mapaDeContexto[nome];
+				 return mapaDeContexto->at(nome);
 			}
 		}
 		
 	}
 	
-	namespace declaracaoProvisoriaInferenciaTipo
+	namespace DeclaracaoProvisoriaInferenciaTipo
+		using namespace MapaDeContexto;
 	{
-		#define constante_subst_tipo_declaracao_variavel "//#TIPOP_VAR_\t_#"
+		#define constante_subst_tipo_declaracao_variavel "//#TIPOP_VAR_\t_\t#"
+		#define constante_sufixo_escopo "SCOPE"
 		#define slotIdVar "\t"
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
-		
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
-		void adicionarDefinicaoDeTipo(string, string);
+		
+		void adcionarDefinicaoDeTipo(string, string, int);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		
-		string adicionaPrefixo(string id)
-		{
-			if(id.find(prefixo_variavel_usuario) != 0)
-				id = prefixo_variavel_usuario + id;
-			return id;
-		}
-	
+		
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string id)
 		{
-			
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string separador = slotIdVar;
-			string idPrefixado = adicionaPrefixo(id);
+			string idPrefixado = adcionaPrefixo(id);
+			//primeiro insere o nome da variavel no primeiro slot e depois adciona o numero do escopo no segundo slot
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
+			string sufixoEscopo = constante_sufixo_escopo;
+			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(numeroEscopoAtual));
 			mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = " ";
 			return tipoProvisorio + " " + idPrefixado + ";\n";
 		}
 			
-		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho)
-		{
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
-			string idPrefixado = adicionaPrefixo(id);
+		{
+			string idPrefixado = adcionaPrefixo(id);
 			string separador = slotIdVar;
-			
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
+			string sufixoEscopo = constante_sufixo_escopo;
+			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(escopo));
+		void adcionarDefinicaoDeTipo(string id, string tipo, int escopo = numeroEscopoAtual)
 			
+			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
+			//verificação a mais inserida pq havia problema na hora de definir o tipo de uma variavel global
+			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
+			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
+				while(escopo > 0){
+					DADOS_VARIAVEL metadata = recuperarDadosVariavel(id, escopo);
+					escopo = metadata.escopo;
+					if(metadata.tipo == "") break;			
+				}
+				constanteMarcacao = constante_subst_tipo_declaracao_variavel;
+				
+				tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
+				sufixoEscopo = constante_sufixo_escopo;
+				tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(escopo));
+			}
+				
 			if(tipo == constante_tipo_string)
 			{
-				cout << tamanho;
 				string charArray = "char " + idPrefixado + "[" + to_string(tamanho) + "]";
 
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
@@ -184,17 +204,16 @@ namespace ControleDeVariaveis
 			}
 				
 			
+		
 		}
 		
 		string substituirTodasAsDeclaracoesProvisorias(string declaracoes)
 		{
-			//string separador = slotIdVar;
 			for(map<string, string>::iterator it=mapaSubstituicaoDeTipoProvisorio.begin();it!=mapaSubstituicaoDeTipoProvisorio.end(); ++it)
 			{
 				string key = it->first;
 				string value = it->second;
-					
-				
+						
 				int pos = declaracoes.find(key);
 				if(pos >= 0)
 				{	
@@ -217,11 +236,11 @@ namespace ControleDeVariaveis
 				}
 			}
 			
+// tinhas posto o clear pra ajudar no gerenciamento de chaves repetidas... mas deu problema
+//			mapaSubstituicaoDeTipoProvisorio.clear();
 			return declaracoes;
 		}
-		
 	}
-	
 	namespace VariaveisTemporarias{
 		#define prefixo_variavel_sistema "temp"
 		
@@ -241,7 +260,7 @@ namespace ControleDeVariaveis
 	
 	using namespace VariaveisTemporarias;
 	using namespace MapaDeContexto;
-	using namespace declaracaoProvisoriaInferenciaTipo;
+	using namespace DeclaracaoProvisoriaInferenciaTipo;
 
 }
 

@@ -36,6 +36,8 @@ STRING \"([^\"\n]|\\\")*\"
 "bool"		{return TK_TIPO_BOOL;}
 "string"	{return TK_TIPO_STRING;}
 "var"		{return TK_PALAVRA_VAR;}
+"backscope" {return TK_BACKSCOPE;}
+"global"		{return TK_PALAVRA_GLOBAL;}
 "show"		{return TK_PALAVRA_PRINT;}
 "read"		{return TK_PALAVRA_SCAN;}
 

@@ -1,8 +1,11 @@
 var abc;
+var a = true;
 
 int main()
 {
-	/*var conversao_explicita = (float) 2 * 3;
+/*
+/*
+	var conversao_explicita = (float) 2 * 3;
 	var conversao_implicita = 32 + conversao_explicita;
 	
 	var expressao_logica_atribuida = true and false or true and not false;
@@ -17,17 +20,21 @@ int main()
 												 (conversao_explicita == conversao_implicita) and
 										 		 false;
 	var convert = 1 + 2 * (float) 3;
-										 		*/
+*/										 		
 	abc = 109;
 	
 	var a;
-	a = 10;	
+		
 	{
-		var a = 'O';
+		var a;
+		a = 'O';
+ // a definição da forma acima (junto com a definição do tipo de um escopo superior abaixo) gera variavel que deveria ser char do tipo int (coportamento incorreto)
+//		var a = 'O';
 		abc = 10;
-//		a = 10;
+//		a = 11; //isso falha nesse código (é o comportamento esperado pq tem "var a" do tipo char)
+		(backscope 1) a = 11;
+//definir tipo de um escopo acima funciona
 	}
 	
 	(1 - 3 * (10 + 50) / 2) * -1.0;
-	
 }
