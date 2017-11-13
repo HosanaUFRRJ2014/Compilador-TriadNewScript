@@ -20,11 +20,10 @@ namespace ControleDeVariaveis
 	namespace MapaDeContexto
 	{
 		#define prefixo_variavel_usuario "VARUSER_"
-		#define constante_TamanhoInicialPilha 1
-		#define constante_TamanhoDeAumentoDaPilha 5
+//		#define constante_TamanhoInicialPilha 5
 		int numeroEscopoAtual = 0;
-		vector<map<string, DADOS_VARIAVEL>> pilhaDeMapas(constante_TamanhoInicialPilha);
-		map<string, DADOS_VARIAVEL> mapaDeContexto;
+		vector<map<string, DADOS_VARIAVEL>*> pilhaDeMapas(0);
+		map<string, DADOS_VARIAVEL> *mapaDeContexto;
 		
 		void inicializarMapaDeContexto();
 		bool incluirNoMapa(string, string);
@@ -36,7 +35,6 @@ namespace ControleDeVariaveis
 		void aumentarEscopo();
 		void empilha(map<string, DADOS_VARIAVEL>*);
 		void diminuirEscopo();
-		map<string, DADOS_VARIAVEL> recuperarMapa(int);
 		bool ehMaiorIgualQueEscopoAtual(int);
 		int escopoResultante(int);
 		
@@ -51,33 +49,26 @@ namespace ControleDeVariaveis
 			return numeroEscopoAtual - qtdRetornoEscopo;
 		}
 		
-		void aumentarEscopo(){
-			map<string, DADOS_VARIAVEL> novoMapa;
-			empilha(&novoMapa);
-			pilhaDeMapas[numeroEscopoAtual].clear();
+		
+		void inicializarMapaDeContexto()
+		{
+			map<string, DADOS_VARIAVEL> *mapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
+			mapa->clear();
+			pilhaDeMapas.push_back(mapa);
 		}
 		
-		void empilha(map<string, DADOS_VARIAVEL>* novoMapa){	
-			if(pilhaDeMapas.size() + 1 > pilhaDeMapas.capacity())
-				pilhaDeMapas.reserve(pilhaDeMapas.size() + constante_TamanhoDeAumentoDaPilha);
-				
+		void aumentarEscopo(){
+			map<string, DADOS_VARIAVEL> *novoMapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
 			numeroEscopoAtual = numeroEscopoAtual+1;
-			pilhaDeMapas.push_back(*novoMapa);
+			novoMapa->clear();
+			pilhaDeMapas.push_back(novoMapa);
+			
 		}
 		
 		void diminuirEscopo(){
 			numeroEscopoAtual = numeroEscopoAtual-1;
-			if(numeroEscopoAtual == -1) 
-				numeroEscopoAtual = 0;
-				//dispara erro e retorna
 			pilhaDeMapas.pop_back();//desempilha
 			
-		}
-
-		void inicializarMapaDeContexto()
-		{
-			empilha(&mapaDeContexto);
-			numeroEscopoAtual = numeroEscopoAtual-1;
 		}
 		
 		string adcionaPrefixo(string nome)
@@ -90,14 +81,14 @@ namespace ControleDeVariaveis
 		bool incluirNoMapa(string nome, string tipo = "")
 		{
 			nome = adcionaPrefixo(nome);
-			
 			if(!variavelJaDeclarada(nome, false))
 			{
 				DADOS_VARIAVEL variavel;
 				variavel.nome = nome;
 				variavel.tipo = tipo;
 				variavel.escopo = numeroEscopoAtual;
-				pilhaDeMapas[numeroEscopoAtual][variavel.nome] = variavel;
+				
+				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
 				return true;
 			}
 			return false;
@@ -108,9 +99,9 @@ namespace ControleDeVariaveis
 			
 			if(variavelJaDeclarada(variavel.nome, true, escopo))
 			{
-				if(mapaDeContexto[variavel.nome].tipo == "")
+				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
-					mapaDeContexto[variavel.nome].tipo = variavel.tipo;
+					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
 					return true;
 				}
 			}
@@ -119,32 +110,32 @@ namespace ControleDeVariaveis
 		
 		bool variavelJaDeclarada(string nome, bool varrerEscopo, int escopo)
 		{
+			//ponto de parada
+			if(escopo < 0)
+				return false;
+			//variavel que vai manter qual foi o ultimo mapa acessado
+			mapaDeContexto = pilhaDeMapas[escopo];
 			if(varrerEscopo)
 			{
-				//ponto de parada
-				if(escopo < 0)
-					return false;
-
 				nome = adcionaPrefixo(nome);
 
-				//variavel que vai manter qual foi o ultimo mapa acessado
-				mapaDeContexto = pilhaDeMapas[escopo];
 				//operador curto circuitado para buscar a variavel nos mapas recursivamente
-				return (mapaDeContexto.find(nome) != mapaDeContexto.end()) || variavelJaDeclarada(nome, varrerEscopo, escopo - 1);
+				return (mapaDeContexto->count(nome) > 0) || variavelJaDeclarada(nome, varrerEscopo, escopo - 1);
 			}
 			else
 			{
 				nome = adcionaPrefixo(nome);
-				return pilhaDeMapas[escopo].find(nome) != pilhaDeMapas[escopo].end();
+				return mapaDeContexto->count(nome) > 0;
 			}
 		}
 		
 		DADOS_VARIAVEL recuperarDadosVariavel(string nome, int escopo)
 		{
+			DADOS_VARIAVEL retorno;
 			nome = adcionaPrefixo(nome);
 			if(variavelJaDeclarada(nome, true, escopo))
 			{
-				return mapaDeContexto[nome];
+				 return mapaDeContexto->at(nome);
 			}
 		}
 		

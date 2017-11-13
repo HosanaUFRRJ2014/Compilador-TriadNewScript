@@ -135,7 +135,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			}
 			|
 			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO ';'
-			{	
+			{
 				if(variavelJaDeclarada($2.label, false)){
 					//mensagem de erro dupla declaração
 					string params[1] = {$2.label};
@@ -163,12 +163,12 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			{
 				if($1.label != $3.label){
 					DADOS_VARIAVEL metaData;
-					
-					if($1.escopoDeAcesso >= 0)
+					if($1.escopoDeAcesso >= 0){
 						metaData = recuperarDadosVariavel($1.label, $1.escopoDeAcesso);
-					else
+					}
+					else{
 						metaData = recuperarDadosVariavel($1.label);
-						
+					}
 					if(metaData.tipo == ""){
 //isso aqui também pode causar problema no futuro devido as lacunas
 						metaData.tipo = $3.tipo;
@@ -193,11 +193,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					}
 //provavelmente ainda há lacunas, mas vamos ignorar por enquanto
 					if($1.tipo == $3.tipo){
-						
 						$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis;
-
-						if($1.tipo == constante_tipo_booleano)
-							$1.label.replace($1.label.find("_"), 1, "__");
 						
 						
 						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
@@ -221,8 +217,10 @@ ID		: TK_ID
 			{
 				if(variavelJaDeclarada($1.label)){
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
+					
 					$$.label = metaData.nome;
 					$$.tipo = metaData.tipo;
+					//cout << $$.label << endl << $$.tipo << endl;
 				}else{
 					string params[1] = {$1.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_NAO_DECLARADA ,params, 1));
