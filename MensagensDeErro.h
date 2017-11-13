@@ -19,6 +19,8 @@ namespace MensagensDeErro{
 	//LÍVIA HERE!	
 	#define MSG_ERRO_COMENTARIO "Erro: '*/' não encontrado para fechar comentário."
 	#define MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO "Erro: Variável tipo 'string' ou 'float' não permitida no comando switch-case."
+	#define MSG_ERRO_BREAK_NAO_PERMITIDO "Erro: Comando 'break' não permitido uso neste escopo."
+	#define MSG_ERRO_CONTINUE_NAO_PERMITIDO "Erro: Comando 'continue' não permitido uso neste escopo."
 	
 
 	string SEP_PARAMS = "\t";

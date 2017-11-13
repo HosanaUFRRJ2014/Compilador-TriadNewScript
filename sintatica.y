@@ -470,7 +470,14 @@ COMANDO_IF	: TK_IF '(' E_REL ')' COMANDO %prec IFX
 
 				$$.traducao = $3.traducao + "\t" + $$.label + " = " + "!" + $3.label + ";\n" + 
 							"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" + 
-							$5.traducao + "\t" + tagFim + ":\n"; 
+							$5.traducao + "\t" + tagFim + ":\n";
+
+				//Para o break e continue.
+				//if(haBreakNoBloco($$.traducao)){
+				//	yyerror(MSG_ERRO_BREAK_NAO_PERMITIDO);
+				//}else if(haContinueNoBloco($$.traducao)){
+				//	yyerror(MSG_ERRO_CONTINUE_NAO_PERMITIDO);
+				//} 
  			
 			}
 			|
@@ -489,43 +496,84 @@ COMANDO_IF	: TK_IF '(' E_REL ')' COMANDO %prec IFX
 				$$.traducao = $3.traducao + "\t" + $$.label + " = " + $3.label + ";\n" + 
 								"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagBlocoIf + ";\n" + 
 								$7.traducao + "\t" + "goto " + tagFim + ";\n" + "\t" + tagBlocoIf + ":\n" +
-								$5.traducao + "\t" + tagFim + ":\n";			
+								$5.traducao + "\t" + tagFim + ":\n";
+
+				//Para o break e continue.
+				//if(haBreakNoBloco($$.traducao)){
+				//	yyerror(MSG_ERRO_BREAK_NAO_PERMITIDO);
+				//}else if(haContinueNoBloco($$.traducao)){
+				//	yyerror(MSG_ERRO_CONTINUE_NAO_PERMITIDO);
+				//} 			
 				
 			}
 			;
 
-COMANDO_WHILE	: TK_WHILE '(' E_REL ')' COMANDO
+EMPILHAR_TAG_WHILE	:
+					{ 
+						string tagInicio = gerarNovaTagWhile(false);
+						string tagFim = gerarNovaTagWhile(true);
+						pilhaTagsBreak->empilhar(tagFim);
+						pilhaTagsContinue->empilhar(tagInicio); 
+					}
+					;
+
+COMANDO_WHILE	: EMPILHAR_TAG_WHILE TK_WHILE '(' E_REL ')' COMANDO
 				{
-					string tagInicio = gerarNovaTagWhile(false);
-					string tagFim = gerarNovaTagWhile(true);
+					//string tagInicio = gerarNovaTagWhile(false);
+					//string tagFim = gerarNovaTagWhile(true);
+
+					string tagInicio = pilhaTagsContinue->obterTopo();
+					string tagFim = pilhaTagsBreak->obterTopo();
 
 					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis + 
+					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + $6.traducaoDeclaracaoDeVariaveis + 
 														"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 
-					$$.traducao = "\t" + tagInicio + ":\n" + $3.traducao + "\t" + $$.label + " = " + "!" + $3.label + ";\n" +
+					$$.traducao = "\t" + tagInicio + ":\n" + $4.traducao + "\t" + $$.label + " = " + "!" + $4.label + ";\n" +
 									"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
 									$5.traducao + "\t" + "goto " + tagInicio + ";\n" +
-									"\t" + tagFim + ":\n";  
+									"\t" + tagFim + ":\n";
+
+					//Para o break e continue.
+					//$$.traducao = incluirBreakEContinue($$.traducao,tagInicio,tagFim,false);
+					pilhaTagsContinue->desempilhar();
+					pilhaTagsBreak->desempilhar();  
 
 				}
 				;
 
-COMANDO_DOWHILE	: TK_DO COMANDO TK_WHILE '(' E_REL ')' ';' //PROBLEMAS COM O COMANDO ----> RESOLVIDO, COM GAMBIARRA!
+EMPILHAR_TAG_DOWHILE	:
+					{ 
+						string tagInicio = gerarNovaTagDoWhile(false);
+						string tagFim = gerarNovaTagDoWhile(true);
+						pilhaTagsBreak->empilhar(tagFim);
+						pilhaTagsContinue->empilhar(tagInicio); 
+					}
+					;
+
+COMANDO_DOWHILE	: EMPILHAR_TAG_DOWHILE TK_DO COMANDO TK_WHILE '(' E_REL ')' ';' //PROBLEMAS COM O COMANDO ----> RESOLVIDO, COM GAMBIARRA!
 				{
 
-					string tagInicio = gerarNovaTagDoWhile(false);
-					string tagFim = gerarNovaTagDoWhile(true);
+					//string tagInicio = gerarNovaTagDoWhile(false);
+					//string tagFim = gerarNovaTagDoWhile(true);
+
+					string tagInicio = pilhaTagsContinue->obterTopo();
+					string tagFim = pilhaTagsBreak->obterTopo();
 
 					$$.label = gerarNovaVariavel();
-					$$.traducaoDeclaracaoDeVariaveis = $5.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis + 
+					$$.traducaoDeclaracaoDeVariaveis = $6.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis + 
 														"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 
-					$$.traducao = "\t" + tagInicio + ":\n" + $2.traducao + 
-									$5.traducao + "\t" + $$.label + " = " + "!" + $5.label + ";\n" +
+					$$.traducao = "\t" + tagInicio + ":\n" + $3.traducao + 
+									$6.traducao + "\t" + $$.label + " = " + "!" + $6.label + ";\n" +
 									"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
 									"\t" + "goto " + tagInicio + ";\n" +
 									"\t" + tagFim + ":\n";
+
+					//Para o break e continue.
+					//$$.traducao = incluirBreakEContinue($$.traducao,tagInicio,tagFim,false);
+					pilhaTagsContinue->desempilhar();
+					pilhaTagsBreak->desempilhar();
 				}
 				;
 
@@ -589,34 +637,45 @@ UPDATE	:	T_UPDATE ',' UPDATE
 			T_UPDATE 
 			|
 			;
+
+EMPILHAR_TAG_FOR	: 
+					{	
+						string tagInicio = gerarNovaTagFor(false);
+						string tagFim = gerarNovaTagFor(true);
+						pilhaTagsContinue->empilhar(tagInicio);
+						pilhaTagsBreak->empilhar(tagFim);
+					}
+					;
  
 //TK_FOR '(' INIT ';' E_REL ';' UPDATE ')' COMANDO
-COMANDO_FOR	: TK_FOR '(' INIT E_REL ';' UPDATE ')' COMANDO
+COMANDO_FOR	: EMPILHAR_TAG_FOR TK_FOR '(' INIT E_REL ';' UPDATE ')' COMANDO
 			{
-				string tagInicio = gerarNovaTagFor(false);
-				string tagFim = gerarNovaTagFor(true);
-
+				//string tagInicio = gerarNovaTagFor(false);
+				//string tagFim = gerarNovaTagFor(true);
+				
+				string tagInicio = pilhaTagsContinue->obterTopo();
+				string tagFim = pilhaTagsBreak->obterTopo();
+				
 				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis + $4.traducaoDeclaracaoDeVariaveis +
-													$6.traducaoDeclaracaoDeVariaveis + $8.traducaoDeclaracaoDeVariaveis +
+				$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis +
+													$7.traducaoDeclaracaoDeVariaveis + $9.traducaoDeclaracaoDeVariaveis +
 													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 
-				$$.traducao = $3.traducao + "\t" + tagInicio + ":\n" + 
-								$4.traducao + "\t" + $$.label + " = " + "!" + $4.label + ";\n" +
+				$$.traducao = $4.traducao + "\t" + tagInicio + ":\n" + 
+								$5.traducao + "\t" + $$.label + " = " + "!" + $5.label + ";\n" +
 								"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
-								$8.traducao + $6.traducao + "\t" + "goto " + tagInicio + ";\n" + 
-								"\t" + tagFim + ":\n";			
+								$9.traducao + $7.traducao + "\t" + "goto " + tagInicio + ";\n" + 
+								"\t" + tagFim + ":\n";
+
+				//Para o break e continue.
+				//$$.traducao = incluirBreakEContinue($$.traducao,tagInicio,tagFim,false);
+				pilhaTagsContinue->desempilhar();
+				pilhaTagsBreak->desempilhar();			
 			}
 			;
 
-COMANDO_SWITCH	: TK_SWITCH '(' ID ')' CASES //FASE DE CONSTRUÇÃO!
+COMANDO_SWITCH	: TK_SWITCH '(' ID ')' '{' CASES '}' //FASE DE CONSTRUÇÃO!
 				{
-					
-					/*	#define tarja_variavel .....  //.....
-						#define tarja_tagFim **********  //**********
-
-						void substituirVariaveisCase(string traducao, string varTemp, string tagFim)*/
-
 
 					if($3.tipo != constante_tipo_string && $3.tipo != constante_tipo_flutuante) {
 						//(...)
@@ -625,16 +684,12 @@ COMANDO_SWITCH	: TK_SWITCH '(' ID ')' CASES //FASE DE CONSTRUÇÃO!
 						//$$.label = gerarNovaVariavel();
 						
 						//Outra parte da árvore já tera a $3.traducaoDeclaracaoDeVariaveis salva. Portanto, teríamos repetição.
-						$$.traducaoDeclaracaoDeVariaveis = $5.traducaoDeclaracaoDeVariaveis;
+						$$.traducaoDeclaracaoDeVariaveis = $6.traducaoDeclaracaoDeVariaveis;
 
-						//$$.traducao = $3.traducao + "\t" + tagInicio + ":\n" + 
-							//			$4.traducao + "\t" + $$.label + " = " + "!" + $4.label + ";\n" +
-								//		"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
-									//	$8.traducao + $6.traducao + "\t" + "goto " + tagInicio + ";\n" + 
-										//"\t" + tagFim + ":\n";
-															
-															
+						$$.traducao = $3.traducao + $6.traducao;
 						
+						//$$.traducao = incluirBreakEContinue($$.traducao,"",tagFim,true);									
+						//$$.traducao = substituirVariaveisCase($$.traducao, $3.label);									
 						
 					}
 					else{
@@ -660,6 +715,7 @@ CASES	: CASE CASES
 
 CASE	: TK_CASE TERMO ':' COMANDO
 		{
+
 			if( ($2.tipo == constante_tipo_inteiro || $2.tipo == constante_tipo_caracter) && 
 				$2.label.find(prefixo_variavel_usuario) != -1 ){
 				
@@ -668,10 +724,28 @@ CASE	: TK_CASE TERMO ':' COMANDO
 				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $4.traducaoDeclaracaoDeVariaveis +
 													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 				$$.tipo = $2.tipo;
+				
+				//if($2.tipo == constante_tipo_break)
 
 				$$.traducao = "\t" + $$.label + " = " + tarja_variavel + " == " + $2.label + ";\n" +
 								"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + $4.traducao; //+  
 								//"\t" + "goto " + tarja_tagFim + ";\n";			
+
+				if(haContinueNoBloco($4.traducao)){
+					yyerror(MSG_ERRO_CONTINUE_NAO_PERMITIDO);
+				}else{
+					$$.traducao = "\t" + $$.label + " = " + tarja_variavel + " == " + $2.label + ";\n" +
+									"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + $4.traducao; //+  
+									//"\t" + "goto " + tarja_tagFim + ";\n";
+				}
+
+			}else{
+				yyerror(MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO);
+			}
+		}
+		;
+
+//incluirBreakEContinue(string traducao, string tagInicio, string tagFim, bool ehSwitch)
 
 				/*
 
@@ -683,42 +757,74 @@ CASE	: TK_CASE TERMO ':' COMANDO
 					BLOCO 1;	
 				*/
 
-
-			}else{
-				yyerror(MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO);
-			}
-		}
-		;
-
 E_BREAK_CONTINUE	: TK_BREAK
-					{
+					{	
+						string salvadorPatria = "\t";
+						$$.traducao = salvadorPatria + "goto " + tarja_break + ";\n";
 
 						//EXECUTAR AQUI A FUNÇÃO QUE VAI DESEMPILHA
-
-						$$.traducao = $3.traducao + "\t" + tagInicio + ":\n" + 
-										$4.traducao + "\t" + $$.label + " = " + "!" + $4.label + ";\n" +
-										"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
-										$8.traducao + $6.traducao + "\t" + "goto " + tagInicio + ";\n" + 
-										"\t" + tagFim + ":\n";
-					
-					/*
-						if (s1.find(s2) != std::string::npos) {
-    std::cout << "found!" << '\n';
-}
-
-					*/
-
+						//string tagBreak = pilhaTagsBreak->obterTopo();
+						//pilhaTagsBreak->desempilhar();
+						/*
+						$$.traducao = "\t" + "goto " + tagBreak + ";\n"
+						$$.tipo = constante_tipo_break;
+						*/
+						/*
+						if(tagBreak.find(tag_while_fim) != std::string::npos || tagBreak.find(tag_dowhile_fim) != std::string::npos
+							|| tagBreak.find(tag_for_fim) != std::string::npos || tagBreak.find(tag_switch_fim) != std::string::npos){
+							
+							$$.traducao = "\t" + "goto " + tagBreak + ";\n"
+							$$.tipo = constante_tipo_break; 
+						}else{
+							yyerror(MSG_ERRO_BREAK_NAO_PERMITIDO);
+						}
+						*/
 					}
 					|
 					TK_CONTINUE
 					{
+						string salvadorPatria = "\t";
+						$$.traducao = salvadorPatria + "goto " + tarja_continue + ";\n";
+
+						//EXECUTAR AQUI A FUNÇÃO QUE VAI DESEMPILHA
+						//string tagContinue = pilhaTagsContinue->obterTopo();
+						//pilhaTagsContinue->desempilhar();
+						/*
+						$$.traducao = "\t" + "goto " + tagContinue + ";\n"
+						$$.tipo = constante_tipo_continue;
+						*/
+						/*
+						if(tagContinue.find(tag_while_inicio) != std::string::npos || 
+							tagContinue.find(tag_dowhile_inicio) != std::string::npos || 
+							tagContinue.find(tag_for_inicio) != std::string::npos){
+							
+							$$.traducao = "\t" + "goto " + tagContinue + ";\n"
+							$$.tipo = constante_tipo_continue; 
+						}else{
+							yyerror(MSG_ERRO_CONTINUE_NAO_PERMITIDO);
+						}
+						*/
 					}
 					;
 
 /* break ---> do-while, while, for, switch
 	continue ----> do-while, while, for
-*/
 
+	#define tag_if_fim "FIM_IF"
+	#define tag_if_else "IF_TRUE"
+	#define tag_while_inicio "INICIO_WHILE"
+	#define tag_while_fim "FIM_WHILE"
+	#define tag_dowhile_inicio "INICIO_DOWHILE"
+	#define tag_dowhile_fim "FIM_DOWHILE"
+	#define tag_for_inicio "INICIO_FOR"
+	#define tag_for_fim "FIM_FOR"
+	#define tag_switch_fim "FIM_SWITCH"
+
+	if (s1.find(s2) != std::string::npos) {
+		std::cout << "found!" << '\n';
+	}
+
+*/
 
 /*TERMO	: TK_NUM ; ID ; TK_CHAR*/
 

@@ -152,28 +152,33 @@ namespace ControleDeFluxo
 			return tag + numInt;
 		}
 
-		//(...)
 	}
 
 	namespace TraducaoControleFluxo{
 
 		#define qtd_elementos_tarja_tempUSER 5 //.....
 		#define qtd_elementos_tarja_tagFim 10 //**********
+		#define qtd_elementos_tarja_break 5 //**********
+		#define qtd_elementos_tarja_continue 5 //**********		
+
 		#define tarja_variavel "....."  //.....
 		#define tarja_tagFim "**********"  //**********
 
-		void substituirVariaveisCase(string traducao, string varTemp, string tagFim){
+		#define tarja_break "%%%%%"  //**********
+		#define tarja_continue "#####"  //**********
 
+		string substituirVariaveisCase(string traducao, string varTemp){
+
+			string novaTraducao;
 			int indexVar = traducao.find(tarja_variavel);
-			int indexTag = traducao.find(tarja_tagFim);
 
-			while(indexVar != -1 || indexTag != -1){
-
+			while(indexVar != -1){
 				traducao.replace(indexVar,qtd_elementos_tarja_tempUSER,varTemp);
-				traducao.replace(indexTag,qtd_elementos_tarja_tagFim,tagFim);
 				indexVar = traducao.find(tarja_variavel);
-				indexTag = traducao.find(tarja_tagFim);
 			}
+
+			novaTraducao = traducao;
+			return novaTraducao;
 
 		}
 
@@ -197,7 +202,7 @@ namespace ControleDeFluxo
 				void empilhar(string s);
 				void desempilhar();
 				void display();
-				string getTopo();
+				string obterTopo();
 				~PilhaTagsControleFluxo();
 		};
 
@@ -244,17 +249,72 @@ namespace ControleDeFluxo
 			}
 		}
 
-		string PilhaTagsControleFluxo::getTopo()
+		string PilhaTagsControleFluxo::obterTopo()
 		{
 			return top->data;
 		}
 
-		PilhaTagsControleFluxo *pilhaTags = new PilhaTagsControleFluxo();
+		PilhaTagsControleFluxo *pilhaTagsBreak = new PilhaTagsControleFluxo();
+		PilhaTagsControleFluxo *pilhaTagsContinue = new PilhaTagsControleFluxo();
 
-		void executarBreakOuContinue(bool ehBreak)
+		string incluirBreakEContinue(string traducao, string tagInicio, string tagFim, bool ehSwitch)
+		{			
+
+			string novaTraducao;
+			int index = traducao.find(tarja_break);
+			
+			while(index != std::string::npos){
+				traducao.replace(index,qtd_elementos_tarja_break,tagFim);
+				index = traducao.find(tarja_break);
+			}
+			
+			if(!ehSwitch)
+			{
+				index = traducao.find(tarja_continue);
+
+				while(index != std::string::npos){
+					traducao.replace(index,qtd_elementos_tarja_continue,tagInicio);
+					index = traducao.find(tarja_continue);
+				}
+			}
+			novaTraducao = traducao;
+
+			return novaTraducao; 
+		}
+		
+		bool haBreakNoBloco(string traducao)
 		{
-			if 
-		} 
+			if(traducao.find(tarja_break) != std::string::npos)
+				return true;
+			else
+				return false;
+		}
+
+		bool haContinueNoBloco(string traducao)
+		{
+			if(traducao.find(tarja_continue) != std::string::npos)
+				return true;
+			else
+				return false;
+		}
+
+
+		/*
+		#define qtd_elementos_tarja_tempUSER 5 //.....
+		#define qtd_elementos_tarja_tagFim 10 //**********
+		#define qtd_elementos_tarja_break 10 //**********
+		#define qtd_elementos_tarja_continue 10 //**********		
+
+		#define tarja_variavel "....."  //.....
+		#define tarja_tagFim "**********"  //**********
+
+		#define tarja_break "----------"  //**********
+		#define tarja_continue "$$$$$$$$$$"  //**********
+
+		void incluirContinue(string traducao,string inicio)
+		{
+		}
+		*/
 
 	}
 	
