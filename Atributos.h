@@ -18,6 +18,7 @@ namespace Atributos
 		string traducaoDeclaracaoDeVariaveis;
 		string traducao;
 		string tipo;
+		int escopoDeAcesso = -1;
 		int tamanho;
 	};
 

@@ -15,9 +15,9 @@ int main()
 	//concatenação de strings
 	
 	
-	var in;
+	var in = 1;
 	//read(in bool);
-	in = true;
+	//in = true;
 
 /*  Código indevidamente bugado
 	var a;

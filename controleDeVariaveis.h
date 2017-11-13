@@ -71,7 +71,7 @@ namespace ControleDeVariaveis
 			
 		}
 		
-		string adcionaPrefixo(string nome)
+		string adicionaPrefixo(string nome)
 		{
 			if(nome.find(prefixo_variavel_usuario) != 0)
 				nome = prefixo_variavel_usuario + nome;
@@ -80,7 +80,7 @@ namespace ControleDeVariaveis
 				
 		bool incluirNoMapa(string nome, string tipo = "")
 		{
-			nome = adcionaPrefixo(nome);
+			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
 				DADOS_VARIAVEL variavel;
@@ -117,14 +117,14 @@ namespace ControleDeVariaveis
 			mapaDeContexto = pilhaDeMapas[escopo];
 			if(varrerEscopo)
 			{
-				nome = adcionaPrefixo(nome);
+				nome = adicionaPrefixo(nome);
 
 				//operador curto circuitado para buscar a variavel nos mapas recursivamente
 				return (mapaDeContexto->count(nome) > 0) || variavelJaDeclarada(nome, varrerEscopo, escopo - 1);
 			}
 			else
 			{
-				nome = adcionaPrefixo(nome);
+				nome = adicionaPrefixo(nome);
 				return mapaDeContexto->count(nome) > 0;
 			}
 		}
@@ -132,7 +132,7 @@ namespace ControleDeVariaveis
 		DADOS_VARIAVEL recuperarDadosVariavel(string nome, int escopo)
 		{
 			DADOS_VARIAVEL retorno;
-			nome = adcionaPrefixo(nome);
+			nome = adicionaPrefixo(nome);
 			if(variavelJaDeclarada(nome, true, escopo))
 			{
 				 return mapaDeContexto->at(nome);
@@ -142,15 +142,17 @@ namespace ControleDeVariaveis
 	}
 	
 	namespace DeclaracaoProvisoriaInferenciaTipo
-		using namespace MapaDeContexto;
 	{
+		using namespace MapaDeContexto;
+	
 		#define constante_subst_tipo_declaracao_variavel "//#TIPOP_VAR_\t_\t#"
 		#define constante_sufixo_escopo "SCOPE"
 		#define slotIdVar "\t"
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
 		
-		void adcionarDefinicaoDeTipo(string, string, int);
+		//void adicionarDefinicaoDeTipo(string, string, int, int);
+		void adicionarDefinicaoDeTipo(string, string, int);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		
 		
@@ -158,8 +160,8 @@ namespace ControleDeVariaveis
 		{
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string separador = slotIdVar;
-			string idPrefixado = adcionaPrefixo(id);
-			//primeiro insere o nome da variavel no primeiro slot e depois adciona o numero do escopo no segundo slot
+			string idPrefixado = adicionaPrefixo(id);
+			//primeiro insere o nome da variavel no primeiro slot e depois adiciona o numero do escopo no segundo slot
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			string sufixoEscopo = constante_sufixo_escopo;
 			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(numeroEscopoAtual));
@@ -167,17 +169,19 @@ namespace ControleDeVariaveis
 			return tipoProvisorio + " " + idPrefixado + ";\n";
 		}
 			
+	
+		//void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho,  int escopo = numeroEscopoAtual)
+		void adicionarDefinicaoDeTipo(string id, string tipo,  int escopo = numeroEscopoAtual)
+		{	
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
-		{
-			string idPrefixado = adcionaPrefixo(id);
+			string idPrefixado = adicionaPrefixo(id);
 			string separador = slotIdVar;
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			string sufixoEscopo = constante_sufixo_escopo;
 			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(escopo));
-		void adcionarDefinicaoDeTipo(string id, string tipo, int escopo = numeroEscopoAtual)
-			
-			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
+		
 			//verificação a mais inserida pq havia problema na hora de definir o tipo de uma variavel global
+			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
 			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
 			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
 				while(escopo > 0){
@@ -194,6 +198,7 @@ namespace ControleDeVariaveis
 				
 			if(tipo == constante_tipo_string)
 			{
+				int tamanho = 0;
 				string charArray = "char " + idPrefixado + "[" + to_string(tamanho) + "]";
 
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
@@ -241,6 +246,7 @@ namespace ControleDeVariaveis
 			return declaracoes;
 		}
 	}
+	
 	namespace VariaveisTemporarias{
 		#define prefixo_variavel_sistema "temp"
 		

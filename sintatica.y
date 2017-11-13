@@ -333,16 +333,21 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 							tipo = "\t" + tipo;
 						}
 						if($1.escopoDeAcesso >= 0){
-							adcionarDefinicaoDeTipo($1.label, tipo, $1.escopoDeAcesso);
+							
+							//adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho,$1.escopoDeAcesso);
+							adicionarDefinicaoDeTipo($1.label, tipo,$1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
 						}
-							adcionarDefinicaoDeTipo($1.label, tipo);
+						else{
+							
+							//adicionarDefinicaoDeTipo($1.label, tipo,$1.tamanho + $3.tamanho);
+							adicionarDefinicaoDeTipo($1.label, tipo);
 							atualizarNoMapa(metaData);
 						}
 						
 						
 						
-						adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho);
+					//	adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho);
 						
 						
 						$1.tipo = $3.tipo;
@@ -351,7 +356,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					if($1.tipo == $3.tipo){
 						$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis;
 						if($3.tipo == constante_tipo_string)
-							$$.traducao = $$.traducao + $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
+							$$.traducao =  $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
 						else
 						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
@@ -370,7 +375,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					$$ = $3;
 				}
 			}
-			|
+			
 			;
 
 //REGRA CRIADA PRA DIMINUIR A QUANTIDADE DE REPETIÇÕES DAS VERIFICAÇÕES DE EXISTENCIA DE VARIAVEL
@@ -662,7 +667,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 
 /*
 				if($1.tipo == "")
-					adcionarDefinicaoDeTipo($1.label, constante_tipo_inteiro);
+					adicionarDefinicaoDeTipo($1.label, constante_tipo_inteiro);
 				$1.tipo = constante_tipo_booleano;
 */
 				$$ = $1;
