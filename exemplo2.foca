@@ -1,38 +1,9 @@
+var b = 10;
 int main()
-{
-	/*var h;
-	h = "doctor";
-	var cabra;
-	cabra = "who";
-	
-	var ornitorinco;
-	ornitorinco = "tra";*/
-	
-	
-	//var h = "aloha";
-	//h = "doctor " + "who"; //bugado. (lixo de memória do strcat)
-	//show("I love " + h);
-	//concatenação de strings
-	
-	
-	var in = 1;
-	//read(in bool);
-	//in = true;
-
-/*  Código indevidamente bugado
+{	
 	var a;
-	var b = 0;
 	
-	a = 8000;
-
-	b = a + b;
-	
-	var c;
-	var d = 1.2;
-	
-	c = 1;
-	var e = c + d;
-	
-*/
-
+	read(a:int);
+	show(a+b);
+	show(b);
 }

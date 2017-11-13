@@ -151,8 +151,7 @@ namespace ControleDeVariaveis
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
 		
-		//void adicionarDefinicaoDeTipo(string, string, int, int);
-		void adicionarDefinicaoDeTipo(string, string, int);
+		void adicionarDefinicaoDeTipo(string, string, int, int);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		
 		
@@ -171,7 +170,7 @@ namespace ControleDeVariaveis
 			
 	
 		//void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho,  int escopo = numeroEscopoAtual)
-		void adicionarDefinicaoDeTipo(string id, string tipo,  int escopo = numeroEscopoAtual)
+		void adicionarDefinicaoDeTipo(string id, string tipo, int escopo = numeroEscopoAtual, int tamanho = 0)
 		{	
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string idPrefixado = adicionaPrefixo(id);
@@ -183,11 +182,17 @@ namespace ControleDeVariaveis
 			//verificação a mais inserida pq havia problema na hora de definir o tipo de uma variavel global
 			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
 			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
-			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
+			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) != mapaSubstituicaoDeTipoProvisorio.end()){
+				DADOS_VARIAVEL metadata;
 				while(escopo > 0){
-					DADOS_VARIAVEL metadata = recuperarDadosVariavel(id, escopo);
+					metadata = recuperarDadosVariavel(id, escopo);
 					escopo = metadata.escopo;
-					if(metadata.tipo == "") break;			
+					if(metadata.tipo == "")
+					{
+						metadata.tipo = tipo;
+						atualizarNoMapa(metadata, escopo);
+						break;
+					}			
 				}
 				constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 				
@@ -218,7 +223,10 @@ namespace ControleDeVariaveis
 			{
 				string key = it->first;
 				string value = it->second;
-						
+				
+				if(value == "")
+					continue;
+				
 				int pos = declaracoes.find(key);
 				if(pos >= 0)
 				{	
@@ -236,7 +244,7 @@ namespace ControleDeVariaveis
 						//-8 para eliminar o char    [*];
 						declaracoes.replace(pos, key.length() + value.length() -8  + 1, value);
 					}
-					
+					mapaSubstituicaoDeTipoProvisorio[key] = "";
 					
 				}
 			}
@@ -251,7 +259,6 @@ namespace ControleDeVariaveis
 		#define prefixo_variavel_sistema "temp"
 		
 		string gerarNovaVariavel();
-		
 		//declaração de variaveis var <nome variavel>;
 		string gerarNovaVariavel(){
 			static int num = 0;
