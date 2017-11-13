@@ -13,5 +13,26 @@ int main()
 	//h = "doctor " + "who"; //bugado. (lixo de memória do strcat)
 	//show("I love " + h);
 	//concatenação de strings
-show(1 < 2);
+	
+	
+	var in;
+	//read(in bool);
+	in = true;
+
+/*  Código indevidamente bugado
+	var a;
+	var b = 0;
+	
+	a = 8000;
+
+	b = a + b;
+	
+	var c;
+	var d = 1.2;
+	
+	c = 1;
+	var e = c + d;
+	
+*/
+
 }

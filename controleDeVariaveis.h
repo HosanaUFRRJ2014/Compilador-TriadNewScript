@@ -171,19 +171,19 @@ namespace ControleDeVariaveis
 			
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			
-			
-			if(tipo != constante_tipo_string)
+			if(tipo == constante_tipo_string)
 			{
-				
-				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
-			}
-				
-			else
-			{
+				cout << tamanho;
 				string charArray = "char " + idPrefixado + "[" + to_string(tamanho) + "]";
 
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
 			}
+			else
+			{
+				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
+			}
+				
+			
 		}
 		
 		string substituirTodasAsDeclaracoesProvisorias(string declaracoes)
@@ -199,14 +199,21 @@ namespace ControleDeVariaveis
 				if(pos >= 0)
 				{	
 					
-					if(key.find("[") && key.find("char"))
+					/*infelizmente não tem como fazer verificação com a string, pois o value não é constante_tipo_string
+					 e sim uma combinação do nome da váriável e seu respectivo tamanho. 
+					Por isso a verificação de todos os outros tipos em lugar disso.*/
+					if(value == constante_tipo_inteiro || value == constante_tipo_flutuante || value == constante_tipo_caracter || value == constante_tipo_booleano)
+					{
+						declaracoes.replace(pos, key.length(), value);
+					}
+					
+					else
 					{
 						//-8 para eliminar o char    [*];
 						declaracoes.replace(pos, key.length() + value.length() -8  + 1, value);
 					}
 					
-					else
-						declaracoes.replace(pos, key.length(), value);
+					
 				}
 			}
 			

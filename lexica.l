@@ -31,8 +31,13 @@ STRING \"([^\"\n]|\\\")*\"
 
 "main"		{return TK_MAIN;}
 "int"		{return TK_TIPO_INT;}
+"float"		{return TK_TIPO_FLOAT;}
+"char"		{return TK_TIPO_CHAR;}
+"bool"		{return TK_TIPO_BOOL;}
+"string"	{return TK_TIPO_STRING;}
 "var"		{return TK_PALAVRA_VAR;}
 "show"		{return TK_PALAVRA_PRINT;}
+"read"		{return TK_PALAVRA_SCAN;}
 
 "//".*		{/*Não faça nada. 
 			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}

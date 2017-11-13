@@ -18,6 +18,7 @@
 
 #include "TratamentoString.h"
 
+#include "EntradaESaida.h"
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
@@ -29,13 +30,12 @@ using namespace ControleDeVariaveis;
 using namespace MensagensDeErro;
 using namespace Atributos;
 using namespace TratamentoString;
-
+using namespace EntradaESaida;
 
 int yylex(void);
 void yyerror(string);
 bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
-string constroiPrint(string);
 ATRIBUTOS tratarExpressaoAritmetica(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 
@@ -50,7 +50,7 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 %token TK_OP_LOGICO_UNA
 %token TK_OP_RELACIONAL
 
-%token TK_MAIN TK_ID TK_TIPO_INT TK_PALAVRA_VAR TK_PALAVRA_PRINT
+%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_PALAVRA_VAR TK_PALAVRA_PRINT TK_PALAVRA_SCAN
 %token TK_FIM TK_ERROR
 %token TK_CONVERSAO_EXPLICITA
 
@@ -116,10 +116,12 @@ COMANDO 	: E ';'
 			}
 			|
 			PRINT
+			|
+			SCAN
 			;
 			
 			
-PRINT			: TK_PALAVRA_PRINT '(' ARG ')' ';'
+PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')' ';'
 			{
 			
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
@@ -129,7 +131,7 @@ PRINT			: TK_PALAVRA_PRINT '(' ARG ')' ';'
 			;
 
 			
-ARG			: STRING
+ARG_PRINT		: STRING
 			{
 					
 				$$.traducao = $1.traducao + "\n" + constroiPrint($1.label);
@@ -162,7 +164,79 @@ ARG			: STRING
 				$$.traducao = $1.traducao + "\n" + constroiPrint($1.label);
 			}
 			;
+		
+SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';'
+			{
+				//cout << " // Entrei em TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';' \n";
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $$.traducao + $3.traducao;
+	
+			}
+			;		
+
+ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN 
+			|
+			ARG_SCAN
+			{
+				//cout << $3.traducao << " *******\n";
+				
+				$$ = $1;
 			
+			}
+			;
+			
+ARG_SCAN		: ID  TIPO	
+			{
+				cout << "\n//Entrou em ID  TIPO\n";
+				
+				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $$.traducao + $2.traducao;
+				
+				$$.traducao = $$.traducao + "\n" + constroiScan($2.label);
+				$$.traducao = $$.traducao + "\n\t" + $$.label + " = " + $2.label + ";\n"; 
+				
+		
+			}
+			;
+
+TIPO			:  TK_TIPO_INT     //criar tipo flutuante
+			{
+				//cout << "//Entrou em TK_TIPO_INT\n";
+				$1.tipo = constante_tipo_inteiro;
+				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
+				
+			
+			}
+			|
+			 TK_TIPO_FLOAT 
+			{
+				$1.tipo = constante_tipo_flutuante;
+				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
+			}
+			|
+			TK_TIPO_CHAR
+			{
+				$1.tipo = constante_tipo_caracter;
+				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
+			
+			}
+			|
+			TK_TIPO_BOOL
+			{
+				//TODO - Implementar o booleano corretamente
+				$1.tipo = constante_tipo_inteiro;
+				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
+			}
+			|
+			TK_TIPO_STRING
+			{
+				//TODO - Implementar String dinâmica
+				cout << "TK_STRING\n";
+				$1.tipo = constante_tipo_caracter;
+				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
+			
+			}
+			;
 			
 DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 			{
@@ -245,8 +319,8 @@ DECLARACOES: TK_PALAVRA_VAR TK_ID ';'
 							tipo = "\t" + tipo;
 						}
 						
-						adicionarDefinicaoDeTipo($1.label, tipo, global_tamanhoStringConcatenada);
-						global_tamanhoStringConcatenada = 0; //perdão a global. :( Podem mudar se tiverem ideia melhor
+						adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho);
+						
 						
 					}
 
@@ -715,10 +789,6 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	
 }
 
-string constroiPrint(string label){
-	string print = "\tstd::cout << " + label + " << "+ " \"\\n\"" +";\n\n";
-	return print;
-}
 
 
 bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
