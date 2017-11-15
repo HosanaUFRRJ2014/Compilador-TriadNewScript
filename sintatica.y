@@ -269,8 +269,7 @@ DECLARACOES: DECLARACAO DECLARACOES
 					
 DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			{
-				if(variavelJaDeclarada($2.label, false))
-				{
+				if(variavelJaDeclarada($2.label, false)){
 					//mensagem de erro dupla declaração
 					string params[1] = {$2.label};
 					yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
@@ -311,7 +310,6 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						tipo = constante_tipo_caracter;
 						tipo = "\t" + tipo;
 						
-					//	$2.label = prefixo_variavel_usuario + $2.label;
 					
 					//	$2.label = prefixo_variavel_usuario + $2.label;
 						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string(global_tamanhoStringConcatenada) + "];\n";
@@ -335,6 +333,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			ID '=' VALOR_ATRIBUICAO ';'
 			{
 				//cout << "Entrou em ID '=' VALOR_ATRIBUICAO ';': \n\n\n";			
+				string tipo = "";	
 				if($1.label != $3.label)
 				{
 					DADOS_VARIAVEL metaData;
@@ -392,7 +391,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					$$ = $3;
 				}
 			}
-			
+			|
 			;
 
 //REGRA CRIADA PRA DIMINUIR A QUANTIDADE DE REPETIÇÕES DAS VERIFICAÇÕES DE EXISTENCIA DE VARIAVEL
@@ -401,7 +400,6 @@ ID		: TK_ID
 				if(variavelJaDeclarada($1.label))
 				{
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
-					
 					$$.label = metaData.nome;
 					$$.tipo = metaData.tipo;
 				}
@@ -699,7 +697,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 
 /*
 				if($1.tipo == "")
-					adicionarDefinicaoDeTipo($1.label, constante_tipo_inteiro);
+					adcionarDefinicaoDeTipo($1.label, constante_tipo_inteiro);
 				$1.tipo = constante_tipo_booleano;
 */
 				$$ = $1;
