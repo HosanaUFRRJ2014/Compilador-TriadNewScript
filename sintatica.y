@@ -176,35 +176,52 @@ SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';'
 			;		
 
 ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN 
-			|
-			ARG_SCAN
 			{
 				//cout << $3.traducao << " *******\n";
-				
-				$$ = $1;
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $1.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $2.traducao + $1.traducao;
 			
 			}
+			|
+			ARG_SCAN
+			
 			;
 			
-ARG_SCAN		: ID  TIPO	
+ARG_SCAN		: ID ':' TIPO	
 			{
-				cout << "\n//Entrou em ID  TIPO\n";
+				cout << "\n//Entrou em ID TIPO\n";
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = "\t" + $3.label + " " + $$.label + ";\n";
+				$$.traducao =  constroiScan($$.label);
+				adicionarDefinicaoDeTipo($1.label, $3.tipo);
 				
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
-				$$.traducao = $$.traducao + $2.traducao;
-				
-				$$.traducao = $$.traducao + "\n" + constroiScan($2.label);
-				$$.traducao = $$.traducao + "\n\t" + $$.label + " = " + $2.label + ";\n"; 
+				$$.traducao = $$.traducao + "\t" + $1.label + " = " + $$.label + ";\n";
 				
 		
 			}
 			;
-
+TIPO: TK_TIPO_INT
+	|
+	TK_TIPO_FLOAT
+	|
+	TK_TIPO_CHAR
+	|
+	TK_TIPO_BOOL
+	|
+	TK_TIPO_STRING
+	;
+/*
 TIPO			:  TK_TIPO_INT     //criar tipo flutuante
 			{
 				//cout << "//Entrou em TK_TIPO_INT\n";
+			//	cout << $$.label;
+				//cout << $1.label;
+			//	cout << $2.label;
+				//cout << $3.label;
+				
 				$1.tipo = constante_tipo_inteiro;
 				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
+			//	cout << $$.label << "********";
 				
 			
 			}
@@ -238,7 +255,7 @@ TIPO			:  TK_TIPO_INT     //criar tipo flutuante
 			
 			}
 			;
-
+*/
 DECLARACOES: DECLARACAO DECLARACOES
 			{
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
