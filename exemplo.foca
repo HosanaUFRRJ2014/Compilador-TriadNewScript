@@ -3,6 +3,7 @@ var a = true;
 
 int main()
 {
+	/*var conversao_explicita = (float) 2 * 3;
 /*
 /*
 	var conversao_explicita = (float) 2 * 3;

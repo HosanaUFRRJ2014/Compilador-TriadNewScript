@@ -1,6 +1,29 @@
-var b = 10;
+var a =1; 
 int main()
-{	
+{
+	/*var h;
+	h = "doctor";
+	var cabra;
+	cabra = "who";
+	
+	var ornitorinco;
+	ornitorinco = "tra";*/
+	
+	
+	//var h = "aloha";
+	//h = "doctor " + "who"; //bugado. (lixo de memória do strcat)
+	//show("I love " + h);
+	//concatenação de strings
+	
+	
+	var in;// = "d " + "w";
+	read(in:bool);
+	show("Variavel in: ");
+	show(in);
+	//read(in bool);
+	//in = true;
+
+/*  Código indevidamente bugado
 	var a;
 	
 	read(a:int);

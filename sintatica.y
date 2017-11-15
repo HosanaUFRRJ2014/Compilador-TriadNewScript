@@ -46,7 +46,6 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 %token TK_OP_LOGICO_BIN
 %token TK_OP_LOGICO_UNA
 %token TK_OP_RELACIONAL
-
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_PALAVRA_VAR TK_PALAVRA_PRINT TK_PALAVRA_SCAN
 %token TK_BACKSCOPE TK_PALAVRA_GLOBAL
 %token TK_FIM TK_ERROR
@@ -306,6 +305,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						label = prefixo_variavel_usuario;
 						label = label + "_" + $2.label;
 					}
+					
 					if(tipo == constante_tipo_string)
 					{
 						tipo = constante_tipo_caracter;
@@ -327,7 +327,6 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					
 					incluirNoMapa($2.label, $4.tipo);
 					$$.label = label;
-					}
 					$$.tipo = $4.tipo;
 				}
 				
@@ -356,6 +355,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 							tipo = constante_tipo_inteiro;
 							tipo = "\t" + tipo;
 						}
+						
 						if($1.escopoDeAcesso >= 0){
 							adcionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho, $1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
@@ -365,16 +365,13 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 							atualizarNoMapa(metaData);
 						}
 						
-						
-						
-					//	adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho);
-						
-						
 						$1.tipo = $3.tipo;
 					}
 //provavelmente ainda há lacunas, mas vamos ignorar por enquanto
 					if($1.tipo == $3.tipo){
 						$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis;
+						
+						
 						if($3.tipo == constante_tipo_string)
 							$$.traducao = $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
 						else
@@ -758,6 +755,7 @@ int main( int argc, char* argv[] )
 	
 	mapaTipos = criarMapa();
 	inicializarMapaDeContexto();
+	//inicializarMapaDeStrings();
 	yyparse();
 	
 	

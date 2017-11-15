@@ -71,7 +71,7 @@ namespace ControleDeVariaveis
 			
 		}
 		
-		string adicionaPrefixo(string nome)
+		string adcionaPrefixo(string nome)
 		{
 			if(nome.find(prefixo_variavel_usuario) != 0)
 				nome = prefixo_variavel_usuario + nome;
@@ -80,7 +80,7 @@ namespace ControleDeVariaveis
 				
 		bool incluirNoMapa(string nome, string tipo = "")
 		{
-			nome = adicionaPrefixo(nome);
+			nome = adcionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
 				DADOS_VARIAVEL variavel;
@@ -211,8 +211,6 @@ namespace ControleDeVariaveis
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
 			}
 				
-			
-		
 		}
 		
 		string substituirTodasAsDeclaracoesProvisorias(string declaracoes)
@@ -221,10 +219,7 @@ namespace ControleDeVariaveis
 			{
 				string key = it->first;
 				string value = it->second;
-				
-				if(value == "")
-					continue;
-				
+						
 				int pos = declaracoes.find(key);
 				if(pos >= 0)
 				{	
@@ -247,13 +242,11 @@ namespace ControleDeVariaveis
 				}
 					
 			}
-			
 // tinhas posto o clear pra ajudar no gerenciamento de chaves repetidas... mas deu problema
 //			mapaSubstituicaoDeTipoProvisorio.clear();
 			return declaracoes;
 		}
 	}
-	
 	namespace VariaveisTemporarias{
 		#define prefixo_variavel_sistema "temp"
 		
