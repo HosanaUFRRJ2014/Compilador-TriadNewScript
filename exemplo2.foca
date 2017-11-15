@@ -16,13 +16,15 @@ int main()
 	//concatenação de strings
 	
 	
-	var in;// = "d " + "w";
-	read(in:bool);
-	show("Variavel in: ");
-	show(in);
-	//read(in bool);
-	//in = true;
-
+	//var in;
+	//read(in:bool);
+	//show("Variavel in: ");
+	//show(in);
+	
+	var a  = "alo";
+	show(a);
+	show(1+3*7);  
+	show("Doctor " + "Who");
 /*  Código indevidamente bugado
 	var a;
 	var b = 0;
