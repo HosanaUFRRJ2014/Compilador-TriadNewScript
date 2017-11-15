@@ -193,18 +193,7 @@ namespace ControleDeVariaveis
 				tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(escopo));
 			}
 				
-			if(tipo == constante_tipo_string)
-			{
-				cout << tamanho;
-				string charArray = "char " + idPrefixado + "[" + to_string(tamanho) + "]";
-
-				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
-			}
-			else
-			{
-				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
-			}
-				
+			mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
 		}
 		
 		string substituirTodasAsDeclaracoesProvisorias(string declaracoes)
@@ -216,22 +205,7 @@ namespace ControleDeVariaveis
 						
 				int pos = declaracoes.find(key);
 				if(pos >= 0)
-				{	
-					
-					/*infelizmente não tem como fazer verificação com a string, pois o value não é constante_tipo_string
-					 e sim uma combinação do nome da váriável e seu respectivo tamanho. 
-					Por isso a verificação de todos os outros tipos em lugar disso.*/
-					if(value == constante_tipo_inteiro || value == constante_tipo_flutuante || value == constante_tipo_caracter || value == constante_tipo_booleano)
-					{
-						declaracoes.replace(pos, key.length(), value);
-					}
-					
-					else
-					{
-						//-8 para eliminar o char    [*];
-						declaracoes.replace(pos, key.length() + value.length() -8  + 1, value);
-					}
-					
+					declaracoes.replace(pos, key.length(), value);
 			}
 // tinhas posto o clear pra ajudar no gerenciamento de chaves repetidas... mas deu problema
 //			mapaSubstituicaoDeTipoProvisorio.clear();
@@ -239,6 +213,7 @@ namespace ControleDeVariaveis
 		}
 		
 	}
+	
 	namespace VariaveisTemporarias{
 		#define prefixo_variavel_sistema "temp"
 		

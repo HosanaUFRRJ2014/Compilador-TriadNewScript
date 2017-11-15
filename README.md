@@ -1,7 +1,6 @@
 # Compilador-Foca
-Este repositório contém o trabalho da disciplina de Compiladores, de 2017-2, do curso de Ciência da Computação, da Universidade Federal Rural do Rio de Janeiro.
-
-O objetivo do trabalho é implementar um analisador léxico e sintático, usando as ferramentas Lex e Bison, a fim de compilar uma linguagem criada pelos integrantes do grupo.
+Exemplo de um compilador simples utilizando LEX e YACC.
+Aula do dia 13.09.2017
 
 
 ##  Para compilar:

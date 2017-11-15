@@ -18,12 +18,10 @@ INT {NUM}|"-"{NUM}
 FLOAT {REAL}|"-"{REAL}
 OP_RELACIONAL "=="|"!="|"<"|">"|">="|"<=" 
 ID {LETRA}({LETRA}|{NUM})*
-STRING \"([^\"\n]|\\\")*\"
+TEXTO ({LETRA}{DIGITO}{ESPACO})*
 
 
 %%
-
-{STRING}	{yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_STRING;}
 
 "\n"		{}
 
@@ -31,15 +29,9 @@ STRING \"([^\"\n]|\\\")*\"
 
 "main"		{return TK_MAIN;}
 "int"		{return TK_TIPO_INT;}
-"float"		{return TK_TIPO_FLOAT;}
-"char"		{return TK_TIPO_CHAR;}
-"bool"		{return TK_TIPO_BOOL;}
-"string"	{return TK_TIPO_STRING;}
 "var"		{return TK_PALAVRA_VAR;}
 "backscope" {return TK_BACKSCOPE;}
 "global"		{return TK_PALAVRA_GLOBAL;}
-"show"		{return TK_PALAVRA_PRINT;}
-"read"		{return TK_PALAVRA_SCAN;}
 
 "//".*		{/*Não faça nada. 
 			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}
@@ -65,8 +57,6 @@ STRING \"([^\"\n]|\\\")*\"
 {BOOLEAN}	{ yylval.label = yytext; yylval.tipo = constante_tipo_booleano; return TK_BOOL; }
 {CHAR}		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CHAR; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
-
-
 
 .			{ *yytext; }
 
