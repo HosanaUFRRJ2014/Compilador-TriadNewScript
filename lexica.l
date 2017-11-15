@@ -30,11 +30,11 @@ STRING \"([^\"\n]|\\\")*\"
 {DELIM} 	{}
 
 "main"		{return TK_MAIN;}
-"int"		{return TK_TIPO_INT;}
-"float"		{return TK_TIPO_FLOAT;}
-"char"		{return TK_TIPO_CHAR;}
-"bool"		{return TK_TIPO_BOOL;}
-"string"	{return TK_TIPO_STRING;}
+"int"		{yylval.label = "int"; yylval.tipo = constante_tipo_inteiro; return TK_TIPO_INT;}
+"float"		{yylval.label = "float"; yylval.tipo = constante_tipo_flutuante; return TK_TIPO_FLOAT;}
+"char"		{yylval.label = "char"; yylval.tipo = constante_tipo_caracter; return TK_TIPO_CHAR;}
+"bool"		{yylval.label = "int"; yylval.tipo = constante_tipo_booleano; return TK_TIPO_BOOL;}
+"string"	{yylval.label = "char*"; yylval.tipo = constante_tipo_string; return TK_TIPO_STRING;}
 "var"		{return TK_PALAVRA_VAR;}
 "backscope" {return TK_BACKSCOPE;}
 "global"		{return TK_PALAVRA_GLOBAL;}
@@ -51,7 +51,7 @@ STRING \"([^\"\n]|\\\")*\"
 "(char)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CONVERSAO_EXPLICITA;}
 "(string)"  { yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_CONVERSAO_EXPLICITA;}
 
-[(){}[\];,]	{ return *yytext; }
+[(){}[\];,:]	{ return *yytext; }
 [+\-*/=]	{ return *yytext; }
 
 "and"		{ yylval.label = "&&"; return TK_OP_LOGICO_BIN;}

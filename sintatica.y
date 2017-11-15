@@ -9,19 +9,15 @@
 
 
 #include "MapaTipos.h"
-
 #include "controleDeVariaveis.h"
-
 #include "MensagensDeErro.h"
-
 #include "Atributos.h"
-
 #include "TratamentoString.h"
-
 #include "EntradaESaida.h"
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
+//#define prefixo_variavel_sistema "temp"
 
 using namespace std;
 
@@ -38,6 +34,7 @@ bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
 ATRIBUTOS tratarExpressaoAritmetica(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
+//string gerarNovaVariavel();
 
 %}
 
@@ -92,7 +89,7 @@ COMANDOS	: COMANDO COMANDOS
 			{
 				$$.traducaoDeclaracaoDeVariaveis = substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) + $2.traducaoDeclaracaoDeVariaveis;
 				if($1.traducao != "" && $1.tipo != constante_tipo_bloco){
-					$$.traducao = $1.traducao + "\n" + constroiPrint($1.tipo, $1.label);
+					$$.traducao = $1.traducao + "\n";// + constroiPrint($1.tipo, $1.label);
 				}
 				$$.traducao = $$.traducao + $2.traducao;
 			}
@@ -164,7 +161,6 @@ ARG_PRINT		: STRING
 				$$.traducao = $1.traducao + "\n" + constroiPrint($1.label);
 			}
 			;
-		
 SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';'
 			{
 				//cout << " // Entrei em TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';' \n";
@@ -175,35 +171,59 @@ SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';'
 			;		
 
 ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN 
-			|
-			ARG_SCAN
 			{
 				//cout << $3.traducao << " *******\n";
-				
-				$$ = $1;
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $1.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $2.traducao + $1.traducao;
 			
 			}
+			|
+			ARG_SCAN
+			
 			;
 			
-ARG_SCAN		: ID  TIPO	
+ARG_SCAN		: ID ':' TIPO	
 			{
-				cout << "\n//Entrou em ID  TIPO\n";
+	//			cout << "\n//Entrou em ID TIPO\n";
+				$$.label = gerarNovaVariavel();
 				
-				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
-				$$.traducao = $$.traducao + $2.traducao;
+	
+				$$.traducaoDeclaracaoDeVariaveis = "\t" + $3.label + " " + $$.label + ";\n";
+				$$.traducao =  constroiScan($$.label);
 				
-				$$.traducao = $$.traducao + "\n" + constroiScan($2.label);
-				$$.traducao = $$.traducao + "\n\t" + $$.label + " = " + $2.label + ";\n"; 
+				if($3.tipo == constante_tipo_booleano)
+					adcionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho + $3.tamanho);
+				
+				else
+					adcionarDefinicaoDeTipo($1.label, $3.tipo,$1.tamanho + $3.tamanho);
+					
+				$$.traducao = $$.traducao + "\t" + $1.label + " = " + $$.label + ";\n";
 				
 		
 			}
 			;
-
+TIPO: TK_TIPO_INT
+	|
+	TK_TIPO_FLOAT
+	|
+	TK_TIPO_CHAR
+	|
+	TK_TIPO_BOOL
+	|
+	TK_TIPO_STRING
+	;
+/*
 TIPO			:  TK_TIPO_INT     //criar tipo flutuante
 			{
 				//cout << "//Entrou em TK_TIPO_INT\n";
+			//	cout << $$.label;
+				//cout << $1.label;
+			//	cout << $2.label;
+				//cout << $3.label;
+				
 				$1.tipo = constante_tipo_inteiro;
 				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
+			//	cout << $$.label << "********";
 				
 			
 			}
@@ -237,7 +257,16 @@ TIPO			:  TK_TIPO_INT     //criar tipo flutuante
 			
 			}
 			;
+*/		
 			
+DECLARACOES: DECLARACAO DECLARACOES
+			{
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $1.traducao + $2.traducao;
+			}
+			|
+			;
+					
 DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			{
 				if(variavelJaDeclarada($2.label, false)){
@@ -283,16 +312,17 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						
 					
 					//	$2.label = prefixo_variavel_usuario + $2.label;
-						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + "[" + to_string($4.tamanho) + "];\n";
-						$$.traducao = $4.traducao + montarCopiarString($2.label, $4.label) + ";\n";
+						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string(global_tamanhoStringConcatenada) + "];\n";
+						$$.traducao = $4.traducao + montarCopiarString(label, $4.label) + ";\n";
 					
 					}
 					
 					else
 					{
-					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + ";\n";
-					$$.traducao = $4.traducao + "\t" + label + " = " + $4.label + ";\n";
+						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + ";\n";
+						$$.traducao = $4.traducao + "\t" + label + " = " + $4.label + ";\n";
 					}
+					
 					incluirNoMapa($2.label, $4.tipo);
 					$$.label = label;
 					$$.tipo = $4.tipo;
@@ -317,7 +347,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					{
 						//isso aqui também pode causar problema no futuro devido as lacunas
 						metaData.tipo = $3.tipo;
-						atualizarNoMapa(metaData);
+						//atualizarNoMapa(metaData);
 						tipo = metaData.tipo;
 						if(tipo == constante_tipo_booleano)
 						{
@@ -326,11 +356,11 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						}
 						
 						if($1.escopoDeAcesso >= 0){
-							adcionarDefinicaoDeTipo($1.label, tipo, $1.escopoDeAcesso);
+							adcionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho, $1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
 						}
 						else{
-							adcionarDefinicaoDeTipo($1.label, tipo);
+							adcionarDefinicaoDeTipo($1.label, tipo,$1.tamanho + $3.tamanho);
 							atualizarNoMapa(metaData);
 						}
 						
@@ -342,9 +372,9 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						
 						
 						if($3.tipo == constante_tipo_string)
-							$$.traducao = $$.traducao + $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
+							$$.traducao = $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
 						else
-						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
+							$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
 					else
 					{
@@ -455,7 +485,7 @@ TERMO		: TK_NUM
 			;
 			
 VALOR_ATRIBUICAO: E
-			{
+/*			{
 				//cout << "Entrou em E de VALOR_ATRIBUICAO: \n\n\n";
 				//se for variavel aqui sempre vai existir, pq vai ter que ter passado pela verificação da regra TERMO: TK_ID
 				//e por passar nessa regra terá o tipo já buscado
@@ -469,7 +499,7 @@ VALOR_ATRIBUICAO: E
 				
 				
 				$$ = $1;
-			}
+			}*/
 			|
 			E_UNARIA
 			|
@@ -893,7 +923,7 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 }
 
 
-string constroiPrint(string tipo, string label){
+/*string constroiPrint(string tipo, string label){
 	string print = "printf(\"\%";
 	if(tipo == constante_tipo_flutuante){
 		print = print + "f\\n\\n\", ";
@@ -905,7 +935,18 @@ string constroiPrint(string tipo, string label){
 	
 	print = print + label + ");\n\n";
 	return print;
-}
+}*/
+
+
+//declaração de variaveis var <nome variavel>;
+/*string gerarNovaVariavel(){
+	static int num = 0;
+	num++;
+	string temp = prefixo_variavel_sistema;
+
+	string numInt = to_string(num);
+	return temp + numInt;
+}*/
 
 bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
 	
