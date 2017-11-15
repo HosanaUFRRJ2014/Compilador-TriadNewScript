@@ -19,7 +19,8 @@ namespace Atributos
 		string traducao;
 		string tipo;
 		int escopoDeAcesso = -1;
-		int tamanho;
+		int tamanho = 0;
+		
 	};
 
 

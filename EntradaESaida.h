@@ -5,10 +5,9 @@
 #include <utility>
 
 
-
 using namespace ControleDeVariaveis;
 using namespace MapaTipos;
-
+//using namespace VariaveisTemporarias;
 
 namespace EntradaESaida
 {
@@ -22,33 +21,34 @@ namespace EntradaESaida
 		return print;
 	}
 
+
 	string constroiScan(string label)
 	{
 		string scan = "\tstd::cin >> " + label + ";\n"; // + ">>"+ " \"\\n\"" +";\n\n";
 		return scan;
 	}
 	
-	
 	string construirTraducaoEntrada(string dolarDolar, string label1, string tipo, int tamanho)
 	{
 		//$1.tipo = constante_tipo_inteiro;
 		dolarDolar = gerarNovaVariavel();
-		adicionarDefinicaoDeTipo(label1, tipo, tamanho);
+		adcionarDefinicaoDeTipo(label1, tipo, tamanho);
 		string traducaoDeclaracaoDeVariaveis = "\t"  + tipo + " " + dolarDolar + ";\n";
 		
 		return traducaoDeclaracaoDeVariaveis;
 	
 	}
 	
-	/*string construirTraducaoEntrada(ATRIBUTOS dolarDolar, string label1, string tipo, int tamanho)
+	
+/*	string construirTraducaoEntrada(string labelDolarDolar, string label1, string tipo, int tamanho)
 	{
 		//$1.tipo = constante_tipo_inteiro;
-		dolarDolar.label = gerarNovaVariavel();
-		adicionarDefinicaoDeTipo(label1, tipo, tamanho);
-		string traducaoDeclaracaoDeVariaveis = "\t"  + tipo + " " + dolarDolar.label + ";\n";
+		labelDolarDolar = gerarNovaVariavel();
+		string traducaoDeclaracaoDeVariaveis = "\t"  + tipo + " " + labelDolarDolar + ";\n";
+		adcionarDefinicaoDeTipo(label1, tipo, tamanho);
 		
 		return traducaoDeclaracaoDeVariaveis;
 	
-	}
-*/
+	}*/
+
 }

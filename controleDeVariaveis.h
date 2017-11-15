@@ -151,7 +151,8 @@ namespace ControleDeVariaveis
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
 		
-		void adicionarDefinicaoDeTipo(string, string, int, int);
+		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
+		void adcionarDefinicaoDeTipo(string, string, int, int);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		
 		
@@ -168,10 +169,8 @@ namespace ControleDeVariaveis
 			return tipoProvisorio + " " + idPrefixado + ";\n";
 		}
 			
-	
-		//void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho,  int escopo = numeroEscopoAtual)
-		void adicionarDefinicaoDeTipo(string id, string tipo, int escopo = numeroEscopoAtual, int tamanho = 0)
-		{	
+		void adcionarDefinicaoDeTipo(string id, string tipo, int tamanho, int escopo = numeroEscopoAtual)
+		{
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string idPrefixado = adicionaPrefixo(id);
 			string separador = slotIdVar;
@@ -183,7 +182,6 @@ namespace ControleDeVariaveis
 			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
 			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
 			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) != mapaSubstituicaoDeTipoProvisorio.end()){
-				DADOS_VARIAVEL metadata;
 				while(escopo > 0){
 					metadata = recuperarDadosVariavel(id, escopo);
 					escopo = metadata.escopo;
@@ -247,6 +245,7 @@ namespace ControleDeVariaveis
 					mapaSubstituicaoDeTipoProvisorio[key] = "";
 					
 				}
+					
 			}
 			
 // tinhas posto o clear pra ajudar no gerenciamento de chaves repetidas... mas deu problema

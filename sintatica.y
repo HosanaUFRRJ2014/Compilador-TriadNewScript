@@ -9,19 +9,15 @@
 
 
 #include "MapaTipos.h"
-
 #include "controleDeVariaveis.h"
-
 #include "MensagensDeErro.h"
-
 #include "Atributos.h"
-
 #include "TratamentoString.h"
-
 #include "EntradaESaida.h"
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
+//#define prefixo_variavel_sistema "temp"
 
 using namespace std;
 
@@ -38,6 +34,7 @@ bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
 ATRIBUTOS tratarExpressaoAritmetica(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
+//string gerarNovaVariavel();
 
 %}
 
@@ -93,7 +90,7 @@ COMANDOS	: COMANDO COMANDOS
 			{
 				$$.traducaoDeclaracaoDeVariaveis = substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) + $2.traducaoDeclaracaoDeVariaveis;
 				if($1.traducao != "" && $1.tipo != constante_tipo_bloco){
-					$$.traducao = $1.traducao + "\n" ;//+ constroiPrint($1.tipo, $1.label);
+					$$.traducao = $1.traducao + "\n";// + constroiPrint($1.tipo, $1.label);
 				}
 				$$.traducao = $$.traducao + $2.traducao;
 			}
@@ -165,7 +162,6 @@ ARG_PRINT		: STRING
 				$$.traducao = $1.traducao + "\n" + constroiPrint($1.label);
 			}
 			;
-		
 SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';'
 			{
 				//cout << " // Entrei em TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';' \n";
@@ -189,12 +185,19 @@ ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN
 			
 ARG_SCAN		: ID ':' TIPO	
 			{
-				cout << "\n//Entrou em ID TIPO\n";
+	//			cout << "\n//Entrou em ID TIPO\n";
 				$$.label = gerarNovaVariavel();
+				
+	
 				$$.traducaoDeclaracaoDeVariaveis = "\t" + $3.label + " " + $$.label + ";\n";
 				$$.traducao =  constroiScan($$.label);
-				adicionarDefinicaoDeTipo($1.label, $3.tipo);
 				
+				if($3.tipo == constante_tipo_booleano)
+					adcionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho + $3.tamanho);
+				
+				else
+					adcionarDefinicaoDeTipo($1.label, $3.tipo,$1.tamanho + $3.tamanho);
+					
 				$$.traducao = $$.traducao + "\t" + $1.label + " = " + $$.label + ";\n";
 				
 		
@@ -255,7 +258,8 @@ TIPO			:  TK_TIPO_INT     //criar tipo flutuante
 			
 			}
 			;
-*/
+*/		
+			
 DECLARACOES: DECLARACAO DECLARACOES
 			{
 				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $2.traducaoDeclaracaoDeVariaveis;
@@ -263,6 +267,7 @@ DECLARACOES: DECLARACAO DECLARACOES
 			}
 			|
 			;
+					
 DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			{
 				if(variavelJaDeclarada($2.label, false))
@@ -308,16 +313,18 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						
 					//	$2.label = prefixo_variavel_usuario + $2.label;
 					
-						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + $2.label + "[" + to_string($4.tamanho) + "];\n";
-						$$.traducao = $4.traducao + montarCopiarString($2.label, $4.label) + ";\n";
+					//	$2.label = prefixo_variavel_usuario + $2.label;
+						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string(global_tamanhoStringConcatenada) + "];\n";
+						$$.traducao = $4.traducao + montarCopiarString(label, $4.label) + ";\n";
 					
 					}
 					
 					else
 					{
-					//	$2.label = prefixo_variavel_usuario + $2.label;
-					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + ";\n";
-					$$.traducao = $4.traducao + "\t" + label + " = " + $4.label + ";\n";
+						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + ";\n";
+						$$.traducao = $4.traducao + "\t" + label + " = " + $4.label + ";\n";
+					}
+					
 					incluirNoMapa($2.label, $4.tipo);
 					$$.label = label;
 					}
@@ -342,23 +349,19 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					{
 						//isso aqui também pode causar problema no futuro devido as lacunas
 						metaData.tipo = $3.tipo;
-						
-						string tipo = $3.tipo;
+						//atualizarNoMapa(metaData);
+						tipo = metaData.tipo;
 						if(tipo == constante_tipo_booleano)
 						{
 							tipo = constante_tipo_inteiro;
 							tipo = "\t" + tipo;
 						}
 						if($1.escopoDeAcesso >= 0){
-							
-							//adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho,$1.escopoDeAcesso);
-							adicionarDefinicaoDeTipo($1.label, tipo,$1.escopoDeAcesso);
+							adcionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho, $1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
 						}
 						else{
-							
-							//adicionarDefinicaoDeTipo($1.label, tipo,$1.tamanho + $3.tamanho);
-							adicionarDefinicaoDeTipo($1.label, tipo);
+							adcionarDefinicaoDeTipo($1.label, tipo,$1.tamanho + $3.tamanho);
 							atualizarNoMapa(metaData);
 						}
 						
@@ -373,9 +376,9 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					if($1.tipo == $3.tipo){
 						$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis;
 						if($3.tipo == constante_tipo_string)
-							$$.traducao =  $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
+							$$.traducao = $3.traducao + montarCopiarString($1.label, $3.label) + ";\n";	
 						else
-						$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
+							$$.traducao = $3.traducao + "\t" + $1.label + " = " + $3.label + ";\n";
 					}
 					else
 					{
@@ -487,6 +490,21 @@ TERMO		: TK_NUM
 			;
 			
 VALOR_ATRIBUICAO: E
+/*			{
+				//cout << "Entrou em E de VALOR_ATRIBUICAO: \n\n\n";
+				//se for variavel aqui sempre vai existir, pq vai ter que ter passado pela verificação da regra TERMO: TK_ID
+				//e por passar nessa regra terá o tipo já buscado
+				if($1.label.find(prefixo_variavel_usuario) == 0 && $1.tipo == ""){
+					string strPrefixoVarUsuario = prefixo_variavel_usuario;
+					string params[1] = {$1.label.replace(0, strPrefixoVarUsuario.length(), "")};
+					//mensagem variavel precisa ter recebido um valor para ter seu tipo definido e atribuido o valor
+					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_UTILIZADA_PRECISA_TER_RECEBIDO_UM_VALOR, params, 1));
+				}
+				
+				
+				
+				$$ = $1;
+			}*/
 			|
 			E_UNARIA
 			|
@@ -909,6 +927,30 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 }
 
 
+/*string constroiPrint(string tipo, string label){
+	string print = "printf(\"\%";
+	if(tipo == constante_tipo_flutuante){
+		print = print + "f\\n\\n\", ";
+	} else if( tipo == constante_tipo_inteiro || tipo == constante_tipo_booleano){
+		print = print + "d\\n\\n\", ";	
+	}else if(tipo == constante_tipo_caracter){
+		print = print + "c\\n\\n\", ";
+	}
+	
+	print = print + label + ");\n\n";
+	return print;
+}*/
+
+
+//declaração de variaveis var <nome variavel>;
+/*string gerarNovaVariavel(){
+	static int num = 0;
+	num++;
+	string temp = prefixo_variavel_sistema;
+
+	string numInt = to_string(num);
+	return temp + numInt;
+}*/
 
 bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
 	
