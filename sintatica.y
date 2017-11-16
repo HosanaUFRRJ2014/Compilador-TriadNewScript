@@ -10,7 +10,7 @@
 
 #include "MapaTipos.h"
 #include "MensagensDeErro.h"
-#include "controleDeVariaveis.h"
+#include "ControleDeVariaveis.h"
 #include "Atributos.h"
 #include "TratamentoString.h"
 #include "EntradaESaida.h"
