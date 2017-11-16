@@ -9,8 +9,8 @@
 
 
 #include "MapaTipos.h"
-#include "controleDeVariaveis.h"
 #include "MensagensDeErro.h"
+#include "controleDeVariaveis.h"
 #include "Atributos.h"
 #include "TratamentoString.h"
 #include "EntradaESaida.h"
@@ -192,10 +192,10 @@ ARG_SCAN		: ID ':' TIPO
 				$$.traducao =  constroiScan($$.label);
 				
 				if($3.tipo == constante_tipo_booleano)
-					adcionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho + $3.tamanho);
+					adicionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho + $3.tamanho);
 				
 				else
-					adcionarDefinicaoDeTipo($1.label, $3.tipo,$1.tamanho + $3.tamanho);
+					adicionarDefinicaoDeTipo($1.label, $3.tipo,$1.tamanho + $3.tamanho);
 					
 				$$.traducao = $$.traducao + "\t" + $1.label + " = " + $$.label + ";\n";
 				
@@ -356,11 +356,11 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						}
 						
 						if($1.escopoDeAcesso >= 0){
-							adcionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho, $1.escopoDeAcesso);
+							adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho, $1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
 						}
 						else{
-							adcionarDefinicaoDeTipo($1.label, tipo,$1.tamanho + $3.tamanho);
+							adicionarDefinicaoDeTipo($1.label, tipo,$1.tamanho + $3.tamanho);
 							atualizarNoMapa(metaData);
 						}
 						
@@ -391,7 +391,6 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					$$ = $3;
 				}
 			}
-			|
 			;
 
 //REGRA CRIADA PRA DIMINUIR A QUANTIDADE DE REPETIÇÕES DAS VERIFICAÇÕES DE EXISTENCIA DE VARIAVEL
@@ -697,7 +696,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 
 /*
 				if($1.tipo == "")
-					adcionarDefinicaoDeTipo($1.label, constante_tipo_inteiro);
+					adicionarDefinicaoDeTipo($1.label, constante_tipo_inteiro);
 				$1.tipo = constante_tipo_booleano;
 */
 				$$ = $1;

@@ -32,7 +32,7 @@ namespace EntradaESaida
 	{
 		//$1.tipo = constante_tipo_inteiro;
 		dolarDolar = gerarNovaVariavel();
-		adcionarDefinicaoDeTipo(label1, tipo, tamanho);
+		adicionarDefinicaoDeTipo(label1, tipo, tamanho);
 		string traducaoDeclaracaoDeVariaveis = "\t"  + tipo + " " + dolarDolar + ";\n";
 		
 		return traducaoDeclaracaoDeVariaveis;
@@ -45,7 +45,7 @@ namespace EntradaESaida
 		//$1.tipo = constante_tipo_inteiro;
 		labelDolarDolar = gerarNovaVariavel();
 		string traducaoDeclaracaoDeVariaveis = "\t"  + tipo + " " + labelDolarDolar + ";\n";
-		adcionarDefinicaoDeTipo(label1, tipo, tamanho);
+		adicionarDefinicaoDeTipo(label1, tipo, tamanho);
 		
 		return traducaoDeclaracaoDeVariaveis;
 	
