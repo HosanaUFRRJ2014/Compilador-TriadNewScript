@@ -52,15 +52,21 @@ namespace ControleDeVariaveis
 		
 		void inicializarMapaDeContexto()
 		{
-			map<string, DADOS_VARIAVEL> *mapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
-			mapa->clear();
+			//map<string, DADOS_VARIAVEL> *mapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
+			//mapa->clear();
+			map<string, DADOS_VARIAVEL> *mapa = new map<string, DADOS_VARIAVEL>();
 			pilhaDeMapas.push_back(mapa);
 		}
 		
 		void aumentarEscopo(){
-			map<string, DADOS_VARIAVEL> *novoMapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
+			//map<string, DADOS_VARIAVEL> *novoMapa = (map<string, DADOS_VARIAVEL>*) malloc(sizeof(map<string, DADOS_VARIAVEL>));
+			map<string, DADOS_VARIAVEL>* novoMapa = new map<string, DADOS_VARIAVEL>();
+			
+			DADOS_VARIAVEL abc;
+			
 			numeroEscopoAtual = numeroEscopoAtual+1;
-			novoMapa->clear();
+//			cout << novoMapa->size();
+//			novoMapa->clear();
 			pilhaDeMapas.push_back(novoMapa);
 			
 		}
@@ -71,7 +77,7 @@ namespace ControleDeVariaveis
 			
 		}
 		
-		string adcionaPrefixo(string nome)
+		string adicionaPrefixo(string nome)
 		{
 			if(nome.find(prefixo_variavel_usuario) != 0)
 				nome = prefixo_variavel_usuario + nome;
@@ -80,7 +86,7 @@ namespace ControleDeVariaveis
 				
 		bool incluirNoMapa(string nome, string tipo = "")
 		{
-			nome = adcionaPrefixo(nome);
+			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
 				DADOS_VARIAVEL variavel;
@@ -117,14 +123,14 @@ namespace ControleDeVariaveis
 			mapaDeContexto = pilhaDeMapas[escopo];
 			if(varrerEscopo)
 			{
-				nome = adcionaPrefixo(nome);
+				nome = adicionaPrefixo(nome);
 
 				//operador curto circuitado para buscar a variavel nos mapas recursivamente
 				return (mapaDeContexto->count(nome) > 0) || variavelJaDeclarada(nome, varrerEscopo, escopo - 1);
 			}
 			else
 			{
-				nome = adcionaPrefixo(nome);
+				nome = adicionaPrefixo(nome);
 				return mapaDeContexto->count(nome) > 0;
 			}
 		}
@@ -132,7 +138,7 @@ namespace ControleDeVariaveis
 		DADOS_VARIAVEL recuperarDadosVariavel(string nome, int escopo)
 		{
 			DADOS_VARIAVEL retorno;
-			nome = adcionaPrefixo(nome);
+			nome = adicionaPrefixo(nome);
 			if(variavelJaDeclarada(nome, true, escopo))
 			{
 				 return mapaDeContexto->at(nome);
@@ -144,59 +150,86 @@ namespace ControleDeVariaveis
 	namespace DeclaracaoProvisoriaInferenciaTipo
 	{
 		using namespace MapaDeContexto;
-		
+	
 		#define constante_subst_tipo_declaracao_variavel "//#TIPOP_VAR_\t_\t#"
-		#define slotIdVar "\t"
 		#define constante_sufixo_escopo "SCOPE"
+		#define slotIdVar "\t"
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
-		
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
-		void adcionarDefinicaoDeTipo(string, string, int, int);
-		string substituirTodasAsDeclaracoesProvisorias(string);
 		
+		void adicionarDefinicaoDeTipo(string, string, int, int);
+		string substituirTodasAsDeclaracoesProvisorias(string);
+		string montarTagTipoProvisorio(string, int);
+		string recuperarIdPelaTag(string);
+		
+		string montarTagTipoProvisorio(string id, int escopo){
+			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
+			string separador = slotIdVar;
+			string idPrefixado = adicionaPrefixo(id);
+			//primeiro insere o numero do escopo da variavel no primeiro slot e depois adiciona o nome da variavel no segundo slot
+			string sufixoEscopo = constante_sufixo_escopo;
+			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), sufixoEscopo + to_string(escopo));
+			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), idPrefixado);
+			return tipoProvisorio;
+		}
 		
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string id)
 		{
+		/*
 			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string separador = slotIdVar;
-			string idPrefixado = adcionaPrefixo(id);
-			//primeiro insere o nome da variavel no primeiro slot e depois adciona o numero do escopo no segundo slot
+			string idPrefixado = adicionaPrefixo(id);
+			//primeiro insere o nome da variavel no primeiro slot e depois adiciona o numero do escopo no segundo slot
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			string sufixoEscopo = constante_sufixo_escopo;
 			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(numeroEscopoAtual));
+			*/
+			string tipoProvisorio = montarTagTipoProvisorio(id, numeroEscopoAtual);
 			mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = " ";
-			return tipoProvisorio + " " + idPrefixado + ";\n";
+			return tipoProvisorio + " " + adicionaPrefixo(id) + ";\n";
 		}
 			
-		void adcionarDefinicaoDeTipo(string id, string tipo, int tamanho, int escopo = numeroEscopoAtual)
-		{
-			string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
-			string idPrefixado = adcionaPrefixo(id);
+	
+		//void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho,  int escopo = numeroEscopoAtual)
+		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho, int escopo = numeroEscopoAtual)
+		{	
+			/*string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
+			string idPrefixado = adicionaPrefixo(id);
 			string separador = slotIdVar;
 			string tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 			string sufixoEscopo = constante_sufixo_escopo;
-			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(escopo));
-			
+			tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(escopo));*/
+			string tipoProvisorio = montarTagTipoProvisorio(id, escopo);
+		
 			//verificação a mais inserida pq havia problema na hora de definir o tipo de uma variavel global
 			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
 			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
-			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) != mapaSubstituicaoDeTipoProvisorio.end()){
+			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
+				DADOS_VARIAVEL metadata;
 				while(escopo > 0){
-					DADOS_VARIAVEL metadata = recuperarDadosVariavel(id, escopo);
+					metadata = recuperarDadosVariavel(id, escopo);
 					escopo = metadata.escopo;
-					if(metadata.tipo == "") break;			
+					if(metadata.tipo == "")
+					{
+						metadata.tipo = tipo;
+						atualizarNoMapa(metadata, escopo);
+						break;
+					}			
 				}
-				
+				/*
 				constanteMarcacao = constante_subst_tipo_declaracao_variavel;
+				
 				tipoProvisorio = constanteMarcacao.replace(constanteMarcacao.find(separador), separador.length(), idPrefixado);
 				sufixoEscopo = constante_sufixo_escopo;
 				tipoProvisorio = tipoProvisorio.replace(tipoProvisorio.find(separador), separador.length(), sufixoEscopo + to_string(escopo));
+				*/
+				tipoProvisorio = montarTagTipoProvisorio(id, escopo);
 			}
 				
 			if(tipo == constante_tipo_string)
 			{
-				cout << tamanho;
-				string charArray = "char " + idPrefixado + "[" + to_string(tamanho) + "]";
+				int tamanho = 0;
+				string charArray = "char " + adicionaPrefixo(id) + "[" + to_string(tamanho) + "]";
 
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
 			}
@@ -205,7 +238,19 @@ namespace ControleDeVariaveis
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
 			}
 				
+			
+		
 		}
+		
+		string recuperarIdPelaTag(string tag){
+			string prefix = prefixo_variavel_usuario;
+			int posPrefix = tag.find(prefix);
+			
+			int posFimNomeVar = tag.find_last_of("#");
+			int inicioId = posPrefix + prefix.length();
+			int tamanhoId = posFimNomeVar - inicioId;
+			return tag.substr(inicioId, tamanhoId);
+ 		}
 		
 		string substituirTodasAsDeclaracoesProvisorias(string declaracoes)
 		{
@@ -213,7 +258,9 @@ namespace ControleDeVariaveis
 			{
 				string key = it->first;
 				string value = it->second;
-						
+				
+				if(value == "") continue;
+				
 				int pos = declaracoes.find(key);
 				if(pos >= 0)
 				{	
@@ -221,31 +268,42 @@ namespace ControleDeVariaveis
 					/*infelizmente não tem como fazer verificação com a string, pois o value não é constante_tipo_string
 					 e sim uma combinação do nome da váriável e seu respectivo tamanho. 
 					Por isso a verificação de todos os outros tipos em lugar disso.*/
+					if(value == " "){
+						string id = recuperarIdPelaTag(key);
+						string params[1] = {id};
+						MensagensDeErro::yywarning(MensagensDeErro::montarMensagemDeErro(MSG_WARINING_VARIAVEL_DECLARADA_NAO_UTILIZADA ,params, 1));
+						
+						value = constante_tipo_inteiro;
+					}
+					
 					if(value == constante_tipo_inteiro || value == constante_tipo_flutuante || value == constante_tipo_caracter || value == constante_tipo_booleano)
 					{
 						declaracoes.replace(pos, key.length(), value);
 					}
-					
 					else
 					{
+						
 						//-8 para eliminar o char    [*];
 						declaracoes.replace(pos, key.length() + value.length() -8  + 1, value);
 					}
+					mapaSubstituicaoDeTipoProvisorio[key] = "";
 					
 				}
-					
 			}
+			
 // tinhas posto o clear pra ajudar no gerenciamento de chaves repetidas... mas deu problema
 //			mapaSubstituicaoDeTipoProvisorio.clear();
+			if(numeroEscopoAtual == 0 && mapaSubstituicaoDeTipoProvisorio.size() > 0){
+				 
+			}
 			return declaracoes;
 		}
-		
 	}
+	
 	namespace VariaveisTemporarias{
 		#define prefixo_variavel_sistema "temp"
 		
 		string gerarNovaVariavel();
-		
 		//declaração de variaveis var <nome variavel>;
 		string gerarNovaVariavel(){
 			static int num = 0;

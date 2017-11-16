@@ -19,10 +19,12 @@ namespace MensagensDeErro{
 	#define MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS "Erro: Não é possível efetuar operação com o operador \"\t\" entre os tipos \"\t\" e \"\t\"."
 	
 	#define MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA "Erro: Não é possível efetuar conversão explicita do tipo \"\t\" para o tipo \"\t\". Operação indevida"
+	#define MSG_WARINING_VARIAVEL_DECLARADA_NAO_UTILIZADA "Warning: A variável \"\t\" foi declarada, mas não foi utilizada."
 	//LÍVIA HERE!	
 	#define MSG_ERRO_COMENTARIO "Erro: '*/' não encontrado para fechar comentário."
+	string montarMensagemDeErro(string, string*, int);
+	void yywarnning(string);
 	
-
 	string SEP_PARAMS = "\t";
 
 	string montarMensagemDeErro(string mensagem, string* parametros = NULL, int qtdParametros = 0){
@@ -38,6 +40,11 @@ namespace MensagensDeErro{
 		
 		return mensagem;
 	
+	}
+	
+	void yywarning(string MSG)
+	{
+		cout << MSG << endl;
 	}
 
 }
