@@ -173,6 +173,7 @@ namespace TratamentoString
 		{
 			retorno = montarConcatenarString(dolarDolar.label, dolar1.label) + ";\n";
 			retorno = retorno + montarConcatenarString(dolarDolar.label, dolar3.label) + ";\n";
+			global_tamanhoStringConcatenada = dolar1.tamanho + dolar3.tamanho + 1;
 		
 		
 		}

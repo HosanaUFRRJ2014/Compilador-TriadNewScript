@@ -6,60 +6,45 @@
 #define TRUE 1
 #define FALSE 0
 
-	int temp1;
-	int VARUSER_a;
+#define TAMANHO_INICIAL_STRING 10
+#define FATOR_MULTIPLICADOR_STRING 2
+#define FATOR_CARGA_STRING 0.75
+
 
 int main(void)
 {
-	temp1 = 1;
-	VARUSER_a = temp1;
 
-	char temp2[4];
-		char VARUSER_a[0];
-	int temp3;
-	int temp4;
-	int temp5;
-	int temp6;
-	int temp7;
-	char temp8[8];
-	char temp9[4];
-	char temp10[13];
+	char temp1[14];
+	char temp2[9];
+	char temp3[24];
 
-	temp2[0] = 'a';
-	temp2[1] = 'l';
+	temp1[0] = 's';
+	temp1[1] = 'a';
+	temp1[2] = 'b';
+	temp1[3] = 'e';
+	temp1[4] = ' ';
+	temp1[5] = 'd';
+	temp1[6] = 'e';
+	temp1[7] = ' ';
+	temp1[8] = 'n';
+	temp1[9] = 'a';
+	temp1[10] = 'd';
+	temp1[11] = 'a';
+	temp1[12] = ' ';
+	temp1[13] = '\0';
+	temp2[0] = 'i';
+	temp2[1] = 'n';
 	temp2[2] = 'o';
-	temp2[3] = '\0';
-	strcpy(VARUSER_a,temp2);
+	temp2[3] = 'c';
+	temp2[4] = 'e';
+	temp2[5] = 'n';
+	temp2[6] = 't';
+	temp2[7] = 'e';
+	temp2[8] = '\0';
+	strcat(temp3,temp1);
+	strcat(temp3,temp2);
 
-
-	std::cout << VARUSER_a <<  "\n";
-
-
-	temp3 = 1;
-	temp4 = 3;
-	temp5 = 7;
-	temp6 = temp4 * temp5;
-	temp7 = temp3 + temp6;
-
-	std::cout << temp7 <<  "\n";
-
-
-	temp8[0] = 'D';
-	temp8[1] = 'o';
-	temp8[2] = 'c';
-	temp8[3] = 't';
-	temp8[4] = 'o';
-	temp8[5] = 'r';
-	temp8[6] = ' ';
-	temp8[7] = '\0';
-	temp9[0] = 'W';
-	temp9[1] = 'h';
-	temp9[2] = 'o';
-	temp9[3] = '\0';
-	strcat(temp10,temp8);
-	strcat(temp10,temp9);
-
-	std::cout << temp10 <<  "\n";
+	std::cout << temp3 <<  "\n";
 
 
 	return 0;

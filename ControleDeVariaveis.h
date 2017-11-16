@@ -228,9 +228,7 @@ namespace ControleDeVariaveis
 				
 			if(tipo == constante_tipo_string)
 			{
-				int tamanho = 0;
 				string charArray = "char " + adicionaPrefixo(id) + "[" + to_string(tamanho) + "]";
-
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
 			}
 			else

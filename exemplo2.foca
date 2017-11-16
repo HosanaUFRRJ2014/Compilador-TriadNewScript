@@ -1,44 +1,8 @@
-var a =1; 
 int main()
 {
-	/*var h;
-	h = "doctor";
-	var cabra;
-	cabra = "who";
-	
-	var ornitorinco;
-	ornitorinco = "tra";*/
-	
-	
-	//var h = "aloha";
-	//h = "doctor " + "who"; //bugado. (lixo de memória do strcat)
-	//show("I love " + h);
-	//concatenação de strings
-	
-	
-	//var in;
-	//read(in:bool);
-	//show("Variavel in: ");
-	//show(in);
-	
-	var a  = "alo";
-	show(a);
-	show(1+3*7);  
-	show("Doctor " + "Who");
-/*  Código indevidamente bugado
+	//var inocente = "a";
+	//read(inocente:string);
 	var a;
-	var b = 0;
-	
-	a = 8000;
-
-	b = a + b;
-	
-	var c;
-	var d = 1.2;
-	
-	c = 1;
-	var e = c + d;
-	
-*/
+	a = "sabe de nada " + "inocente";
 
 }

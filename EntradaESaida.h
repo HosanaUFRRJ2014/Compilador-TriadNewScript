@@ -22,9 +22,15 @@ namespace EntradaESaida
 	}
 
 
-	string constroiScan(string label)
+	string constroiScan(string label,string tipo)
 	{
-		string scan = "\tstd::cin >> " + label + ";\n"; // + ">>"+ " \"\\n\"" +";\n\n";
+		string scan;// = "\tstd::cin >> " + label + ";\n";
+		
+		if(tipo == constante_tipo_string)
+			scan = "\tscanf(\"%c\",label);\n";
+		
+		else
+			scan = "\tstd::cin >> " + label + ";\n";
 		return scan;
 	}
 	

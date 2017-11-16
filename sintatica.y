@@ -67,7 +67,7 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 
 S	 		: DECLARACOES TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "\treturn 0;\n}" << endl;
+				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 0.75\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "\treturn 0;\n}" << endl;
 			}
 			;
 
@@ -130,7 +130,7 @@ PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')' ';'
 			
 ARG_PRINT		: STRING
 			{
-					
+
 				$$.traducao = $1.traducao + "\n" + constroiPrint($1.label);
 				
 			}
@@ -189,13 +189,16 @@ ARG_SCAN		: ID ':' TIPO
 				
 	
 				$$.traducaoDeclaracaoDeVariaveis = "\t" + $3.label + " " + $$.label + ";\n";
-				$$.traducao =  constroiScan($$.label);
+				$$.traducao =  constroiScan($$.label, $3.tipo);
 				
 				if($3.tipo == constante_tipo_booleano)
+					adicionarDefinicaoDeTipo($1.label, $3.label,0);
+					
+				else if($3.tipo == constante_tipo_string)
 					adicionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho + $3.tamanho);
-				
+								
 				else
-					adicionarDefinicaoDeTipo($1.label, $3.tipo,$1.tamanho + $3.tamanho);
+					adicionarDefinicaoDeTipo($1.label, $3.tipo,0);
 					
 				$$.traducao = $$.traducao + "\t" + $1.label + " = " + $$.label + ";\n";
 				
@@ -356,11 +359,11 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						}
 						
 						if($1.escopoDeAcesso >= 0){
-							adicionarDefinicaoDeTipo($1.label, tipo, $1.tamanho + $3.tamanho, $1.escopoDeAcesso);
+							adicionarDefinicaoDeTipo($1.label, tipo, global_tamanhoStringConcatenada, $1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
 						}
 						else{
-							adicionarDefinicaoDeTipo($1.label, tipo,$1.tamanho + $3.tamanho);
+							adicionarDefinicaoDeTipo($1.label, tipo,global_tamanhoStringConcatenada);
 							atualizarNoMapa(metaData);
 						}
 						
