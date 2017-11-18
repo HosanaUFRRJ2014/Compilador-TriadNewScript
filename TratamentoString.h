@@ -17,7 +17,7 @@ namespace TratamentoString
 
 	//FIXME - Remover essas globais do código
 	long global_numCaracteresEspeciais = 0;
-	long global_tamanhoStringConcatenada = 0;
+	//long global_tamanhoStringConcatenada = 0;
 	
 	struct STRING
 	{
@@ -83,6 +83,7 @@ namespace TratamentoString
 	
 	string montarConcatenarString(string str1, string str2)
 	{
+		
 		string retorno = "\tstrcat(" + str1 + "," + str2 + ")";
 		
 		return retorno;
@@ -123,8 +124,8 @@ namespace TratamentoString
 		long tamString = valor.length();
 		
 		
-		STRING novaString = criarString(nomeVar,valor,valor.length());		
-		mapaStrings.insert(make_pair(nomeVar, novaString));
+		//STRING novaString = criarString(nomeVar,valor,valor.length());		
+		//mapaStrings.insert(make_pair(nomeVar, novaString));
 
 		
 		for(long i = 1; i < tamString-1; i++)
@@ -134,8 +135,9 @@ namespace TratamentoString
 		}
 		
 		
+		
 		retorno = retorno + "\t" + nomeVar + "[" + to_string(tamString-2-global_numCaracteresEspeciais) + "] = \'" + "\\"+ "0" + "\';\n";
-	
+		
 	
 		return retorno;
 		
@@ -146,11 +148,14 @@ namespace TratamentoString
 	{
 	
 		string retorno = "";
+		int tamanhoStringConcatenada = 0;
+		
+		
 		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
 		if (operacao == "+")
 		{
-			global_tamanhoStringConcatenada = dolar1.tamanho + dolar3.tamanho + 1;
-			retorno = "\tchar " + dolarDolar.label + "[" +  to_string(global_tamanhoStringConcatenada) + "]" + ";\n";
+			tamanhoStringConcatenada = dolar1.tamanho + dolar3.tamanho /*-2 + 1*/;
+			retorno = "\tchar " + dolarDolar.label + "[" +  to_string(tamanhoStringConcatenada) + "]" + ";\n";
 			
 		
 		
@@ -168,12 +173,40 @@ namespace TratamentoString
 	{
 		string retorno = "";
 		
+		string labelUsuario = "";
+		string labelDolar1 = "";
+		string labelDolar3 = "";
+		
+		//cout << "******* " << dolar3.label << endl; 
+		//cout << dolarDolar.label.find("VARUSER_") << endl; 
+		//cout << std::string::npos << endl; 
+		
+	//	if((dolar3.label.find("VARUSER_")) == std::string::npos)
+	//	{
+
+			labelUsuario = dolarDolar.label;
+			labelDolar1 = dolar1.label;
+			labelDolar3 = dolar3.label;
+		
+	//	}
+		
+	/*	else
+		{
+			labelUsuario = dolar3.label;
+			labelDolar1 = dolar1.label;
+			labelDolar3 = dolarDolar.label;	
+		
+		}
+		
+	*/	
+		retorno = montarCopiarString(labelUsuario,"\"\"") + ";\n";
+		
 		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
 		if (operacao == "+")
 		{
-			retorno = montarConcatenarString(dolarDolar.label, dolar1.label) + ";\n";
-			retorno = retorno + montarConcatenarString(dolarDolar.label, dolar3.label) + ";\n";
-			global_tamanhoStringConcatenada = dolar1.tamanho + dolar3.tamanho + 1;
+			retorno += montarConcatenarString(labelUsuario, labelDolar1) + ";\n";
+			retorno += montarConcatenarString(labelUsuario, labelDolar3) + ";\n";
+		//	global_tamanhoStringConcatenada = dolar1.tamanho + dolar3.tamanho + 1;
 		
 		
 		}

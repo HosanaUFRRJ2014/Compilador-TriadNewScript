@@ -34,7 +34,7 @@ STRING \"([^\"\n]|\\\")*\"
 "float"		{yylval.label = "float"; yylval.tipo = constante_tipo_flutuante; return TK_TIPO_FLOAT;}
 "char"		{yylval.label = "char"; yylval.tipo = constante_tipo_caracter; return TK_TIPO_CHAR;}
 "bool"		{yylval.label = "int"; yylval.tipo = constante_tipo_booleano; return TK_TIPO_BOOL;}
-"string"	{yylval.label = "char * "; yylval.tipo = constante_tipo_string; return TK_TIPO_STRING;}
+"string"	{yylval.label = "char *"; yylval.tipo = constante_tipo_string; return TK_TIPO_STRING;}
 "var"		{return TK_PALAVRA_VAR;}
 "backscope" {return TK_BACKSCOPE;}
 "global"		{return TK_PALAVRA_GLOBAL;}

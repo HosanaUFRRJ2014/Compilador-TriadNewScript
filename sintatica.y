@@ -67,7 +67,7 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 
 S	 		: DECLARACOES TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 0.75\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "\treturn 0;\n}" << endl;
+				cout << "/*Compilador FOCA*/\n" << "#include <stdio.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 0.75\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "\treturn 0;\n}" << endl;
 			}
 			;
 
@@ -195,7 +195,7 @@ ARG_SCAN		: ID ':' TIPO
 					adicionarDefinicaoDeTipo($1.label, $3.label,0);
 					
 				else if($3.tipo == constante_tipo_string)
-					adicionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho + $3.tamanho);
+					adicionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho);
 								
 				else
 					adicionarDefinicaoDeTipo($1.label, $3.tipo,0);
@@ -315,7 +315,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						
 					
 					//	$2.label = prefixo_variavel_usuario + $2.label;
-						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string(global_tamanhoStringConcatenada) + "];\n";
+						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string($4.tamanho) + "];\n";
 						$$.traducao = $4.traducao + montarCopiarString(label, $4.label) + ";\n";
 					
 					}
@@ -359,11 +359,11 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						}
 						
 						if($1.escopoDeAcesso >= 0){
-							adicionarDefinicaoDeTipo($1.label, tipo, global_tamanhoStringConcatenada, $1.escopoDeAcesso);
+							adicionarDefinicaoDeTipo($1.label, tipo, $3.tamanho, $1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
 						}
 						else{
-							adicionarDefinicaoDeTipo($1.label, tipo,global_tamanhoStringConcatenada);
+							adicionarDefinicaoDeTipo($1.label, tipo,$3.tamanho);
 							atualizarNoMapa(metaData);
 						}
 						
@@ -609,7 +609,6 @@ STRING			: TK_STRING
 				$$.tamanho = $1.label.length() +1 -2 - global_numCaracteresEspeciais; //-2 exclui o tamanho das aspas a global vem do namespace TratamentoString
 				$$.traducaoDeclaracaoDeVariaveis = "\tchar " + $$.label + "[" + to_string($$.tamanho) + "];\n";
 				$$.traducao = codigoTraduzido;
-				
 			//	cout << mapaStrings[$$.label].valor << "\n";
 				
 				//cout << $$.traducaoDeclaracaoDeVariaveis << "\n";
@@ -771,29 +770,10 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	
 	dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
 	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;				
-/*	
-//remover esta verificação se for tratar como erro a não atribuição
-	if(dolar1.tipo == "" && dolar3.tipo == "")
-	{
-
-		dolar1.tipo = constante_tipo_inteiro;
-		dolar3.tipo = constante_tipo_inteiro;
-		
-	}	
-	if(dolar1.tipo == "")
-	{
-		dolar1.tipo = dolar3.tipo;
-	}
-	if(dolar3.tipo == "")
-	{
-		dolar3.tipo = dolar1.tipo;
-	}	
-*/		
-	
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
 	
-	if(!(dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string))
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";
+	/*if(!(dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string))
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";*/
 	
 	string label_old = dolarDolar.label;
 	
@@ -823,12 +803,13 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		}
 			
 		
+		dolarDolar.tamanho = dolar1.tamanho + dolar3.tamanho /*- 2 + 1*/;
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
 			
 	
 	}
 		
-	else if((dolar1.tipo == dolar3.tipo) && (dolar1.tipo == resultado)) //se não houver necessidade de conversão
+	else if((dolar1.tipo == dolar3.tipo) /*&& (dolar1.tipo == resultado)*/) //se não houver necessidade de conversão
 	{
 	
 		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";

@@ -282,7 +282,7 @@ namespace ControleDeVariaveis
 					{
 						
 						//-8 para eliminar o char    [*];
-						declaracoes.replace(pos, key.length() + value.length() -8  + 1, value);
+						declaracoes.replace(pos, key.length() + value.length() -7, value + ";");
 					}
 					mapaSubstituicaoDeTipoProvisorio[key] = "";
 					

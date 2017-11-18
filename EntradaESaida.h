@@ -27,7 +27,7 @@ namespace EntradaESaida
 		string scan;// = "\tstd::cin >> " + label + ";\n";
 		
 		if(tipo == constante_tipo_string)
-			scan = "\tscanf(\"%c\",label);\n";
+			scan = "\tscanf(\"%s\","+ label + ");\n";
 		
 		else
 			scan = "\tstd::cin >> " + label + ";\n";

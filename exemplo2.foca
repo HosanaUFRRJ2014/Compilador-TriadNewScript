@@ -1,8 +1,13 @@
 int main()
 {
-	//var inocente = "a";
+	var inocente;
 	//read(inocente:string);
-	var a;
-	a = "sabe de nada " + "inocente";
+	//show(inocente);
+	
+	inocente = "ino" + "cente";
+	
+	var a = inocente + " sabe de nada";
+	show(a);
+	
 
 }
