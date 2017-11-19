@@ -12,6 +12,7 @@ namespace ConstanteTipos
 	#define constante_erro "erro"
 	#define constante_tipo_bloco "BLOCO"
 	//LÍVIA HERE!!
+	#define constante_tipo_default "default"
 	#define constante_tipo_break "break"
 	#define constante_tipo_continue "continue"
 	

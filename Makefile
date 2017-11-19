@@ -1,4 +1,4 @@
-all: 	
+all:
 
 
 		clear
@@ -6,21 +6,21 @@ all:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo.foca > codigo.c
-		
+		./glf < exemplo.foca > codigo.cpp
+
 all-run:
-			
+
 		clear
 		lex lexica.l
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo.foca > codigo.c
-		gcc codigo.c -o cod
+		./glf < exemplo.foca > codigo.cpp
+		g++ codigo.cpp -o cod
 		./cod
 
 
-all-no-code: 	
+all-no-code:
 
 		clear
 		lex lexica.l
@@ -30,10 +30,37 @@ all-no-code:
 		./glf < exemplo.foca
 
 
-no-string-lib-mode:
+clear-all:
+		rm y.tab.c y.tab.h lex.yy.c cod glf y.output
+
+
+#Makefile para o exemplo2.foca
+all2:
+
+
 		clear
 		lex lexica.l
-		yacc -d sintatica.y
-		g++ -o glf y.tab.c -lfl
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo.foca
+		./glf < exemplo2.foca > codigo.cpp
+
+all2-run:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < exemplo2.foca > codigo.cpp
+		g++ codigo.cpp -o cod
+		./cod
+
+all2-no-code:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < exemplo2.foca

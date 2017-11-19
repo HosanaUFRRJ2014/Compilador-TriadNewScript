@@ -18,13 +18,14 @@ namespace ControleDeFluxo
 		#define tag_for_inicio "INICIO_FOR"
 		#define tag_for_fim "FIM_FOR"
 		#define tag_switch_fim "FIM_SWITCH"
+		#define tag_case_inicio "INICIO_CASE"
 		//(...)
 		
 		string gerarNovaTagIf(bool fim);
 		string gerarNovaTagWhile(bool fim); //...
 		string gerarNovaTagDoWhile(bool fim); //...
 		string gerarNovaTagFor(bool fim); //...
-		string gerarNovaTagSwitch(); //...
+		pair<string,int> gerarNovaTagSwitch(bool tagCase); //...
 
 		/*
 		string criarNovaTag(int num1,int num2,string tagCmd1,string tagCmd2,bool fim){
@@ -140,40 +141,57 @@ namespace ControleDeFluxo
 			return tag + numInt;
 		}
 
-		string gerarNovaTagSwitch(){
+		pair<string,int> gerarNovaTagSwitch(bool tagCase){
 			static int numFim = 0;
+			static int numCaseInicio = 0;
 			string tag;
 			string numInt;
+			pair<string,int> resultado;
+				
+			if(tagCase)
+			{
+				numCaseInicio++;
+				tag = tag_case_inicio;
+				numInt = to_string(numCaseInicio);
+			}
+			else
+			{
+				numFim++;
+				tag = tag_switch_fim;
+				numInt = to_string(numFim);
+			}
 
-			numFim++;
-			tag = tag_switch_fim;
-			numInt = to_string(numFim);
-	
-			return tag + numInt;
+			resultado.first = tag + numInt;
+			resultado.second = numCaseInicio + 1;
+		
+			return resultado;
+			//return tag + numInt;
 		}
 
 	}
 
 	namespace TraducaoControleFluxo{
 
-		#define qtd_elementos_tarja_tempUSER 5 //.....
-		#define qtd_elementos_tarja_tagFim 10 //**********
-		#define qtd_elementos_tarja_break 5 //**********
-		#define qtd_elementos_tarja_continue 5 //**********		
+		//#define qtd_elementos_tarja_tempUSER 5 //.....
+		//#define qtd_elementos_tarja_tagFim 5 //**********
+		//#define qtd_elementos_tarja_break 5 //**********
+		//#define qtd_elementos_tarja_continue 5 //**********
+		
+		#define qtd_elementos_tarja 5		
 
 		#define tarja_variavel "....."  //.....
-		#define tarja_tagFim "**********"  //**********
+		#define tarja_tagFim "*****"  //**********
 
 		#define tarja_break "%%%%%"  //**********
 		#define tarja_continue "#####"  //**********
 
-		string substituirVariaveisCase(string traducao, string varTemp){
+		string substituirVariaveisCase(string traducao, string varUser){
 
 			string novaTraducao;
 			int indexVar = traducao.find(tarja_variavel);
 
-			while(indexVar != -1){
-				traducao.replace(indexVar,qtd_elementos_tarja_tempUSER,varTemp);
+			while(indexVar != std::string::npos){
+				traducao.replace(indexVar,qtd_elementos_tarja,varUser);
 				indexVar = traducao.find(tarja_variavel);
 			}
 
@@ -181,11 +199,93 @@ namespace ControleDeFluxo
 			return novaTraducao;
 
 		}
+		
+		string incluirBreakEContinue(string traducao, string tagInicio, string tagFim, bool ehSwitch)
+		{			
+
+			string novaTraducao;
+			int index = traducao.find(tarja_break);
+			
+			//Substituir as tarjas do Break.
+			while(index != std::string::npos){
+				traducao.replace(index,qtd_elementos_tarja,tagFim);
+				index = traducao.find(tarja_break);
+			}
+			
+			if(!ehSwitch) //Switches não suportam continue.
+			{
+				index = traducao.find(tarja_continue);
+				
+				//Substituir as tarjas do Continue.
+				while(index != std::string::npos){
+					traducao.replace(index,qtd_elementos_tarja,tagInicio);
+					index = traducao.find(tarja_continue);
+				}
+			}
+			novaTraducao = traducao;
+
+			return novaTraducao; 
+		}
+		
+		bool haBreakNoBloco(string traducao)
+		{
+			if(traducao.find(tarja_break) != std::string::npos)
+				return true;
+			else
+				return false;
+		}
+
+		bool haContinueNoBloco(string traducao)
+		{
+			if(traducao.find(tarja_continue) != std::string::npos)
+				return true;
+			else
+				return false;
+		}
 
 	}
-
+	
 	namespace PilhaControleFluxo{
-		  
+		vector<string> pilhaTagInicio(0);
+		vector<string> pilhaTagFim(0);
+
+		void adicionarTagInicio(string);
+		void adicionarTagFim(string);
+		void removerTopoTagInicio();
+		void removerTopoTagFim();
+		string obterTopoPilhaInicio();
+		string obterTopoPilhaFim();
+
+		void adicionarTagInicio(string tag){
+			pilhaTagInicio.push_back(tag);
+		}
+		void adicionarTagFim(string tag){
+			pilhaTagFim.push_back(tag);
+		}
+		
+		void removerTopoTagInicio(){
+			pilhaTagInicio.pop_back();
+		}
+		void removerTopoTagFim(){
+			pilhaTagFim.pop_back();
+		}
+		
+		bool pilhaInicioVazia(){
+			return pilhaTagInicio.empty();
+		}
+		
+		bool pilhaFimVazia(){
+			return pilhaTagFim.empty();
+		}
+		
+		string obterTopoPilhaInicio(){
+			return pilhaTagInicio.at(pilhaTagInicio.size() -1);
+		}
+		
+		string obterTopoPilhaFim(){
+			return pilhaTagFim.at(pilhaTagFim.size() -1);
+		}
+		/*
 		struct no
 		{
 			string data;
@@ -201,10 +301,19 @@ namespace ControleDeFluxo
 				}
 				void empilhar(string s);
 				void desempilhar();
+				bool vazia();
 				void display();
 				string obterTopo();
 				~PilhaTagsControleFluxo();
 		};
+
+		bool PilhaTagsControleFluxo::vazia()
+		{
+			if(top != NULL)
+				return false;
+			else
+				return true;
+		}
 
 		void PilhaTagsControleFluxo::empilhar(string s)
 		{
@@ -256,47 +365,9 @@ namespace ControleDeFluxo
 
 		PilhaTagsControleFluxo *pilhaTagsBreak = new PilhaTagsControleFluxo();
 		PilhaTagsControleFluxo *pilhaTagsContinue = new PilhaTagsControleFluxo();
+		*/
 
-		string incluirBreakEContinue(string traducao, string tagInicio, string tagFim, bool ehSwitch)
-		{			
-
-			string novaTraducao;
-			int index = traducao.find(tarja_break);
-			
-			while(index != std::string::npos){
-				traducao.replace(index,qtd_elementos_tarja_break,tagFim);
-				index = traducao.find(tarja_break);
-			}
-			
-			if(!ehSwitch)
-			{
-				index = traducao.find(tarja_continue);
-
-				while(index != std::string::npos){
-					traducao.replace(index,qtd_elementos_tarja_continue,tagInicio);
-					index = traducao.find(tarja_continue);
-				}
-			}
-			novaTraducao = traducao;
-
-			return novaTraducao; 
-		}
 		
-		bool haBreakNoBloco(string traducao)
-		{
-			if(traducao.find(tarja_break) != std::string::npos)
-				return true;
-			else
-				return false;
-		}
-
-		bool haContinueNoBloco(string traducao)
-		{
-			if(traducao.find(tarja_continue) != std::string::npos)
-				return true;
-			else
-				return false;
-		}
 
 
 		/*
