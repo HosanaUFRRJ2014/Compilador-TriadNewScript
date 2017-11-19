@@ -4,7 +4,7 @@ int main()
 	//read(inocente:string);
 	//show(inocente);
 	
-	inocente = "ino" + "cente";
+	inocente = "inocente";
 	
 	var a = inocente + " sabe de nada";
 	show(a);

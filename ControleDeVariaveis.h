@@ -12,7 +12,7 @@ namespace ControleDeVariaveis
 	{
 		string tipo;
 		string nome;
-		int tamanho;
+		int tamanho = 0;
 		int escopo;
 	};
 	
@@ -26,7 +26,7 @@ namespace ControleDeVariaveis
 		map<string, DADOS_VARIAVEL> *mapaDeContexto;
 		
 		void inicializarMapaDeContexto();
-		bool incluirNoMapa(string, string);
+		bool incluirNoMapa(string,int, string);
 		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
 		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
@@ -84,13 +84,14 @@ namespace ControleDeVariaveis
 			return nome;
 		}
 				
-		bool incluirNoMapa(string nome, string tipo = "")
+		bool incluirNoMapa(string nome, int tamanho, string tipo = "")
 		{
 			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
 				DADOS_VARIAVEL variavel;
 				variavel.nome = nome;
+				variavel.tamanho = tamanho;
 				variavel.tipo = tipo;
 				variavel.escopo = numeroEscopoAtual;
 				
@@ -104,7 +105,8 @@ namespace ControleDeVariaveis
 		{
 			
 			if(variavelJaDeclarada(variavel.nome, true, escopo))
-			{
+			{	
+				mapaDeContexto->at(variavel.nome).tamanho = variavel.tamanho;
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;

@@ -281,7 +281,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 				else
 				{
 					$$.traducaoDeclaracaoDeVariaveis = "\t" + construirDeclaracaoProvisoriaDeInferenciaDeTipo($2.label);
-					incluirNoMapa($2.label);
+					incluirNoMapa($2.label,0);
 				}
 			}
 			|
@@ -297,6 +297,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 				else
 				{
 					//cout << "Entrou no else: \n\n\n";
+					int tamanho = 0;
 					string tipo = $4.tipo;
 					string label = prefixo_variavel_usuario;
 					label = label + $2.label;
@@ -312,8 +313,11 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					{
 						tipo = constante_tipo_caracter;
 						tipo = "\t" + tipo;
-						
-					
+						tamanho = global_tamanhoString;
+						//tamanho calcula literalemnte o tamanho da label "temp5" que é 5
+						//tamanho = calcularTamanhoString($4.label);
+						cout << "**tamanho str concat: " << tamanho << endl;
+						//cout << "**4.label: " << $4.label << endl;
 					//	$2.label = prefixo_variavel_usuario + $2.label;
 						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string($4.tamanho) + "];\n";
 						$$.traducao = $4.traducao + montarCopiarString(label, $4.label) + ";\n";
@@ -326,7 +330,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						$$.traducao = $4.traducao + "\t" + label + " = " + $4.label + ";\n";
 					}
 					
-					incluirNoMapa($2.label, $4.tipo);
+					incluirNoMapa($2.label,tamanho, $4.tipo);
 					$$.label = label;
 					$$.tipo = $4.tipo;
 				}
@@ -336,7 +340,8 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			ID '=' VALOR_ATRIBUICAO ';'
 			{
 				//cout << "Entrou em ID '=' VALOR_ATRIBUICAO ';': \n\n\n";			
-				string tipo = "";	
+				string tipo = "";
+				int tamanho = 0;	
 				if($1.label != $3.label)
 				{
 					DADOS_VARIAVEL metaData;
@@ -346,6 +351,8 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					else{
 						metaData = recuperarDadosVariavel($1.label);
 					}
+					
+					//cout <<"metadata.tamanho: " << metaData.tamanho << endl;
 					if(metaData.tipo == "")
 					{
 						//isso aqui também pode causar problema no futuro devido as lacunas
@@ -357,6 +364,13 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 							tipo = constante_tipo_inteiro;
 							tipo = "\t" + tipo;
 						}
+						
+						if(tipo == constante_tipo_string)
+						{
+							metaData.tamanho = global_tamanhoString;
+							cout << "tam strg concat gl: " << metaData.tamanho << endl;
+						}
+						
 						
 						if($1.escopoDeAcesso >= 0){
 							adicionarDefinicaoDeTipo($1.label, tipo, $3.tamanho, $1.escopoDeAcesso);
@@ -607,12 +621,10 @@ STRING			: TK_STRING
 				//$$.tamanho = $1.label.length() +1 -2; //-2 exclui o tamanho das aspas
 				string codigoTraduzido = geraDeclaracaoString($$.label, $1.label);
 				$$.tamanho = $1.label.length() +1 -2 - global_numCaracteresEspeciais; //-2 exclui o tamanho das aspas a global vem do namespace TratamentoString
+				global_tamanhoString = $$.tamanho;
+				cout << "$$.tamanho: " << $$.tamanho << endl;
 				$$.traducaoDeclaracaoDeVariaveis = "\tchar " + $$.label + "[" + to_string($$.tamanho) + "];\n";
 				$$.traducao = codigoTraduzido;
-			//	cout << mapaStrings[$$.label].valor << "\n";
-				
-				//cout << $$.traducaoDeclaracaoDeVariaveis << "\n";
-				
 				$$.tipo = $1.tipo;
 				
 				global_numCaracteresEspeciais = 0;
@@ -710,7 +722,7 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 				string nomeUpperCase = $1.label;
 				transform(nomeUpperCase.begin(), nomeUpperCase.end(), nomeUpperCase.begin(), ::toupper);
 				$$.label = nomeUpperCase;
-				incluirNoMapa($$.label, $1.tipo);
+				incluirNoMapa($$.label,0, $1.tipo);
 				$$.tipo = $1.tipo;
 			}
 			|
@@ -764,10 +776,10 @@ int main( int argc, char* argv[] )
 
 ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
+	cout << "** Entrou em tratarExpressaoAritmetica " << endl;
 	ATRIBUTOS dolarDolar;
 	
 	dolarDolar.label = gerarNovaVariavel();
-	
 	dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
 	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;				
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
@@ -803,7 +815,20 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		}
 			
 		
-		dolarDolar.tamanho = dolar1.tamanho + dolar3.tamanho /*- 2 + 1*/;
+		dolarDolar.tamanho = dolar1.tamanho + dolar3.tamanho /*- 2 + 1*/; //provável chamada de metadata aqui
+		cout << "***********dolar1.tamanho: " << dolar1.tamanho << endl;
+		cout << "***********dolar3.tamanho: " << dolar3.tamanho << endl;
+		
+		global_tamanhoString = dolarDolar.tamanho;
+		
+		//DADOS_VARIAVEL metadata;// = (DADOS_VARIAVEL *) malloc(sizeof(DADOS_VARIAVEL));
+		
+		
+		//recuperarDadosVariavel(dolar3.label);
+			
+		//metadata.tamanho = dolarDolar.tamanho;
+		
+		//atualizarNoMapa(metadata);
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
 			
 	

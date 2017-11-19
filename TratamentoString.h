@@ -17,7 +17,7 @@ namespace TratamentoString
 
 	//FIXME - Remover essas globais do código
 	long global_numCaracteresEspeciais = 0;
-	//long global_tamanhoStringConcatenada = 0;
+	int global_tamanhoString = 0;
 	
 	struct STRING
 	{
@@ -32,6 +32,7 @@ namespace TratamentoString
 	string montarCopiarString(string, string);
 	string montarConcatenarString(string, string);
 	string tratarCaracteresEspeciais(string, string, long *);
+	int calcularTamanhoString(string);
 	string geraDeclaracaoString(string, string);
 	string realizarTraducaoDeclaracaoDeString(string, ATRIBUTOS, ATRIBUTOS, ATRIBUTOS);
 	string realizarOperacaoAritmeticaString(string, ATRIBUTOS, ATRIBUTOS, ATRIBUTOS);
@@ -117,6 +118,12 @@ namespace TratamentoString
 		return retorno;
 	}
 	
+	
+	int calcularTamanhoString(string valor)
+	{
+		return valor.length();
+	
+	}
 	
 	string geraDeclaracaoString(string nomeVar, string valor)
 	{
@@ -244,13 +251,13 @@ namespace TratamentoString
 		
 		
 	//CóDIGO INúTIL DAQUI POR DIANTE - Não apaguei porque pode ainda se tornar útil	
-	string realizarConversaoImplicitaString(ATRIBUTOS dolar)
+	/*string realizarConversaoImplicitaString(ATRIBUTOS dolar)
 	{
 		string retorno;
 		
 		STRING novaString;
 
-		/*Conversões, caso necessárias*/
+		//*Conversões, caso necessárias
 		if(dolar.tipo != constante_tipo_string)
 		{
 			novaString.label = dolar.label;
@@ -275,7 +282,7 @@ namespace TratamentoString
 	
 	}
 	
-	/*bool incluirNoMapaStrings(string, string, int tamanho)
+	bool incluirNoMapaStrings(string, string, int tamanho)
 	{
 	
 		return false;
@@ -291,7 +298,7 @@ namespace TratamentoString
 		
 		return mapaString[id];
 	
-	}*/
+	}
 	
 		
 
@@ -308,7 +315,7 @@ namespace TratamentoString
 	}
 	
 	
-	/*map<string, STRING> recuperarMapaStrings(int)
+	map<string, STRING> recuperarMapaStrings(int)
 	{
 		map<string, STRING> mapa;
 	
@@ -321,9 +328,9 @@ namespace TratamentoString
 	
 		return false;
 	
-	}*/
+	}
 	
-	/*vector<map<string, STRING>> pilhaDeMapasString(constante_TamanhoInicialPilhaString)
+	vector<map<string, STRING>> pilhaDeMapasString(constante_TamanhoInicialPilhaString)
 	{
 		vector<map<string, STRING>> vetor;
 	
