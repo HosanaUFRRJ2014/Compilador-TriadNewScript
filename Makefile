@@ -64,3 +64,34 @@ all2-no-code:
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
 		./glf < exemplo2.foca
+		
+#Makefile para o exemplo3.foca
+all3:
+
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < exemplo3.foca > codigo.cpp
+
+all3-run:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < exemplo3.foca > codigo.cpp
+		g++ codigo.cpp -o cod
+		./cod
+
+all3-no-code:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < exemplo3.foca

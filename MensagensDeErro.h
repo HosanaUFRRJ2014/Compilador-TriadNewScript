@@ -26,6 +26,9 @@ namespace MensagensDeErro{
 	#define MSG_ERRO_TIPO_CASE_DISTINTO "Erro: Tipo diferente do id de comparação no comando switch-case."
 	#define MSG_ERRO_BREAK_NAO_PERMITIDO "Erro: Comando 'break' não permitido uso neste escopo."
 	#define MSG_ERRO_CONTINUE_NAO_PERMITIDO "Erro: Comando 'continue' não permitido uso neste escopo."
+	#define MSG_ERRO_VARIAVEL_SEM_ATRIBUICAO_FOR "Erro: Variável \"\t\" não foi inicializada no comando for."
+	#define MSG_ERRO_UPDATE_FOR_SEM_ATRIBUICAO "Erro: Termos de atualização do for não correspondentes."
+	
 	string montarMensagemDeErro(string, string*, int);
 	void yywarnning(string);
 	
