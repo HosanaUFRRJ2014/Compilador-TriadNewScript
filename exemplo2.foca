@@ -1,13 +1,21 @@
 int main()
 {
 	var inocente;
-	//read(inocente:string);
-	//show(inocente);
+	read(inocente:string);
+	show(inocente);
+
+	var a;
 	
-	inocente = "inocente";
-	
-	var a = "sabe\tde\t'nada' \n" + inocente;
+	read(a:string);
 	show(a);
 	
+	
+	//codigo meio bugado
+	/*var a = "a";
+	var b = "aaa";
+	a = "abc" + b;
 
+	show(a);*/
+	
+	
 }

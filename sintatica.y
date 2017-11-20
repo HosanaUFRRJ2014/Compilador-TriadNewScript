@@ -67,7 +67,7 @@ ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 
 S	 		: DECLARACOES TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <stdio.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 0.75\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "\treturn 0;\n}" << endl;
+				cout << "/*Compilador FOCA*/\n" << "#include <stdio.h>\n#include <stdlib.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 1\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "fimCodInter:\treturn 0;\n}" << endl;
 			}
 			;
 
@@ -186,21 +186,32 @@ ARG_SCAN		: ID ':' TIPO
 			{
 	//			cout << "\n//Entrou em ID TIPO\n";
 				$$.label = gerarNovaVariavel();
-				
-	
+				string dolarDolar = $$.label;
 				$$.traducaoDeclaracaoDeVariaveis = "\t" + $3.label + " " + $$.label + ";\n";
-				$$.traducao =  constroiScan($$.label, $3.tipo);
-				
-				if($3.tipo == constante_tipo_booleano)
-					adicionarDefinicaoDeTipo($1.label, $3.label,0);
-					
-				else if($3.tipo == constante_tipo_string)
-					adicionarDefinicaoDeTipo($1.label, $3.label,$1.tamanho);
-								
+	
+		
+				if($3.tipo == constante_tipo_string)
+				{
+					adicionarDefinicaoDeTipoDinamico($1.label, $3.tipo);
+					$$ = traducaoStringDinamica($$, $1.label);
+					$$.traducao = $$.traducao + montarCopiarString($1.label, $$.label) + ";\n";
+				}
+		
 				else
-					adicionarDefinicaoDeTipo($1.label, $3.tipo,0);
+				{
+					$$.traducao =  constroiScan($$.label, $3.tipo);
+					if($3.tipo == constante_tipo_booleano)
+					{
+						
+						$$ = validarEntradaBooleanEmTempoExecucao($$);
+					}
+								
 					
-				$$.traducao = $$.traducao + "\t" + $1.label + " = " + $$.label + ";\n";
+					adicionarDefinicaoDeTipo($1.label, $3.label,0);
+					$$.traducao = $$.traducao + "\t" + $1.label + " = " + dolarDolar + ";\n";
+				
+				}	
+				
 				
 		
 			}
@@ -314,11 +325,6 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						tipo = constante_tipo_caracter;
 						tipo = "\t" + tipo;
 						tamanho = global_tamanhoString;
-						//tamanho calcula literalemnte o tamanho da label "temp5" que é 5
-						//tamanho = calcularTamanhoString($4.label);
-						//cout << "**Em tk_palavra_var... tamanho: " << tamanho << endl;
-						//cout << "**4.label: " << $4.label << endl;
-					//	$2.label = prefixo_variavel_usuario + $2.label;
 						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string($4.tamanho) + "];\n";
 						$$.traducao = $4.traducao + montarCopiarString(label, $4.label) + ";\n";
 					
@@ -530,6 +536,7 @@ VALOR_ATRIBUICAO: E
 				if(verificarPossibilidadeDeConversaoExplicita($2.tipo, $1.tipo)){
 					$$.label = gerarNovaVariavel();
 					$$.tipo = $1.tipo;
+					$$.tamanho = $1.tamanho;
 					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "\t" + $$.tipo + " " + $$.label + ";\n";
 					
 					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + $2.label + ";\n";

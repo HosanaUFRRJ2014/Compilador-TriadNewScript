@@ -12,47 +12,46 @@
 int main(int argc, char const *argv[])
 {
 	
-	long i;
-	char c;
-	char um;
-	long count;
-	long tamanhoAtual;
-	char * vetor;
+	int temp0;
+	char temp1;
+	int temp2;
+//	int tempx;
+	int temp3;
+	char * vetor; //trocar por label da entrada
 
 
-	int aux1;
-	int aux2;
-	int aux3;
-	int aux4;
+	int temp4;
+	int temp5;
+	int temp6;
+	int temp7;
 
-	i = 0;
-	um = 1;
-	tamanhoAtual = TAMANHO_INICIAL_STRING;
+	temp0 = 0;
+	temp2 = 1;
+	temp3 = TAMANHO_INICIAL_STRING;
 	vetor = (char *) malloc(TAMANHO_INICIAL_STRING); //só armazena 1060 caracteres
-	aux1 = 1;
+	temp4 = 1;
 
+whileStr: //concatenar com label da string
+		scanf("%c",&temp1);
+		vetor[temp0] = temp1;
+		temp0 = temp0 + temp2;
 
-whileStr: 
-		scanf("%c",&c);
-		vetor[i] = c;
-		i = i + um;
+		temp5 = temp3 * FATOR_CARGA_STRING;
+		temp6 = temp0 < temp5; 
 
-		aux2 = tamanhoAtual * FATOR_CARGA_STRING;
-		aux3 = i < aux2; 
+		//printf("O temp0  em: %d\n", temp0);
 
-		printf("O i  em: %lu\n", i);
-
-		if (aux3) goto tamInaltr;
-			printf("O i estourou, em: %lu, (tamanhoAtual * FATOR_CARGA_STRING): %d\n", i, aux2);
-			tamanhoAtual = tamanhoAtual * FATOR_MULTIPLICADOR_STRING;
-			vetor = (char *) realloc(vetor, tamanhoAtual);
+		if (temp6) goto tamInaltr;
+			//printf("O temp0 estourou, em: %d, (tamanhoAtual * FATOR_CARGA_STRING): %d\n", temp0, temp5);
+			temp3 = temp3 * FATOR_MULTIPLICADOR_STRING;
+			vetor = (char *) realloc(vetor, temp3);
 
 tamInaltr: 
-		aux4 = c == '\n';
-		if (aux4) goto fimWhileStr;
+		temp7 = temp1 == '\n';
+		if (temp7) goto fimWhileStr;
 
 
-		if (aux1) goto whileStr;
+		if (temp4) goto whileStr;
 
 
 
@@ -78,12 +77,12 @@ fimWhileStr:
 
 	}*/
 
-	count = i;
+	/*tempx = temp0;
 	printf("\n\n\n\n***********************************Imprimindo entrada:***************************************** \n\n\n\n");
-	for (i = 0; i < count; ++i)
+	for (temp0 = 0; temp0 < tempx; ++temp0)
 	{
-		printf("%c",vetor[i]);
-	}
+		printf("%c",vetor[temp0]);
+	}*/
 
 	return 0;
 }

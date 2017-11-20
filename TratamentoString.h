@@ -94,7 +94,23 @@ namespace TratamentoString
 	{
 		string retorno = "";
 		
-		if(valor[*i] == '\\' && (valor[*i+1] == '\\'|| valor[*i+1] == '\"'|| valor[*i+1] == 'n' || valor[*i+1] == 't' || valor[*i+1] == '0')) 
+		if(valor[*i] == '\\' && valor[*i+1] == '\"')
+		{
+			if(*i+2 != valor.length())
+			{
+				retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\" + valor[*i+1] + "\';\n";
+				*i = *i + 1;
+				global_numCaracteresEspeciais = global_numCaracteresEspeciais + 1;
+			}
+		
+			else
+				retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\\\" + "\';\n";	
+		
+			
+		
+		}
+		
+		else if(valor[*i] == '\\' && (valor[*i+1] == '\\' || valor[*i+1] == 'n' || valor[*i+1] == 't' || valor[*i+1] == '0')) 
 		{
 			retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + "\\" + valor[*i+1] + "\';\n";
 			*i = *i + 1;
@@ -110,9 +126,8 @@ namespace TratamentoString
 		}
 		
 		else
-		{
 			retorno = "\t" + nomeVar + "[" + to_string(*i-1-global_numCaracteresEspeciais) + "] = \'" + valor[*i] + "\';\n";
-		}
+		
 		
 		
 		return retorno;

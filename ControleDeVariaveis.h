@@ -160,6 +160,7 @@ namespace ControleDeVariaveis
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
 		
 		void adicionarDefinicaoDeTipo(string, string, int, int);
+		void adicionarDefinicaoDeTipoDinamico(string, string , int);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		string montarTagTipoProvisorio(string, int);
 		string recuperarIdPelaTag(string);
@@ -241,6 +242,41 @@ namespace ControleDeVariaveis
 			
 		
 		}
+		
+		
+		void adicionarDefinicaoDeTipoDinamico(string id, string tipo, int escopo = numeroEscopoAtual)
+		{	
+			string tipoProvisorio = montarTagTipoProvisorio(id, escopo);
+			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
+				DADOS_VARIAVEL metadata;
+				while(escopo > 0){
+					metadata = recuperarDadosVariavel(id, escopo);
+					escopo = metadata.escopo;
+					if(metadata.tipo == "")
+					{
+						metadata.tipo = tipo;
+						atualizarNoMapa(metadata, escopo);
+						break;
+					}			
+				}
+
+				tipoProvisorio = montarTagTipoProvisorio(id, escopo);
+			}
+				
+			if(tipo == constante_tipo_string)
+			{
+				string charArray = "char  *  " + adicionaPrefixo(id);
+				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
+			}
+			else
+			{
+				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = tipo;
+			}
+				
+			
+		
+		}
+		
 		
 		string recuperarIdPelaTag(string tag){
 			string prefix = prefixo_variavel_usuario;
