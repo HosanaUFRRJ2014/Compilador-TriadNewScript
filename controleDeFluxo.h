@@ -19,12 +19,14 @@ namespace ControleDeFluxo
 		#define tag_for_fim "FIM_FOR"
 		#define tag_switch_fim "FIM_SWITCH"
 		#define tag_case_inicio "INICIO_CASE"
+		#define tag_update_for "UPDATE_FOR"
 		//(...)
 		
 		string gerarNovaTagIf(bool fim);
 		string gerarNovaTagWhile(bool fim); //...
 		string gerarNovaTagDoWhile(bool fim); //...
 		string gerarNovaTagFor(bool fim); //...
+		string gerarNovaTagUpdateFor(); //...
 		pair<string,int> gerarNovaTagSwitch(bool tagCase); //...
 
 		/*
@@ -140,6 +142,19 @@ namespace ControleDeFluxo
 	
 			return tag + numInt;
 		}
+		
+		string gerarNovaTagUpdateFor(){
+			static int numUpdate = 0;
+			string tag;
+			string numInt;
+
+			numUpdate++;
+			tag = tag_update_for;
+			numInt = to_string(numUpdate);
+			
+			return tag + numInt;
+		}
+		
 
 		pair<string,int> gerarNovaTagSwitch(bool tagCase){
 			static int numFim = 0;

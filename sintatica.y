@@ -38,7 +38,6 @@ ATRIBUTOS tratarExpressaoAritmetica(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 //string gerarNovaVariavel();
 
-//LIVIA HERE!!!
 ATRIBUTOS tratarDeclaracaoSemAtribuicao(ATRIBUTOS);
 ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS, ATRIBUTOS);
@@ -86,7 +85,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS, ATRIBUTOS);
 %%
 
 
-S	 		: DECLARACOES_GLOBAIS TK_TIPO_INT TK_MAIN '(' ')' BLOCO //DECLARACOES TK_TIPO_INT TK_MAIN '(' ')' BLOCO no início!!!! //LIVIA HERE!!!
+S	 		: DECLARACOES_GLOBAIS TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
 				cout << endl << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "\treturn 0;\n}" << endl;
 			}
@@ -129,7 +128,7 @@ COMANDO 	: E ';'
 			|
 			E_BREAK_CONTINUE ';'
 			|
-			INICIO_DECLARACAO //LIVIA HERE!!
+			INICIO_DECLARACAO
 			|
 			BLOCO
 			{
@@ -296,7 +295,6 @@ DECLARACOES: DECLARACAO DECLARACOES
 			;
 */
 
-//LIVIA HERE!!!!
 
 //Para declaração de variáveis globais.
 DECLARACOES_GLOBAIS: INICIO_DECLARACAO DECLARACOES_GLOBAIS
@@ -361,7 +359,7 @@ ATRIBUICAO_VARIAVEL	:  ID '=' VALOR_ATRIBUICAO
 
 /*CÓDIGO ORIGINAL!!!
 					
-DECLARACAO: TK_PALAVRA_VAR TK_ID //';' //LIVIA HERE!!!
+DECLARACAO: TK_PALAVRA_VAR TK_ID //';'
 			{
 			
 				$$ = tratarDeclaracaoSemAtribuicao($2);
@@ -381,7 +379,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID //';' //LIVIA HERE!!!
 				
 			}
 			|
-			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO //';' //LIVIA HERE!!
+			TK_PALAVRA_VAR TK_ID '=' VALOR_ATRIBUICAO //';'
 			{	
 			
 				$$ = tratarDeclaracaoComAtribuicao($2,$4);
@@ -438,7 +436,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID //';' //LIVIA HERE!!!
 				
 			}
 			|
-			ID '=' VALOR_ATRIBUICAO //';' //LIVIA HERE!!!
+			ID '=' VALOR_ATRIBUICAO //';'
 			{
 				
 				$$ = tratarAtribuicaoVariavel($1,$3);
@@ -870,7 +868,7 @@ COMANDO_IF	: TK_IF '(' E_LOGICA ')' COMANDO %prec IFX
 
 				$$.traducao = $3.traducao + "\t" + $$.label + " = " + "!" + $3.label + ";\n" + 
 							"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" + 
-							$5.traducao + "\t" + tagFim + ":\n"; 			
+							$5.traducao + "\t" + tagFim + ":;\n"; 			
 			}
 			|
 			TK_IF '(' E_LOGICA ')' COMANDO TK_ELSE COMANDO
@@ -889,7 +887,7 @@ COMANDO_IF	: TK_IF '(' E_LOGICA ')' COMANDO %prec IFX
 				$$.traducao = $3.traducao + "\t" + $$.label + " = " + $3.label + ";\n" + 
 								"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagBlocoIf + ";\n" + 
 								$7.traducao + "\t" + "goto " + tagFim + ";\n" + "\t" + tagBlocoIf + ":\n" +
-								$5.traducao + "\t" + tagFim + ":\n";				
+								$5.traducao + "\t" + tagFim + ":;\n";				
 			}
 			;
 
@@ -914,7 +912,7 @@ COMANDO_WHILE	: EMPILHAR_TAG_WHILE TK_WHILE '(' E_LOGICA ')' COMANDO
 					$$.traducao = "\t" + tagInicio + ":\n" + $4.traducao + "\t" + $$.label + " = " + "!" + $4.label + ";\n" +
 									"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
 									$6.traducao + "\t" + "goto " + tagInicio + ";\n" +
-									"\t" + tagFim + ":\n";
+									"\t" + tagFim + ":;\n";
 
 					removerTopoTagInicio();
 					removerTopoTagFim();  
@@ -944,7 +942,7 @@ COMANDO_DOWHILE	: EMPILHAR_TAG_DOWHILE TK_DO COMANDO TK_WHILE '(' E_LOGICA ')' '
 									$6.traducao + "\t" + $$.label + " = " + "!" + $6.label + ";\n" +
 									"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
 									"\t" + "goto " + tagInicio + ";\n" +
-									"\t" + tagFim + ":\n";
+									"\t" + tagFim + ":;\n";
 
 					removerTopoTagInicio();
 					removerTopoTagFim();
@@ -992,15 +990,16 @@ INITS	: CRIACAO_VARIAVEL
 		;
 		
 CONDICAO	: E_LOGICA
-			/*
 			| 
 			{ //MESMO PROBLEMA DO BLOCO REPETIDO NO FINAL!
+				/*
 				$$.traducaoDeclaracaoDeVariaveis = "";
 				$$.traducao = "";
 				$$.label = "";
-				$$.tipo = constante_tipo_condicao_vazia_for;			
+				$$.tipo = constante_tipo_condicao_vazia_for;
+				*/
+				yyerror(MSG_ERRO_FOR_SEM_CONDICAO);			
 			}
-			*/
 			;
 		
 //Separação feita para evitar o reconhecimento de sentenças que finalizem com ','.
@@ -1042,7 +1041,8 @@ UPDATES	: ATRIBUICAO_VARIAVEL
 
 EMPILHAR_TAG_FOR	: 
 					{	
-						string tagInicio = gerarNovaTagFor(false);
+						//string tagInicio = gerarNovaTagFor(false);
+						string tagInicio = gerarNovaTagUpdateFor();
 						string tagFim = gerarNovaTagFor(true);
 						adicionarTagInicio(tagInicio);
 						adicionarTagFim(tagFim);
@@ -1053,7 +1053,8 @@ EMPILHAR_TAG_FOR	:
  
 COMANDO_FOR	: EMPILHAR_TAG_FOR TK_FOR '(' INIT ';' CONDICAO ';' UPDATE ')' COMANDO
 			{				
-				string tagInicio = obterTopoPilhaInicio();
+				string tagInicio = gerarNovaTagFor(false);
+				string tagUpdate = obterTopoPilhaInicio();
 				string tagFim = obterTopoPilhaFim();
 				
 				//cout << "TRADUCAO DE INIT:" << endl << endl << $4.traducao << endl;
@@ -1065,19 +1066,21 @@ COMANDO_FOR	: EMPILHAR_TAG_FOR TK_FOR '(' INIT ';' CONDICAO ';' UPDATE ')' COMAN
 													$8.traducaoDeclaracaoDeVariaveis + $10.traducaoDeclaracaoDeVariaveis +
 													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
 					
-				if($6.tipo != constante_tipo_condicao_vazia_for){
+				//if($6.tipo != constante_tipo_condicao_vazia_for){
 
 					$$.traducao = $4.traducao + "\t" + tagInicio + ":\n" + 
 									$6.traducao + "\t" + $$.label + " = " + "!" + $6.label + ";\n" +
 									"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
-									$10.traducao + $8.traducao + "\t" + "goto " + tagInicio + ";\n" + 
-									"\t" + tagFim + ":\n";
-				}else{
-					
+									$10.traducao + "\t" + tagUpdate + ":\n" + 
+									$8.traducao + "\t" + "goto " + tagInicio + ";\n" + 
+									"\t" + tagFim + ":;\n";
+				//}else{
+					/*
 					$$.traducao = $4.traducao + "\t" + tagInicio + ":\n" + 
 									$10.traducao + $8.traducao + "\t" + "goto " + tagInicio + ";\n" + 
-									"\t" + tagFim + ":\n";				
-				}
+									"\t" + tagFim + ":\n";
+					*/				
+				//}
 
 				removerTopoTagInicio();
 				removerTopoTagFim();		
@@ -1114,14 +1117,14 @@ COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' ID ')' '{' CASES DEFAULT'}'
 							$$.traducao = $4.traducao + $7.traducao + $8.traducao +
 										//"\t" + "goto " + tagFim + ";\n"
 										//"\t" + tagFimENumProx.first + ":\n";
-										"\t" + obterTopoPilhaFim() + ":\n";
+										"\t" + obterTopoPilhaFim() + ":;\n";
 												
 						}else{
 							$$.traducao = $4.traducao + $7.traducao + $8.traducao +
 										//"\t" + "goto " + tagFim + ";\n"
 										"\t" + tagCaseAtual + ":\n" +
 										//"\t" + tagFimENumProx.first + ":\n";
-										"\t" + obterTopoPilhaFim() + ":\n";
+										"\t" + obterTopoPilhaFim() + ":;\n";
 						}
 															
 						$$.traducao = substituirVariaveisCase($$.traducao, $4.label);
@@ -1181,7 +1184,7 @@ CASE	: TK_CASE TERMO ':' COMANDO
 				//Adicionar a tag do inicio do case antes do comando em si.
 				string salvadorDaPatria = "\t";
 				$4.traducao = salvadorDaPatria + "{\n" + "\t" + tagCaseENumProx.first + ":\n" + $4.traducao + 
-													"\t" + "goto " + proxCase + ":\n" + "\t" + "}\n"; 
+													"\t" + "goto " + proxCase + ";\n" + "\t" + "}\n"; 
 
 				$$.traducao =  $2.traducao + "\t" + $$.label + " = " + tarja_variavel + " == " + $2.label + ";\n" +
 								"\t" + "if" + "(" + $$.label + ")\n" + $4.traducao; //+
@@ -1402,8 +1405,6 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	return dolarDolar;
 	
 }
-
-//LIVIA HERE!!!!!!
 
 //TK_PALAVRA_VAR TK_ID ';'
 ATRIBUTOS tratarDeclaracaoSemAtribuicao(ATRIBUTOS dolar2){

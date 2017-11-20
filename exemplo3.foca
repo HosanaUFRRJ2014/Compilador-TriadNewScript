@@ -1,10 +1,56 @@
-//var a = 10,b;
+//var a = 2,b;
+
+//a = 8;b = 5;
 
 //var abc;
 //var a = true;
 
+//Colocar ; no fim de todas as labels de fim; consertar o continue no comando for; colocar mensagem de erro na condição não declarada no for
+
 int main()
 {
+
+
+	var a;
+	a = 10.0;
+	while(a > 0){
+		for(var i = 0;1==1;++i){
+			if(i > a)
+				break;
+			else
+				continue;
+		}
+		a = a / 2;
+		if(a>0 and a<1)
+			break;
+	}
+
+/*
+var a = 0;
+//do{
+	++a;
+	switch(a){
+		case 0:{
+			++a;
+			break;
+			}
+		case 10:{
+			++a;
+			break;
+			}
+		case 20:{
+			++a;
+			break;
+			}
+		case 30:
+			continue;
+	}
+	//if(a==30) break;
+//}
+//while(1==1);
+*/
+//------------------------------------------------------
+
 	/* //TESTE IF / IF-ELSE
 	if(3 != 9 and 4 == 0){
 		50 - 50;
@@ -68,12 +114,14 @@ int main()
 	
 	//TESTE FOR
 	
+	/*
 	var a = 7, b = -9, c = -10, d = 100, e = 9000;
 
 	for(;;){
 		8000 + 8000;
 		7 + 7;
 	}
+	*/
 
 	/*	
 	for(e = -1,b = 10;e < 0;-e){
