@@ -6,7 +6,7 @@ int main()
 	
 	inocente = "inocente";
 	
-	var a = inocente + " sabe de nada";
+	var a = "sabe\tde\t'nada' \n" + inocente;
 	show(a);
 	
 

@@ -30,7 +30,7 @@ all-no-code:
 		./glf < exemplo.foca
 
 
-clear-all:
+all-clear:
 		rm y.tab.c y.tab.h lex.yy.c cod glf y.output
 
 

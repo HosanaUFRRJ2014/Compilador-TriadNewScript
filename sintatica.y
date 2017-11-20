@@ -316,7 +316,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						tamanho = global_tamanhoString;
 						//tamanho calcula literalemnte o tamanho da label "temp5" que é 5
 						//tamanho = calcularTamanhoString($4.label);
-						cout << "**tamanho str concat: " << tamanho << endl;
+						//cout << "**Em tk_palavra_var... tamanho: " << tamanho << endl;
 						//cout << "**4.label: " << $4.label << endl;
 					//	$2.label = prefixo_variavel_usuario + $2.label;
 						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string($4.tamanho) + "];\n";
@@ -333,6 +333,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					incluirNoMapa($2.label,tamanho, $4.tipo);
 					$$.label = label;
 					$$.tipo = $4.tipo;
+					$$.tamanho = tamanho;
 				}
 				
 			}
@@ -368,7 +369,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						if(tipo == constante_tipo_string)
 						{
 							metaData.tamanho = global_tamanhoString;
-							cout << "tam strg concat gl: " << metaData.tamanho << endl;
+					//		cout  << "Em ID '=' VALOR_ATRIBUICAO : " << metaData.tamanho << endl;
 						}
 						
 						
@@ -402,6 +403,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					}
 					$$.label = $1.label;
 					$$.tipo = $1.tipo;
+					$$.tamanho = tamanho;
 				}
 				else
 				{
@@ -418,6 +420,7 @@ ID		: TK_ID
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
 					$$.label = metaData.nome;
 					$$.tipo = metaData.tipo;
+					$$.tamanho = metaData.tamanho;
 				}
 				else
 				{
@@ -501,7 +504,7 @@ TERMO		: TK_NUM
 			;
 			
 VALOR_ATRIBUICAO: E
-/*			{
+			/*{
 				//cout << "Entrou em E de VALOR_ATRIBUICAO: \n\n\n";
 				//se for variavel aqui sempre vai existir, pq vai ter que ter passado pela verificação da regra TERMO: TK_ID
 				//e por passar nessa regra terá o tipo já buscado
@@ -511,7 +514,6 @@ VALOR_ATRIBUICAO: E
 					//mensagem variavel precisa ter recebido um valor para ter seu tipo definido e atribuido o valor
 					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_UTILIZADA_PRECISA_TER_RECEBIDO_UM_VALOR, params, 1));
 				}
-				
 				
 				
 				$$ = $1;
@@ -542,7 +544,8 @@ VALOR_ATRIBUICAO: E
 E 			: E '+' E
 			{
 				//cout << "Entrou em E+E: \n\n\n";
-				$$ = tratarExpressaoAritmetica("+", $1, $3);							
+				$$ = tratarExpressaoAritmetica("+", $1, $3);
+						
 			}
 			|
 			E '-' E
@@ -558,6 +561,7 @@ E1 			: E1 '*' E1
 			{
 				//cout << "Entrou em E*E: \n\n\n";
 				$$ = tratarExpressaoAritmetica("*", $1, $3);
+				
 			}
 			|
 			E1 '/' E1
@@ -622,7 +626,6 @@ STRING			: TK_STRING
 				string codigoTraduzido = geraDeclaracaoString($$.label, $1.label);
 				$$.tamanho = $1.label.length() +1 -2 - global_numCaracteresEspeciais; //-2 exclui o tamanho das aspas a global vem do namespace TratamentoString
 				global_tamanhoString = $$.tamanho;
-				cout << "$$.tamanho: " << $$.tamanho << endl;
 				$$.traducaoDeclaracaoDeVariaveis = "\tchar " + $$.label + "[" + to_string($$.tamanho) + "];\n";
 				$$.traducao = codigoTraduzido;
 				$$.tipo = $1.tipo;
@@ -706,8 +709,6 @@ E_LOGICA	: E_LOGICA TK_OP_LOGICO_BIN E_LOGICA
 				}
 				
 				$1.label.replace($1.label.find("_"), 1, "__");
-
-
 /*
 				if($1.tipo == "")
 					adicionarDefinicaoDeTipo($1.label, constante_tipo_inteiro);
@@ -776,7 +777,6 @@ int main( int argc, char* argv[] )
 
 ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
-	cout << "** Entrou em tratarExpressaoAritmetica " << endl;
 	ATRIBUTOS dolarDolar;
 	
 	dolarDolar.label = gerarNovaVariavel();
@@ -815,20 +815,8 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		}
 			
 		
-		dolarDolar.tamanho = dolar1.tamanho + dolar3.tamanho /*- 2 + 1*/; //provável chamada de metadata aqui
-		cout << "***********dolar1.tamanho: " << dolar1.tamanho << endl;
-		cout << "***********dolar3.tamanho: " << dolar3.tamanho << endl;
-		
+		dolarDolar.tamanho = dolar1.tamanho + dolar3.tamanho /*- 2 + 1*/; 
 		global_tamanhoString = dolarDolar.tamanho;
-		
-		//DADOS_VARIAVEL metadata;// = (DADOS_VARIAVEL *) malloc(sizeof(DADOS_VARIAVEL));
-		
-		
-		//recuperarDadosVariavel(dolar3.label);
-			
-		//metadata.tamanho = dolarDolar.tamanho;
-		
-		//atualizarNoMapa(metadata);
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
 			
 	
