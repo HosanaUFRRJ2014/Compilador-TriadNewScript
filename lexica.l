@@ -58,6 +58,17 @@ STRING \"([^\"\n]|\\\")*\"
 "or"		{ yylval.label = "||"; return TK_OP_LOGICO_BIN;}
 "not"		{ yylval.label = "!"; return TK_OP_LOGICO_UNA;}
 
+"if"		{yylval.label = yytext; return TK_IF;}
+"else"		{yylval.label = yytext; return TK_ELSE;}
+"while"		{yylval.label = yytext; return TK_WHILE;}
+"do"		{yylval.label = yytext; return TK_DO;}
+"for"		{yylval.label = yytext; return TK_FOR;}
+"switch"	{yylval.label = yytext; return TK_SWITCH;}
+"case"		{yylval.label = yytext; return TK_CASE;}
+"default"		{yylval.label = yytext; return TK_DEFAULT;}
+"break"		{yylval.label = yytext; return TK_BREAK;}
+"continue"	{yylval.label = yytext; return TK_CONTINUE;}
+
 {OP_RELACIONAL} { yylval.label = yytext ; return TK_OP_RELACIONAL; }
 
 {INT}		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_NUM; }

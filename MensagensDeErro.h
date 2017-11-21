@@ -20,8 +20,16 @@ namespace MensagensDeErro{
 	
 	#define MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA "Erro: Não é possível efetuar conversão explicita do tipo \"\t\" para o tipo \"\t\". Operação indevida"
 	#define MSG_WARINING_VARIAVEL_DECLARADA_NAO_UTILIZADA "Warning: A variável \"\t\" foi declarada, mas não foi utilizada."
-	//LÍVIA HERE!	
+
 	#define MSG_ERRO_COMENTARIO "Erro: '*/' não encontrado para fechar comentário."
+	#define MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO "Erro: Variável tipo 'string', 'char' ou 'float' não permitida no comando switch-case."
+	#define MSG_ERRO_TIPO_CASE_DISTINTO "Erro: Tipo diferente do id de comparação no comando switch-case."
+	#define MSG_ERRO_BREAK_NAO_PERMITIDO "Erro: Comando 'break' não permitido uso neste escopo."
+	#define MSG_ERRO_CONTINUE_NAO_PERMITIDO "Erro: Comando 'continue' não permitido uso neste escopo."
+	#define MSG_ERRO_VARIAVEL_SEM_ATRIBUICAO_FOR "Erro: Variável \"\t\" não foi inicializada no comando for."
+	#define MSG_ERRO_UPDATE_FOR_SEM_ATRIBUICAO "Erro: Termos de atualização do for não correspondentes."
+	#define MSG_ERRO_FOR_SEM_CONDICAO "Erro: Condição no comando for inexistente."
+	
 	string montarMensagemDeErro(string, string*, int);
 	void yywarnning(string);
 	

@@ -24,11 +24,14 @@ int main()
 	
 	var a;
 	
+	show("Diga-me o seu nome: ");
 	read(a:string);
+	show(a);
+	var b = "Ola, ";
 	
-	var b = "hei ";
+	show(b + a);
 
-	show("abc" + b);
+//	show("abc" + b);
 	
 	
 }

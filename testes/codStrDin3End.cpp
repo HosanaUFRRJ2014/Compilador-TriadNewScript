@@ -2,56 +2,54 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TAMANHO_INICIAL_STRING 10
-#define FATOR_MULTIPLICADOR_STRING 2
-#define FATOR_CARGA_STRING 0.75 
-
- //o número de vezes que a String crescerá
-//Como no Hashmap do Java. https://docs.oracle.com/javase/6/docs/api/java/util/HashMap.html
+#define TAMANHO_INICIAL 5
+#define FATOR_MULTIPLICADOR 2 //o número de vezes que a String crescerá
+#define FATOR_CARGA 0.75 //Como no Hashmap do Java. https://docs.oracle.com/javase/6/docs/api/java/util/HashMap.html
 
 int main(int argc, char const *argv[])
 {
 	
-	int temp0;
-	char temp1;
-	int temp2;
-//	int tempx;
-	int temp3;
-	char * vetor; //trocar por label da entrada
+	long i;
+	char c;
+	char um;
+	long count;
+	long tamanhoAtual;
+	char * vetor;
 
 
-	int temp4;
-	int temp5;
-	int temp6;
-	int temp7;
+	int aux1;
+	int aux2;
+	int aux3;
+	int aux4;
 
-	temp0 = 0;
-	temp2 = 1;
-	temp3 = TAMANHO_INICIAL_STRING;
-	vetor = (char *) malloc(TAMANHO_INICIAL_STRING); //só armazena 1060 caracteres
-	temp4 = 1;
+	i = 0;
+	um = 1;
+	tamanhoAtual = TAMANHO_INICIAL;
+	vetor = (char *) malloc(TAMANHO_INICIAL); //só armazena 1060 caracteres
+	aux1 = 1;
 
-whileStr: //concatenar com label da string
-		scanf("%c",&temp1);
-		vetor[temp0] = temp1;
-		temp0 = temp0 + temp2;
 
-		temp5 = temp3 * FATOR_CARGA_STRING;
-		temp6 = temp0 < temp5; 
+whileStr: 
+		scanf("%c",&c);
+		vetor[i] = c;
+		i = i + um;
 
-		//printf("O temp0  em: %d\n", temp0);
+		aux2 = tamanhoAtual * FATOR_CARGA;
+		aux3 = i < aux2; 
 
-		if (temp6) goto tamInaltr;
-			//printf("O temp0 estourou, em: %d, (tamanhoAtual * FATOR_CARGA_STRING): %d\n", temp0, temp5);
-			temp3 = temp3 * FATOR_MULTIPLICADOR_STRING;
-			vetor = (char *) realloc(vetor, temp3);
+		printf("O i  em: %lu\n", i);
+
+		if (aux3) goto tamInaltr;
+			printf("O i estourou, em: %lu, (tamanhoAtual * FATOR_CARGA): %d\n", i, aux2);
+			tamanhoAtual = tamanhoAtual * FATOR_MULTIPLICADOR;
+			vetor = (char *) realloc(vetor, tamanhoAtual);
 
 tamInaltr: 
-		temp7 = temp1 == '\n';
-		if (temp7) goto fimWhileStr;
+		aux4 = c == '\n'
+		if (aux4) goto fimWhileStr;
 
 
-		if (temp4) goto whileStr;
+		if (aux1) goto whileStr;
 
 
 
@@ -65,10 +63,10 @@ fimWhileStr:
 		vetor[i] = c;
 		i = i + um;
 
-		if (i >= tamanhoAtual * FATOR_CARGA_STRING)
+		if (i >= tamanhoAtual * FATOR_CARGA)
 		{
 			printf("O i estourou, em: %d\n", i);
-			tamanhoAtual = tamanhoAtual * FATOR_MULTIPLICADOR_STRING;
+			tamanhoAtual = tamanhoAtual * FATOR_MULTIPLICADOR;
 			vetor = (char *) realloc(vetor, tamanhoAtual);
 		}
 
@@ -77,12 +75,12 @@ fimWhileStr:
 
 	}*/
 
-	/*tempx = temp0;
+	count = i;
 	printf("\n\n\n\n***********************************Imprimindo entrada:***************************************** \n\n\n\n");
-	for (temp0 = 0; temp0 < tempx; ++temp0)
+	for (i = 0; i < count; ++i)
 	{
-		printf("%c",vetor[temp0]);
-	}*/
+		printf("%c",vetor[i]);
+	}
 
 	return 0;
 }
