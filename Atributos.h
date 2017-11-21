@@ -20,6 +20,7 @@ namespace Atributos
 		string tipo;
 		int escopoDeAcesso = -1;
 		int tamanho = 0;
+		bool ehDinamica = false;
 		
 	};
 

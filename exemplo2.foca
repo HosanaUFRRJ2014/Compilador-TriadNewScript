@@ -1,15 +1,19 @@
 int main()
 {
-	var inocente;
-	read(inocente:string);
-	show(inocente);
+	//var inocente = 3;
+	var a = "eita";
+	
+	show(a + "\tatras\tde\t" + a);
+	//read(inocente:string);
+	//show(inocente);
 
-	var a;
-	
-	read(a:string);
-	show(a);
+	//var a;
+	//a = "sabe de nada";
 	
 	
+	//var soma = inocente + "oi";
+	
+	//show(soma);
 	//codigo meio bugado
 	/*var a = "a";
 	var b = "aaa";

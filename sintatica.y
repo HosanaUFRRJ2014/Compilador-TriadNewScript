@@ -185,16 +185,32 @@ ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN
 ARG_SCAN		: ID ':' TIPO	
 			{
 	//			cout << "\n//Entrou em ID TIPO\n";
+				int tamanho = 0;
+				bool ehDinamica = true;
 				$$.label = gerarNovaVariavel();
 				string dolarDolar = $$.label;
 				$$.traducaoDeclaracaoDeVariaveis = "\t" + $3.label + " " + $$.label + ";\n";
-	
-		
+				
+			//	cout << "$$label: " << $$.label << endl;
+			//	cout << "$1label: " << $1.label << endl;
+				DADOS_VARIAVEL metadata;
+				if($1.escopoDeAcesso >= 0)
+				{
+					metadata = recuperarDadosVariavel($1.label, $1.escopoDeAcesso);
+				}
+				else
+				{
+					metadata = recuperarDadosVariavel($1.label);
+				}	
+				
+				
+				
 				if($3.tipo == constante_tipo_string)
 				{
-					adicionarDefinicaoDeTipoDinamico($1.label, $3.tipo);
+					//adicionarDefinicaoDeTipo($1.label, $3.tipo,tamanho,ehDinamico);
 					$$ = traducaoStringDinamica($$, $1.label);
 					$$.traducao = $$.traducao + montarCopiarString($1.label, $$.label) + ";\n";
+	
 				}
 		
 				else
@@ -202,15 +218,36 @@ ARG_SCAN		: ID ':' TIPO
 					$$.traducao =  constroiScan($$.label, $3.tipo);
 					if($3.tipo == constante_tipo_booleano)
 					{
-						
 						$$ = validarEntradaBooleanEmTempoExecucao($$);
+						
 					}
 								
 					
-					adicionarDefinicaoDeTipo($1.label, $3.label,0);
+					//adicionarDefinicaoDeTipo($1.label, $3.label,tamanho,ehDinamico);
 					$$.traducao = $$.traducao + "\t" + $1.label + " = " + dolarDolar + ";\n";
 				
 				}	
+				
+				
+				metadata.tipo = $3.tipo;
+				metadata.ehDinamica = ehDinamica;
+				
+				if($1.escopoDeAcesso >= 0)
+				{
+					adicionarDefinicaoDeTipo($1.label, $3.tipo, tamanho,ehDinamica, $1.escopoDeAcesso);
+					atualizarNoMapa(metadata, $1.escopoDeAcesso);
+				}
+				else
+				{
+					adicionarDefinicaoDeTipo($1.label, $3.tipo,tamanho,ehDinamica);
+					atualizarNoMapa(metadata);
+				}
+				
+				
+				$1.tipo = metadata.tipo;
+				$1.ehDinamica = metadata.ehDinamica;
+				
+				
 				
 				
 		
@@ -323,8 +360,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					if(tipo == constante_tipo_string)
 					{
 						tipo = constante_tipo_caracter;
-						tipo = "\t" + tipo;
-						tamanho = global_tamanhoString;
+						tamanho = $4.tamanho;
 						$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string($4.tamanho) + "];\n";
 						$$.traducao = $4.traducao + montarCopiarString(label, $4.label) + ";\n";
 					
@@ -348,7 +384,8 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 			{
 				//cout << "Entrou em ID '=' VALOR_ATRIBUICAO ';': \n\n\n";			
 				string tipo = "";
-				int tamanho = 0;	
+				int tamanho = 0;
+				bool ehDinamico = false;	
 				if($1.label != $3.label)
 				{
 					DADOS_VARIAVEL metaData;
@@ -373,18 +410,18 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						}
 						
 						if(tipo == constante_tipo_string)
-						{
-							metaData.tamanho = global_tamanhoString;
-					//		cout  << "Em ID '=' VALOR_ATRIBUICAO : " << metaData.tamanho << endl;
+						{		
+							metaData.tamanho = $3.tamanho;
+					
 						}
 						
 						
 						if($1.escopoDeAcesso >= 0){
-							adicionarDefinicaoDeTipo($1.label, tipo, $3.tamanho, $1.escopoDeAcesso);
+							adicionarDefinicaoDeTipo($1.label, tipo, $3.tamanho,ehDinamico, $1.escopoDeAcesso);
 							atualizarNoMapa(metaData, $1.escopoDeAcesso);
 						}
 						else{
-							adicionarDefinicaoDeTipo($1.label, tipo,$3.tamanho);
+							adicionarDefinicaoDeTipo($1.label, tipo,$3.tamanho,ehDinamico);
 							atualizarNoMapa(metaData);
 						}
 						
@@ -629,15 +666,12 @@ STRING			: TK_STRING
 			{
 			//	cout << "Entrou em TK_STRING\n";
 				$$.label = gerarNovaVariavel();
-				//$$.tamanho = $1.label.length() +1 -2; //-2 exclui o tamanho das aspas
-				string codigoTraduzido = geraDeclaracaoString($$.label, $1.label);
-				$$.tamanho = $1.label.length() +1 -2 - global_numCaracteresEspeciais; //-2 exclui o tamanho das aspas a global vem do namespace TratamentoString
-				global_tamanhoString = $$.tamanho;
+				int tamString = $1.label.length();
+				string codigoTraduzido = geraDeclaracaoString($$.label, $1.label,&tamString);
+				$$.tamanho = tamString; //tamanho modificado pelo tratamento caracteres especiais;
 				$$.traducaoDeclaracaoDeVariaveis = "\tchar " + $$.label + "[" + to_string($$.tamanho) + "];\n";
 				$$.traducao = codigoTraduzido;
 				$$.tipo = $1.tipo;
-				
-				global_numCaracteresEspeciais = 0;
 				
 				
 			}
@@ -791,9 +825,6 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;				
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
 	
-	/*if(!(dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string))
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";*/
-	
 	string label_old = dolarDolar.label;
 	
 	if(resultado == constante_erro)
@@ -804,15 +835,13 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	
 	/*
 	*TODO	
-	*Tratar caso de ser do tipo String
+	*Tratar conversão para tipo String
 	*
 	*/
 	else if(dolar1.tipo == constante_tipo_string && dolar3.tipo == constante_tipo_string)
 	{
-		//realizando a soma das traduções fora das funções
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoDeString(op, dolarDolar, dolar1,dolar3);
 		
-		string traducao = realizarOperacaoAritmeticaString(op, dolarDolar,dolar1,dolar3);
+		string traducao = realizarOperacaoAritmeticaString(op, &dolarDolar,&dolar1,&dolar3);
 		
 		if(traducao == "") //o operador ainda não está implementado. Fiz assim para não alterar no mapa, vou apagar o if
 		{
@@ -820,11 +849,11 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 			yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
 		
 		}
-			
 		
-		dolarDolar.tamanho = dolar1.tamanho + dolar3.tamanho /*- 2 + 1*/; 
-		global_tamanhoString = dolarDolar.tamanho;
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
+		
+		//realizando a soma das traduções fora das funções
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoDeString(op, dolarDolar, dolar1,dolar3);
 			
 	
 	}
@@ -878,10 +907,12 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	
 	string varConvert = gerarNovaVariavel();
 	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-	if(resultado == constante_erro)
+	
+	//FIXME - remover a verificação de string daqui, após a implementação dessa operações corretamente.
+	if(resultado == constante_erro || dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string)
 	{
 		
-		string params[3] = {dolar1.tipo, dolar3.tipo, op};
+		string params[3] = {op, dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 	}
 		
