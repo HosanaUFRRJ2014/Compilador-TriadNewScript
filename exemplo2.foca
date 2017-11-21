@@ -1,9 +1,12 @@
 int main()
 {
 	//var inocente = 3;
-	var a = "eita";
 	
-	show(a + "\tatras\tde\t" + a);
+//	var a = "alok";
+	
+	//var a = "eita";
+	
+	//show(a + "\tatras\tde\t" + a);
 	//read(inocente:string);
 	//show(inocente);
 
@@ -15,11 +18,17 @@ int main()
 	
 	//show(soma);
 	//codigo meio bugado
-	/*var a = "a";
-	var b = "aaa";
-	a = "abc" + b;
+	//var a = "a";
+	//var b = "aaa";
+	//a = "abc" + b;
+	
+	var a;
+	
+	read(a:string);
+	
+	var b = "hei ";
 
-	show(a);*/
+	show("abc" + b);
 	
 	
 }

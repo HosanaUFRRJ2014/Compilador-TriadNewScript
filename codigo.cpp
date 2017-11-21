@@ -1,3 +1,5 @@
+anho: 
+1.tamanho: 
 /*Compilador FOCA*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,38 +18,34 @@
 int main(void)
 {
 
-	char temp1[4];
-	char VARUSER_a[4];
-	char temp2[10];
-	char temp3[14];
-	char temp4[18];
+	char temp1[1];
+	char VARUSER_a[1];
+	char temp2[3];
+	char VARUSER_b[3];
+	char temp3[3];
+	char temp4[6];
 
-	temp1[0] = 'e';
-	temp1[1] = 'i';
-	temp1[2] = 't';
-	temp1[3] = 'a';
-	temp1[4] = '\0';
+	temp1[0] = 'a';
+	temp1[1] = '\0';
 	strcpy(VARUSER_a,temp1);
 
-	temp2[0] = '\t';
+	temp2[0] = 'a';
 	temp2[1] = 'a';
-	temp2[2] = 't';
-	temp2[3] = 'r';
-	temp2[4] = 'a';
-	temp2[5] = 's';
-	temp2[6] = '\t';
-	temp2[7] = 'd';
-	temp2[8] = 'e';
-	temp2[9] = '\t';
-	temp2[10] = '\0';
-	strcpy(temp3,"");
-	strcat(temp3,VARUSER_a);
-	strcat(temp3,temp2);
+	temp2[2] = 'a';
+	temp2[3] = '\0';
+	strcpy(VARUSER_b,temp2);
+
+	temp3[0] = 'a';
+	temp3[1] = 'b';
+	temp3[2] = 'c';
+	temp3[3] = '\0';
 	strcpy(temp4,"");
 	strcat(temp4,temp3);
-	strcat(temp4,VARUSER_a);
+	strcat(temp4,VARUSER_b);
+	strcpy(VARUSER_a,temp4);
 
-	std::cout << temp4 <<  "\n";
+
+	std::cout << VARUSER_a <<  "\n";
 
 
 fimCodInter:	return 0;

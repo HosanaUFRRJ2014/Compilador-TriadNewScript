@@ -400,7 +400,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					if(metaData.tipo == "")
 					{
 						//isso aqui também pode causar problema no futuro devido as lacunas
-						metaData.tipo = $3.tipo;
+						metaData.tipo = $3.tipo; 
 						//atualizarNoMapa(metaData);
 						tipo = metaData.tipo;
 						if(tipo == constante_tipo_booleano)
@@ -412,7 +412,7 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						if(tipo == constante_tipo_string)
 						{		
 							metaData.tamanho = $3.tamanho;
-					
+							
 						}
 						
 						
@@ -428,7 +428,8 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 						$1.tipo = $3.tipo;
 					}
 //provavelmente ainda há lacunas, mas vamos ignorar por enquanto
-					if($1.tipo == $3.tipo){
+					if($1.tipo == $3.tipo){ 
+						//$1.tamanho = $3.tamanho;
 						$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis;
 						
 						
@@ -446,7 +447,8 @@ DECLARACAO: TK_PALAVRA_VAR TK_ID ';'
 					}
 					$$.label = $1.label;
 					$$.tipo = $1.tipo;
-					$$.tamanho = tamanho;
+					$$.tamanho = $1.tamanho;
+					
 				}
 				else
 				{
@@ -840,7 +842,13 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	*/
 	else if(dolar1.tipo == constante_tipo_string && dolar3.tipo == constante_tipo_string)
 	{
+	
+		//DADOS_VARIAVEL metadata1 = recuperarDadosVariavel(dolar1.label);
+		//DADOS_VARIAVEL metadata3 = recuperarDadosVariavel(dolar3.label);
 		
+		
+		//cout<< metadata.ehDinamica << endl;
+		//cout<< dolar3.ehDinamica << endl;	
 		string traducao = realizarOperacaoAritmeticaString(op, &dolarDolar,&dolar1,&dolar3);
 		
 		if(traducao == "") //o operador ainda não está implementado. Fiz assim para não alterar no mapa, vou apagar o if

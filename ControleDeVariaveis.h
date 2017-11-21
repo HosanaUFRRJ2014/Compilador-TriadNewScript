@@ -147,6 +147,8 @@ namespace ControleDeVariaveis
 			{
 				 return mapaDeContexto->at(nome);
 			}
+			
+			return retorno;
 		}
 		
 	}

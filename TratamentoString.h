@@ -13,7 +13,7 @@ using namespace MapaTipos;
 namespace TratamentoString
 {
 	/*#define constante_TamanhoInicialPilhaString 1
-	#define constante_TamanhoDeAumentoDaPilhaString 5*/
+	#define constante_TamanhoDeAumentoDaPilhaString 5
 
 	
 	struct STRING
@@ -22,10 +22,11 @@ namespace TratamentoString
 		string valor;
 		int tamanho;
 		
-	};
+	};*/
 	
 	
-	STRING criarString(string,string,int);
+	//STRING criarString(string,string,int);
+	bool ehStringVazia(int );
 	string montarCopiarString(string, string);
 	string montarConcatenarString(string, string);
 	string tratarCaracteresEspeciais(string, string, int *, int *);
@@ -53,7 +54,7 @@ namespace TratamentoString
 
 
 	map<string, STRING> mapaStrings;
-	*/
+	
 	
 	
 	
@@ -67,6 +68,12 @@ namespace TratamentoString
 		
 		
 		return nova;
+	
+	}*/
+	
+	bool ehStringVazia(int tamanhoString)
+	{
+		if(tamanhoString == 2) return true;
 	
 	}
 	
@@ -132,16 +139,25 @@ namespace TratamentoString
 		string retorno = "";
 		int numCaracteresEspeciais = 0;
 		
-		for(int i = 1; i < *tamString-1; i++)
+		if(!ehStringVazia(*tamString))
 		{
-			retorno = retorno + tratarCaracteresEspeciais(nomeVar,valor,&i,&numCaracteresEspeciais);		
+			for(int i = 1; i < *tamString-1; i++)
+			{
+				retorno = retorno + tratarCaracteresEspeciais(nomeVar,valor,&i,&numCaracteresEspeciais);		
 			
+			}
+		
+			*tamString = *tamString - 2 - numCaracteresEspeciais;
+			retorno = retorno + "\t" + nomeVar + "[" + to_string(*tamString) + "] = \'" + "\\"+ "0" + "\';\n";
 		}
 		
-		*tamString = *tamString - 2 - numCaracteresEspeciais;
-		retorno = retorno + "\t" + nomeVar + "[" + to_string(*tamString) + "] = \'" + "\\"+ "0" + "\';\n";
+		else
+		{ 
+			*tamString = 1;
+			retorno = retorno + "\t" + nomeVar + "[" + to_string(0) + "] = \'" + "\\"+ "0" + "\';\n";
+		}
 		
-		
+			
 		
 		return retorno;
 		
@@ -172,12 +188,13 @@ namespace TratamentoString
 	string realizarOperacaoAritmeticaString(string operacao,ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3)
 	{
 		string retorno = "";	
-		retorno = montarCopiarString(dolarDolar->label,"\"\"") + ";\n";
+		
 		
 		
 		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
 		if (operacao == "+")
 		{
+			retorno = montarCopiarString(dolarDolar->label,"\"\"") + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar1->label) + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar3->label) + ";\n";
 			dolarDolar->tamanho = dolar1->tamanho + dolar3->tamanho; 
