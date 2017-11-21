@@ -87,7 +87,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS, ATRIBUTOS);
 
 S	 		: DECLARACOES_GLOBAIS TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <stdio.h>\n#include <stdlib.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 1\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "fimCodInter:\treturn 0;\n}" << endl;
+				cout << "/*Compilador FOCA*/\n" << "#include <stdio.h>\n#include <stdlib.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 1\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "FIMCODINTER:\treturn 0;\n}" << endl;
 			}
 			;
 
@@ -1313,12 +1313,15 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	else if(dolar1.tipo == constante_tipo_string && dolar3.tipo == constante_tipo_string)
 	{
 	
-		//DADOS_VARIAVEL metadata1 = recuperarDadosVariavel(dolar1.label);
-		//DADOS_VARIAVEL metadata3 = recuperarDadosVariavel(dolar3.label);
+		DADOS_VARIAVEL metadata1 = recuperarDadosVariavel(dolar1.label);
+		DADOS_VARIAVEL metadata3 = recuperarDadosVariavel(dolar3.label);
 		
+		dolar1.ehDinamica = metadata1.ehDinamica;
+		dolar3.ehDinamica = metadata3.ehDinamica;
 		
-		//cout<< metadata.ehDinamica << endl;
-		//cout<< dolar3.ehDinamica << endl;	
+		/*cout<< dolar1.ehDinamica << endl;
+		cout<< dolar3.ehDinamica << endl;*/	
+		
 		string traducao = realizarOperacaoAritmeticaString(op, &dolarDolar,&dolar1,&dolar3);
 		
 		if(traducao == "") //o operador ainda não está implementado. Fiz assim para não alterar no mapa, vou apagar o if
@@ -1330,7 +1333,7 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
 		
-		//realizando a soma das traduções fora das funções
+		
 		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoDeString(op, dolarDolar, dolar1,dolar3);
 			
 	
@@ -1559,7 +1562,8 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 			dolar1.tipo = dolar3.tipo;
 		}
 //provavelmente ainda há lacunas, mas vamos ignorar por enquanto
-		if(dolar1.tipo == dolar3.tipo){ 
+		if(dolar1.tipo == dolar3.tipo)
+		{ 
 			//$1.tamanho = $3.tamanho;
 			dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis;
 			

@@ -34,7 +34,7 @@ namespace TratamentoString
 	string realizarTraducaoDeclaracaoDeString(string, ATRIBUTOS *, ATRIBUTOS *, ATRIBUTOS *);
 	string realizarOperacaoAritmeticaString(string, ATRIBUTOS, ATRIBUTOS, ATRIBUTOS);
 	ATRIBUTOS tratarConversaoImplicitaString(string , ATRIBUTOS , ATRIBUTOS );
-	
+	bool necessidaDeclaracaoDinamica(ATRIBUTOS , ATRIBUTOS );
 	
 	
 	
@@ -170,14 +170,12 @@ namespace TratamentoString
 		string retorno = "";
 		
 		
-		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
-		if (operacao == "+")
-		{
+		if(necessidaDeclaracaoDinamica(dolar1, dolar3))
+			retorno = "\tchar * " + dolarDolar.label + ";\n";
+		
+		
+		else
 			retorno = "\tchar " + dolarDolar.label + "[" +  to_string(dolarDolar.tamanho) + "]" + ";\n";
-		
-		}
-		
-		//TODO - fazer para outras operações aritméticas
 		
 		
 		return retorno;
@@ -188,8 +186,6 @@ namespace TratamentoString
 	string realizarOperacaoAritmeticaString(string operacao,ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3)
 	{
 		string retorno = "";	
-		
-		
 		
 		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
 		if (operacao == "+")
@@ -205,6 +201,15 @@ namespace TratamentoString
 		
 		return retorno;
 	
+	
+	}
+	
+	bool necessidaDeclaracaoDinamica(ATRIBUTOS dolar1, ATRIBUTOS dolar3)
+	{
+		if(dolar1.ehDinamica || dolar3.ehDinamica)
+			return true;
+			
+		return false;
 	
 	}
 	

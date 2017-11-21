@@ -1,5 +1,3 @@
-anho: 
-1.tamanho: 
 /*Compilador FOCA*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,35 +16,90 @@ anho:
 int main(void)
 {
 
-	char temp1[1];
-	char VARUSER_a[1];
-	char temp2[3];
-	char VARUSER_b[3];
-	char temp3[3];
-	char temp4[6];
+	char  *  VARUSER_a;
+	char  *  VARUSER_b;
+	char * temp1;
+	int temp2;
+	char temp3;
+	int temp4;
+	int temp5;
+	int temp6;
+	int temp7;
+	int temp8;
+	int temp9;
+	int temp10;
+	char * temp11;
+	int temp12;
+	char temp13;
+	int temp14;
+	int temp15;
+	int temp16;
+	int temp17;
+	int temp18;
+	int temp19;
+	int temp20;
+	char * temp21;
 
-	temp1[0] = 'a';
-	temp1[1] = '\0';
+	temp2 = 0;
+	temp4 = 1;
+	temp5 = TAMANHO_INICIAL_STRING;
+	temp1 = (char *) malloc(TAMANHO_INICIAL_STRING);
+	temp3 = 1;
+	temp6 = 1;
+	temp10 = '\n';
+
+WHILESTRtemp1:
+	scanf("%c",&temp3);
+	temp1[temp2] = temp3;
+	temp2 = temp2 + temp4;
+	temp7 = temp5 * FATOR_CARGA_STRING;
+	temp8 = temp2 < temp7;
+	if(temp8) goto TAMINALTRtemp1;
+		temp5 = temp5 * FATOR_MULTIPLICADOR_STRING;
+		temp1 = (char *) realloc(temp1,temp5);
+TAMINALTRtemp1:
+	temp9 = temp3 == temp10;
+	if(temp9) goto FIMWHILESTRtemp1;
+	if(temp6) goto WHILESTRtemp1;
+FIMWHILESTRtemp1:
+
+	temp3 = '\0';
+	VARUSER_a = (char *) realloc(temp1,temp5);
 	strcpy(VARUSER_a,temp1);
 
-	temp2[0] = 'a';
-	temp2[1] = 'a';
-	temp2[2] = 'a';
-	temp2[3] = '\0';
-	strcpy(VARUSER_b,temp2);
+	temp12 = 0;
+	temp14 = 1;
+	temp15 = TAMANHO_INICIAL_STRING;
+	temp11 = (char *) malloc(TAMANHO_INICIAL_STRING);
+	temp13 = 1;
+	temp16 = 1;
+	temp20 = '\n';
 
-	temp3[0] = 'a';
-	temp3[1] = 'b';
-	temp3[2] = 'c';
-	temp3[3] = '\0';
-	strcpy(temp4,"");
-	strcat(temp4,temp3);
-	strcat(temp4,VARUSER_b);
-	strcpy(VARUSER_a,temp4);
+WHILESTRtemp11:
+	scanf("%c",&temp13);
+	temp11[temp12] = temp13;
+	temp12 = temp12 + temp14;
+	temp17 = temp15 * FATOR_CARGA_STRING;
+	temp18 = temp12 < temp17;
+	if(temp18) goto TAMINALTRtemp11;
+		temp15 = temp15 * FATOR_MULTIPLICADOR_STRING;
+		temp11 = (char *) realloc(temp11,temp15);
+TAMINALTRtemp11:
+	temp19 = temp13 == temp20;
+	if(temp19) goto FIMWHILESTRtemp11;
+	if(temp16) goto WHILESTRtemp11;
+FIMWHILESTRtemp11:
+
+	temp13 = '\0';
+	VARUSER_b = (char *) realloc(temp11,temp15);
+	strcpy(VARUSER_b,temp11);
+
+	strcpy(temp21,"");
+	strcat(temp21,VARUSER_a);
+	strcat(temp21,VARUSER_b);
+
+	std::cout << temp21 <<  "\n";
 
 
-	std::cout << VARUSER_a <<  "\n";
-
-
-fimCodInter:	return 0;
+FIMCODINTER:	return 0;
 }

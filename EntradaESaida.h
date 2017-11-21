@@ -67,7 +67,7 @@ namespace EntradaESaida
 		atributos.traducao += constroiTraducaoOperacao(temps[1], "FALSE",label , "==");
 		atributos.traducao += constroiTraducaoOperacao(temps[2], temps[0], temps[1], "||");
 		atributos.traducao += constroiTraducaoAtribuicao(temps[3], "!" + temps[2]);
-		atributos.traducao += constroiTraducaoIF(temps[3], "fimCodInter");
+		atributos.traducao += constroiTraducaoIF(temps[3], "FIMCODINTER");
 		
 		return atributos;
 	
@@ -79,7 +79,7 @@ namespace EntradaESaida
 	
 		ATRIBUTOS atributos;
 		//string tempa, tempb,tempc,tempd;
-		int numVariaveis = 8;
+		int numVariaveis = 9;
 		string temps[numVariaveis];
 		string label = atrib.label;
 		atributos = atrib;
@@ -103,22 +103,24 @@ namespace EntradaESaida
 		atributos.traducao += "\t" + label    + " = (char *) malloc(TAMANHO_INICIAL_STRING);\n";
 		atributos.traducao += constroiTraducaoAtribuicao(temps[1], "1");
 		atributos.traducao += constroiTraducaoAtribuicao(temps[4], "1");
+		atributos.traducao += constroiTraducaoAtribuicao(temps[8], "\'\\n\'");
 	
-		atributos.traducao += "\nwhileStr" + label + ":\n";
+		atributos.traducao += "\nWHILESTR" + label + ":\n";
 		atributos.traducao += "\tscanf(\"%c\",&" + temps[1] + ");\n";
 		atributos.traducao += "\t" + label + "[" + temps[0] + "] = " + temps[1] +";\n";
 		atributos.traducao += constroiTraducaoOperacao(temps[0], temps[0], temps[2], "+");
 		atributos.traducao += constroiTraducaoOperacao(temps[5], temps[3], "FATOR_CARGA_STRING", "*");
 		atributos.traducao += constroiTraducaoOperacao(temps[6], temps[0], temps[5], "<");
 		
-		atributos.traducao += constroiTraducaoIF(temps[6], "tamInaltr" + label);
+		atributos.traducao += constroiTraducaoIF(temps[6], "TAMINALTR" + label);
 		atributos.traducao += "\t" + constroiTraducaoOperacao(temps[3], temps[3], "FATOR_MULTIPLICADOR_STRING", "*");
 		atributos.traducao += "\t\t" + label + " = (char *) realloc(" + label + "," + temps[3] + ");\n";
-		atributos.traducao += "tamInaltr" + label + ":\n";
-		atributos.traducao += constroiTraducaoOperacao(temps[7], temps[1], "\'\\n\'", "==");
-		atributos.traducao += constroiTraducaoIF(temps[7], "fimWhileStr" + label);
-		atributos.traducao += constroiTraducaoIF(temps[4], "whileStr" + label);
-		atributos.traducao += "fimWhileStr" + label + ":\n\n";
+		atributos.traducao += "TAMINALTR" + label + ":\n";
+		atributos.traducao += constroiTraducaoOperacao(temps[7], temps[1], temps[8], "==");
+		atributos.traducao += constroiTraducaoIF(temps[7], "FIMWHILESTR" + label);
+		atributos.traducao += constroiTraducaoIF(temps[4], "WHILESTR" + label);
+		atributos.traducao += "FIMWHILESTR" + label + ":\n\n";
+		atributos.traducao += constroiTraducaoAtribuicao(temps[1], "\'\\0\'");
 		atributos.traducao += "\t" + labelUsuario + " = (char *) realloc(" + label + "," + temps[3] + ");\n";
 
 		return atributos;
