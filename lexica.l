@@ -1,6 +1,6 @@
 %{
 #include <string>
-
+//CHAR \'({LETRA}|{NUM})\'
 %}
 
 %option yylineno
@@ -12,7 +12,7 @@ LETRA [A-Za-z_]
 DELIM {ESPACO}+
 NUM {DIGITO}+
 REAL {NUM}+("."{NUM}+)?
-CHAR \'({LETRA}|{NUM})\'
+CHAR \'([^\"\n]|\\\")\'
 BOOLEAN "true"|"false"
 INT {NUM}|"-"{NUM}	
 FLOAT {REAL}|"-"{REAL}
@@ -34,7 +34,7 @@ STRING \"([^\"\n]|\\\")*\"
 "float"		{yylval.label = "float"; yylval.tipo = constante_tipo_flutuante; return TK_TIPO_FLOAT;}
 "char"		{yylval.label = "char"; yylval.tipo = constante_tipo_caracter; return TK_TIPO_CHAR;}
 "bool"		{yylval.label = "int"; yylval.tipo = constante_tipo_booleano; return TK_TIPO_BOOL;}
-"string"	{yylval.label = "char*"; yylval.tipo = constante_tipo_string; return TK_TIPO_STRING;}
+"string"	{yylval.label = "char *"; yylval.tipo = constante_tipo_string; return TK_TIPO_STRING;}
 "var"		{return TK_PALAVRA_VAR;}
 "backscope" {return TK_BACKSCOPE;}
 "global"		{return TK_PALAVRA_GLOBAL;}
@@ -44,7 +44,11 @@ STRING \"([^\"\n]|\\\")*\"
 "//".*		{/*Não faça nada. 
 			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}
 [/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]		{/*Não faça nada.*/}
-[/][*]                                    {yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO));}
+[/][*]                                    {string params[1] = {yytext};
+											yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO,params, 1));}
+[*][/]                                    {	string params[1] = {yytext};
+											yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO,params, 1));}
+
 
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
 "(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}

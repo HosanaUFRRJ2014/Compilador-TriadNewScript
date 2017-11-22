@@ -12,7 +12,8 @@ namespace ControleDeVariaveis
 	{
 		string tipo;
 		string nome;
-		int tamanho;
+		int tamanho = 0;
+		bool ehDinamica;
 		int escopo;
 	};
 	
@@ -26,7 +27,7 @@ namespace ControleDeVariaveis
 		map<string, DADOS_VARIAVEL> *mapaDeContexto;
 		
 		void inicializarMapaDeContexto();
-		bool incluirNoMapa(string, string);
+		bool incluirNoMapa(string,int, string);
 		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
 		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
@@ -84,13 +85,14 @@ namespace ControleDeVariaveis
 			return nome;
 		}
 				
-		bool incluirNoMapa(string nome, string tipo = "")
+		bool incluirNoMapa(string nome, int tamanho, string tipo = "")
 		{
 			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
 				DADOS_VARIAVEL variavel;
 				variavel.nome = nome;
+				variavel.tamanho = tamanho;
 				variavel.tipo = tipo;
 				variavel.escopo = numeroEscopoAtual;
 				
@@ -104,7 +106,9 @@ namespace ControleDeVariaveis
 		{
 			
 			if(variavelJaDeclarada(variavel.nome, true, escopo))
-			{
+			{	
+				mapaDeContexto->at(variavel.nome).tamanho = variavel.tamanho;
+				mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
@@ -143,6 +147,8 @@ namespace ControleDeVariaveis
 			{
 				 return mapaDeContexto->at(nome);
 			}
+			
+			return retorno;
 		}
 		
 	}
@@ -157,7 +163,7 @@ namespace ControleDeVariaveis
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
 		
-		void adicionarDefinicaoDeTipo(string, string, int, int);
+		void adicionarDefinicaoDeTipo(string, string, int,bool, int);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		string montarTagTipoProvisorio(string, int);
 		string recuperarIdPelaTag(string);
@@ -191,7 +197,7 @@ namespace ControleDeVariaveis
 			
 	
 		//void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho,  int escopo = numeroEscopoAtual)
-		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho, int escopo = numeroEscopoAtual)
+		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho, bool ehDinamico, int escopo = numeroEscopoAtual)
 		{	
 			/*string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string idPrefixado = adicionaPrefixo(id);
@@ -202,15 +208,18 @@ namespace ControleDeVariaveis
 			string tipoProvisorio = montarTagTipoProvisorio(id, escopo);
 		
 			//verificação a mais inserida pq havia problema na hora de definir o tipo de uma variavel global
-			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
+			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno			
 			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
+			
+			DADOS_VARIAVEL metadata;
 			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
-				DADOS_VARIAVEL metadata;
+				
 				while(escopo > 0){
 					metadata = recuperarDadosVariavel(id, escopo);
 					escopo = metadata.escopo;
 					if(metadata.tipo == "")
 					{
+						
 						metadata.tipo = tipo;
 						atualizarNoMapa(metadata, escopo);
 						break;
@@ -228,9 +237,13 @@ namespace ControleDeVariaveis
 				
 			if(tipo == constante_tipo_string)
 			{
-				int tamanho = 0;
-				string charArray = "char " + adicionaPrefixo(id) + "[" + to_string(tamanho) + "]";
-
+				string charArray;
+				if(ehDinamico)
+					charArray = "char  *  " + adicionaPrefixo(id);
+				
+				else
+					charArray = "char " + adicionaPrefixo(id) + "[" + to_string(tamanho) + "]";
+				
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
 			}
 			else
@@ -241,6 +254,7 @@ namespace ControleDeVariaveis
 			
 		
 		}
+		
 		
 		string recuperarIdPelaTag(string tag){
 			string prefix = prefixo_variavel_usuario;
@@ -284,7 +298,7 @@ namespace ControleDeVariaveis
 					{
 						
 						//-8 para eliminar o char    [*];
-						declaracoes.replace(pos, key.length() + value.length() -8  + 1, value);
+						declaracoes.replace(pos, key.length() + value.length() -7, value + ";");
 					}
 					mapaSubstituicaoDeTipoProvisorio[key] = "";
 					

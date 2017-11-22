@@ -14,12 +14,13 @@ namespace Atributos
 
 	struct ATRIBUTOS
 	{
-		string label; //Texto lido do lex.
-		string traducaoDeclaracaoDeVariaveis; //Para colocação do atributo no início do código.
-		string traducao; //Tradução do código atual.
-		string tipo; //Tipo resultante atual da tradução.
+		string label;
+		string traducaoDeclaracaoDeVariaveis;
+		string traducao;
+		string tipo;
 		int escopoDeAcesso = -1;
 		int tamanho = 0;
+		bool ehDinamica = false;
 		
 	};
 

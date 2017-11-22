@@ -30,7 +30,7 @@ all-no-code:
 		./glf < exemplo.foca
 
 
-clear-all:
+all-clear:
 		rm y.tab.c y.tab.h lex.yy.c cod glf y.output
 
 
@@ -64,10 +64,9 @@ all2-no-code:
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
 		./glf < exemplo2.foca
-		
+
 #Makefile para o exemplo3.foca
 all3:
-
 
 		clear
 		lex lexica.l
@@ -91,7 +90,67 @@ all3-no-code:
 
 		clear
 		lex lexica.l
-		yacc -d -v sintatica.y
+		yacc -d -v -t sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
 		./glf < exemplo3.foca
+		
+#Makefile para o teste1.foca
+allT:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste1.foca > codigo.cpp
+
+allT-run:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste1.foca > codigo.cpp
+		g++ codigo.cpp -o cod
+		./cod
+
+allT-no-code:
+
+		clear
+		lex lexica.l
+		yacc -d -v -t sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste1.foca
+
+#Makefile para o teste2.foca
+all2:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste2.foca > codigo.cpp
+
+allT2-run:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste2.foca > codigo.cpp
+		g++ codigo.cpp -o cod
+		./cod
+
+allT2-no-code:
+
+		clear
+		lex lexica.l
+		yacc -d -v -t sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste2.foca
