@@ -234,6 +234,30 @@ ARG_SCAN		: ID ':' TIPO
 				}	
 				
 				//cout << "label3\n";
+				if(metadata.tipo == ""){
+					metadata.tipo = $3.tipo;
+					metadata.ehDinamica = ehDinamica;
+					if($1.escopoDeAcesso >= 0)
+					{
+						adicionarDefinicaoDeTipo($1.label, $3.tipo, tamanho,ehDinamica, $1.escopoDeAcesso);
+						atualizarNoMapa(metadata, $1.escopoDeAcesso);
+					}
+					else
+					{	
+						//cout << "label5.1\n";
+						adicionarDefinicaoDeTipo($1.label, $3.tipo,tamanho,ehDinamica);
+						//cout << "label5.2\n";
+						atualizarNoMapa(metadata);
+						//cout << "label5.3\n";
+					}
+				}
+				else if(metadata.tipo != $3.tipo)
+				{
+				//TODO: criar mensagem de erro própria para o input
+					string strPrefixoVarUsuario = prefixo_variavel_usuario;
+					string params[3] = {$1.label.replace(0, strPrefixoVarUsuario.length(), ""), $1.tipo, $3.tipo};
+				yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
+				}
 				
 				if($3.tipo == constante_tipo_string)
 				{
@@ -259,25 +283,12 @@ ARG_SCAN		: ID ':' TIPO
 				}	
 				
 				//cout << "label4\n";
-				metadata.tipo = $3.tipo;
-				metadata.ehDinamica = ehDinamica;
+
 				//cout << "label5\n";
 			//	if(metadata.tipo == constante_tipo_string)
 			//	{
 				//cout << "labelx";
-				if($1.escopoDeAcesso >= 0)
-				{
-					adicionarDefinicaoDeTipo($1.label, $3.tipo, tamanho,ehDinamica, $1.escopoDeAcesso);
-					atualizarNoMapa(metadata, $1.escopoDeAcesso);
-				}
-				else
-				{	
-					//cout << "label5.1\n";
-					adicionarDefinicaoDeTipo($1.label, $3.tipo,tamanho,ehDinamica);
-					//cout << "label5.2\n";
-					atualizarNoMapa(metadata);
-					//cout << "label5.3\n";
-				}
+
 			//	}
 				
 				//cout << "label6\n";
@@ -1161,6 +1172,21 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;				
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
 	
+	/*
+	a + b
+	if(erro)
+		print erro;
+	
+	if(resultado == string)
+		tratarString(op, a, b);
+	else
+		if(a.tipo != resultado)
+			escreve conversao;
+		if(b.tipo != resultado)
+			escreve convesao;
+	*/
+	
+	
 	string label_old = dolarDolar.label;
 	
 	if(resultado == constante_erro)
@@ -1343,11 +1369,29 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 		
 		if(tipo == constante_tipo_string)
 		{
-			tipo = constante_tipo_caracter;
-			dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string(dolar4.tamanho) + "];\n";
+			if(dolar4.ehDinamica)
+			{
+				tipo = constante_tipo_caracter;
+					dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " * " + label+ ";\n";
 			
-			//cout << dolarDolar.traducaoDeclaracaoDeVariaveis << "EEEEEEEEEEEEEEEEEEE\n";
-			dolarDolar.traducao = dolar4.traducao + montarCopiarString(label, dolar4.label) + ";\n";
+					//cout << dolarDolar.traducaoDeclaracaoDeVariaveis << "EEEEEEEEEEEEEEEEEEE\n";
+					//TENTATIVA ATRIBUICAO COM MALLOC
+					//dolarDolar.traducao = dolar4.traducao + "\t" + label +" = (char*) malloc(" + to_string(dolar4.tamanho) + ");\n\t" + montarCopiarString(label, dolar4.label) + ";\n";
+					
+					//TENTATIVA ATRIBUINDO PONTEIRO
+					dolarDolar.traducao = dolar4.traducao + "\t" + label +" = "+ dolar4.label + ";\n";
+//					dolarDolar.traducao = dolar4.traducao + "\t strcpy(" + label +", \"\");\n\t strcat("+ label + ", "+ dolar4.label + ");\n";
+					//dolarDolar.traducao = dolar4.traducao + "\t strcpy(" + label +", \"\");\n";
+					
+			}
+			else
+			{
+				tipo = constante_tipo_caracter;
+				dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string(dolar4.tamanho) + "];\n";
+			
+				//cout << dolarDolar.traducaoDeclaracaoDeVariaveis << "EEEEEEEEEEEEEEEEEEE\n";
+				dolarDolar.traducao = dolar4.traducao + montarCopiarString(label, dolar4.label) + ";\n";
+			}
 		
 		}
 		

@@ -96,6 +96,36 @@ all3-no-code:
 		./glf < exemplo3.foca
 		
 #Makefile para o teste1.foca
+allT0:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste0.foca > codigo.cpp
+
+allT0-run:
+
+		clear
+		lex lexica.l
+		yacc -d -v sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste0.foca > codigo.cpp
+		g++ codigo.cpp -o cod
+		./cod
+
+allT0-no-code:
+
+		clear
+		lex lexica.l
+		yacc -d -v -t sintatica.y
+		g++ -std=c++0x -o glf y.tab.c -lfl
+
+		./glf < teste0.foca
+		
+#Makefile para o teste1.foca
 allT:
 
 		clear
@@ -126,7 +156,7 @@ allT-no-code:
 		./glf < teste1.foca
 
 #Makefile para o teste2.foca
-all2:
+allT2:
 
 		clear
 		lex lexica.l

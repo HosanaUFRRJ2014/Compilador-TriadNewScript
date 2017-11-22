@@ -115,6 +115,10 @@ namespace ControleDeVariaveis
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
 					return true;
 				}
+				
+				if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_string){
+					mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
+				}
 			}
 			return false;
 		}

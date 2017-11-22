@@ -1,55 +1,6 @@
-var abc;
-var a = true;
-
-int main()
-{
-	/*TESTE IF / IF-ELSE
-	if(3 != 9 and 4 == 0){
-		50 - 50;
-	}
-	
-	if((1 < 2 and 4 == 4) or not 20 != 60){
-		50 - 50;
-	}else{
-		10 + 10;
-	}
-	*/
-		
-	/*TESTE WHILE
-	while((1 < 2 and 4 == 4) or not 20 != 60){
-		50 - 50;
-	}
-	*/
-	
-	/* TESTE DO-WHILE
-	var a = 9;
-	
-	do{
-		50 - 50;
-	}while(a > 8000 or a < 5 and 3 == 3);
-	*/
-	
-	/*TESTE SWITCH
-	var funcionaPf = 7;
-	
-	switch(funcionaPf){
-		case 1:{
-			10 - 10;
-		}
-		case 30:{
-			8000 + 9000;
-		}
-		case 8000:{
-			5 - 5;
-			3 - 3;
-		}
-		default:{
-			8 - 8;
-		}
-	}
-	*/
-	
-	
-
-	
+int main(){
+	var a, b;
+	read (a:string);
+	read (b:string);
+	show(a + b);
 }

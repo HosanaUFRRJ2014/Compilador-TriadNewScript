@@ -17,7 +17,6 @@ int main(void)
 {
 
 	char  *  VARUSER_a;
-	char  *  VARUSER_b;
 	char * temp1;
 	int temp2;
 	char temp3;
@@ -28,16 +27,6 @@ int main(void)
 	int temp8;
 	int temp9;
 	int temp10;
-	char * temp11;
-	int temp12;
-	char temp13;
-	int temp14;
-	int temp15;
-	int temp16;
-	int temp17;
-	int temp18;
-	int temp19;
-	int temp20;
 
 	temp2 = 0;
 	temp4 = 1;
@@ -65,33 +54,6 @@ FIMWHILESTRtemp1:
 	temp1[temp2] = '\0';
 	VARUSER_a = (char *) realloc(temp1,temp5);
 	strcpy(VARUSER_a,temp1);
-
-	temp12 = 0;
-	temp14 = 1;
-	temp15 = TAMANHO_INICIAL_STRING;
-	temp11 = (char *) malloc(TAMANHO_INICIAL_STRING);
-	temp13 = 1;
-	temp16 = 1;
-	temp20 = '\n';
-
-WHILESTRtemp11:
-	scanf("%c",&temp13);
-	temp11[temp12] = temp13;
-	temp12 = temp12 + temp14;
-	temp17 = temp15 * FATOR_CARGA_STRING;
-	temp18 = temp12 < temp17;
-	if(temp18) goto TAMINALTRtemp11;
-		temp15 = temp15 * FATOR_MULTIPLICADOR_STRING;
-		temp11 = (char *) realloc(temp11,temp15);
-TAMINALTRtemp11:
-	temp19 = temp13 == temp20;
-	if(temp19) goto FIMWHILESTRtemp11;
-	if(temp16) goto WHILESTRtemp11;
-FIMWHILESTRtemp11:
-
-	temp11[temp12] = '\0';
-	VARUSER_b = (char *) realloc(temp11,temp15);
-	strcpy(VARUSER_b,temp11);
 
 FIMCODINTER:	return 0;
 }

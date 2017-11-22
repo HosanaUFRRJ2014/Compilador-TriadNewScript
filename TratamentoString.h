@@ -198,6 +198,8 @@ namespace TratamentoString
 			retorno += montarConcatenarString(dolarDolar->label, dolar1->label) + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar3->label) + ";\n";
 			dolarDolar->tamanho = dolar1->tamanho + dolar3->tamanho; 
+			if(dolar1->ehDinamica == true || dolar3->ehDinamica == true)
+				dolarDolar->ehDinamica = true;
 		/*	cout << "*realizarOperacaoAritmeticaString**************\n";
 			cout << "label1: " << dolar1->label << " tamaho: " << dolar1->tamanho << endl;
 			cout << "label3: " << dolar3->label << " tamaho: " << dolar3->tamanho << endl;
