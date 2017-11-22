@@ -21,7 +21,8 @@ namespace MensagensDeErro{
 	#define MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA "Erro: Não é possível efetuar conversão explicita do tipo \"\t\" para o tipo \"\t\". Operação indevida"
 	#define MSG_WARINING_VARIAVEL_DECLARADA_NAO_UTILIZADA "Warning: A variável \"\t\" foi declarada, mas não foi utilizada."
 
-	#define MSG_ERRO_COMENTARIO "Erro: '*/' não encontrado para fechar comentário."
+	#define MSG_ERRO_COMENTARIO "Erro: '\t' não encontrado para fechar comentário."
+	
 	#define MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO "Erro: Variável tipo 'string', 'char' ou 'float' não permitida no comando switch-case."
 	#define MSG_ERRO_TIPO_CASE_DISTINTO "Erro: Tipo diferente do id de comparação no comando switch-case."
 	#define MSG_ERRO_BREAK_NAO_PERMITIDO "Erro: Comando 'break' não permitido uso neste escopo."

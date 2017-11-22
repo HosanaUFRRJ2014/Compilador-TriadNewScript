@@ -189,6 +189,8 @@ namespace TratamentoString
 	{
 		string retorno = "";	
 		
+		
+		
 		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
 		if (operacao == "+")
 		{

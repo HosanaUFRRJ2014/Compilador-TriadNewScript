@@ -23,29 +23,28 @@ namespace ControleDeFluxo
 		//(...)
 		
 		string gerarNovaTagIf(bool fim);
-		string gerarNovaTagWhile(bool fim); //...
-		string gerarNovaTagDoWhile(bool fim); //...
-		string gerarNovaTagFor(bool fim); //...
-		string gerarNovaTagUpdateFor(); //...
-		pair<string,int> gerarNovaTagSwitch(bool tagCase); //...
+		string gerarNovaTagWhile(bool fim); 
+		string gerarNovaTagDoWhile(bool fim);
+		string gerarNovaTagFor(bool fim); 
+		string gerarNovaTagUpdateFor();
+		pair<string,int> gerarNovaTagSwitch(bool tagCase);
 
 		/*
-		string criarNovaTag(int num1,int num2,string tagCmd1,string tagCmd2,bool fim){
+		string criarNovaTag(int *num1,int *num2,string tagCmd1,string tagCmd2,bool fim){
 
-			string tag;
-			int numInt;
+			string numInt, tag;
 
 			if(fim)
 			{
-				num1++;
+				*num1 += 1;
 				tag = tagCmd1;
-				numInt = to_string(num1);
+				numInt = to_string(*num1);
 			}
 			else
 			{
-				num2++;
+				*num2 += 1;
 				tag = tagCmd2;
-				numInt = to_string(num2);
+				numInt = to_string(*num2);
 			}
 
 			return tag + numInt;
@@ -59,6 +58,9 @@ namespace ControleDeFluxo
 			static int numElse = 0;
 			string tag;
 			string numInt;
+			//string resultado;
+			
+			//resultado = criarNovaTag(&numFim,&numElse,tag_if_fim,tag_if_else,fim);
 
 			if(fim)
 			{

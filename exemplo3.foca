@@ -10,7 +10,142 @@
 int main()
 {
 
+		//--------------------------------------------------------------------------------------------------------------------------------	 
+	
+	//If / if-else
+	
+	/*
+	var hue,contador = 0,zueira = "";
+	
+	show("Quantas vezes vc esta afim de zuar hoje?");
+	read(hue:int);
+	
+	if(hue != 0){
+		show("*********INICIO DA ZUEIRA*********");
+	
+		while(contador < hue){
+	
+			zueira = zueira + "hue";
+			show(zueira);
+			++contador;
+		}
+	
+		show(zueira); 
+	}else{
+		show("Poxa,zueira é tão boa...");
+	}
+	*/
+	
+	/*
+	var luaDeCristal = "Lua de Cristal";
+	var verso = "Que me faz sonhar!";
+	var vezesOuvir = 0;
+	var amo = "AMO", queroMais = "QUERO MAIS!";
+	
+	for(var i = 0;i < 10;++i,++vezesOuvir){
+		show("Eu ouvi esta música: ");
+		show(vezesOuvir);
+		
+		if(i < 5)
+			show(queroMais);
+		else
+			show(amo);
+	}
+	*/
+	
+	//Exemplo de calculadora simples.
+		
+	var num1,num2,op,result,c;
+		
+	while(true)
+	{
+		show("Diga-me a operacao desejada (+,-,*,/): ");
+		read(op:char);
+		show("Diga-me o operando 1: ");
+		read(num1:int);		
+		show("Diga-me o operando 2: ");
+		read(num2:int);	
+		
+		switch(op){
+		
+			case '+':{
+				result = num1 + num2;
+				break;
+			}
+					
+			case '-':{
+				result = num1 - num2;
+				break;
+			}
+			
+			case '*':{
+				result = num1 * num2;
+				break;
+			}
+			
+			case '/':{
+				result = num1 / num2;
+				break;
+			}
+			default:{
+				show("Operando inválido.Por favor, reescreva a operacao.");
+				continue;
+			}
+		}
+		
+		show("Resultado: ");
+		show(result);
+		
+		show("Deseja continuar? Digite 's' ou 'n':");
+		read(c:char);
+		
+		if(c == 'n')
+			break;
+		
+	}
+	
+	
+	/*
+		var op = '+',num1 = 10,num2 = 5,result;
+	
+		switch(op){
+		
+			case '+':{
+				result = num1 + num2;
+				//2 + 2;
+				break;
+			}
+					
+			case '-':{
+				result = num1 - num2;
+				//2 - 2;
+				break;
+			}
+			
+			case '*':{
+				result = num1 * num2;
+				//9 * 9;
+				break;
+			}
+			
+			case '/':{
+				result = num1 / num2;
+				//10 + 90;
+				break;
+			}
+			default:{
+				show("Operando inválido.Por favor, reescreva a operacao.");
+			}
+		}
+		
+		show(result);
+	*/
+	
+	
+	
+	
 
+	/*
 	var a;
 	a = 10.0;
 	while(a > 0){
@@ -24,30 +159,35 @@ int main()
 		if(a>0 and a<1)
 			break;
 	}
+	*/
 
 /*
 var a = 0;
 //do{
-	++a;
+	//++a;
 	switch(a){
 		case 0:{
 			++a;
-			break;
-			}
+			//break;
+		}
 		case 10:{
 			++a;
 			break;
-			}
+		}
 		case 20:{
 			++a;
+			//break;
+		}
+		case 30:{
+			++a;
 			break;
-			}
-		case 30:
-			continue;
+		}
 	}
 	//if(a==30) break;
 //}
 //while(1==1);
+
+show(a);
 */
 //------------------------------------------------------
 
@@ -167,6 +307,8 @@ var a = 0;
 	
 	}while(0 == 0);	
 	*/
+	
+	
 	
 	
 	
