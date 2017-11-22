@@ -33,9 +33,9 @@ int main()
 	read(a:string);
 	read(b:string);
   
-  	var c = a + b;
+  	//var c = a + b;
   	
-  	show(c);
+  	show(a + b);
 	
 	/*var a;
 	
