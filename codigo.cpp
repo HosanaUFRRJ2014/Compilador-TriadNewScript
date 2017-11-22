@@ -38,7 +38,6 @@ int main(void)
 	int temp18;
 	int temp19;
 	int temp20;
-	char * temp21;
 
 	temp2 = 0;
 	temp4 = 1;
@@ -63,7 +62,7 @@ TAMINALTRtemp1:
 	if(temp6) goto WHILESTRtemp1;
 FIMWHILESTRtemp1:
 
-	temp3 = '\0';
+	temp1[temp2] = '\0';
 	VARUSER_a = (char *) realloc(temp1,temp5);
 	strcpy(VARUSER_a,temp1);
 
@@ -90,16 +89,9 @@ TAMINALTRtemp11:
 	if(temp16) goto WHILESTRtemp11;
 FIMWHILESTRtemp11:
 
-	temp13 = '\0';
+	temp11[temp12] = '\0';
 	VARUSER_b = (char *) realloc(temp11,temp15);
 	strcpy(VARUSER_b,temp11);
-
-	strcpy(temp21,"");
-	strcat(temp21,VARUSER_a);
-	strcat(temp21,VARUSER_b);
-
-	std::cout << temp21 <<  "\n";
-
 
 FIMCODINTER:	return 0;
 }

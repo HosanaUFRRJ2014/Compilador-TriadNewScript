@@ -120,7 +120,7 @@ namespace EntradaESaida
 		atributos.traducao += constroiTraducaoIF(temps[7], "FIMWHILESTR" + label);
 		atributos.traducao += constroiTraducaoIF(temps[4], "WHILESTR" + label);
 		atributos.traducao += "FIMWHILESTR" + label + ":\n\n";
-		atributos.traducao += constroiTraducaoAtribuicao(temps[1], "\'\\0\'");
+		atributos.traducao += "\t" + label + "[" + temps[0] + "] = " + "\'\\0\'" +";\n";
 		atributos.traducao += "\t" + labelUsuario + " = (char *) realloc(" + label + "," + temps[3] + ");\n";
 
 		return atributos;

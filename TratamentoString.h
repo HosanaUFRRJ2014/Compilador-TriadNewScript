@@ -31,7 +31,7 @@ namespace TratamentoString
 	string montarConcatenarString(string, string);
 	string tratarCaracteresEspeciais(string, string, int *, int *);
 	string geraDeclaracaoString(string, string, int *);
-	string realizarTraducaoDeclaracaoDeString(string, ATRIBUTOS *, ATRIBUTOS *, ATRIBUTOS *);
+	string realizarTraducaoDeclaracaoDeString(string, ATRIBUTOS , ATRIBUTOS , ATRIBUTOS );
 	string realizarOperacaoAritmeticaString(string, ATRIBUTOS, ATRIBUTOS, ATRIBUTOS);
 	ATRIBUTOS tratarConversaoImplicitaString(string , ATRIBUTOS , ATRIBUTOS );
 	bool necessidaDeclaracaoDinamica(ATRIBUTOS , ATRIBUTOS );
@@ -171,9 +171,11 @@ namespace TratamentoString
 		
 		
 		if(necessidaDeclaracaoDinamica(dolar1, dolar3))
+		{
+			//cout << dolarDolar.label;
 			retorno = "\tchar * " + dolarDolar.label + ";\n";
 		
-		
+		}
 		else
 			retorno = "\tchar " + dolarDolar.label + "[" +  to_string(dolarDolar.tamanho) + "]" + ";\n";
 		
@@ -194,6 +196,11 @@ namespace TratamentoString
 			retorno += montarConcatenarString(dolarDolar->label, dolar1->label) + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar3->label) + ";\n";
 			dolarDolar->tamanho = dolar1->tamanho + dolar3->tamanho; 
+		/*	cout << "*realizarOperacaoAritmeticaString**************\n";
+			cout << "label1: " << dolar1->label << " tamaho: " << dolar1->tamanho << endl;
+			cout << "label3: " << dolar3->label << " tamaho: " << dolar3->tamanho << endl;
+			cout << "label$$: " << dolarDolar->label << " tamaho: " << dolarDolar->tamanho << endl;
+			cout << "***************\n";*/
 		
 		
 		}
@@ -206,9 +213,12 @@ namespace TratamentoString
 	
 	bool necessidaDeclaracaoDinamica(ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 	{
-		if(dolar1.ehDinamica || dolar3.ehDinamica)
+		//cout << dolar1.ehDinamica << endl;
+		//cout << dolar3.ehDinamica << endl;
+		if(dolar1.ehDinamica || dolar3.ehDinamica)  //necessidade de fazer assim, pq valores que deviam ser 0 estavam vindo como numero 252, por exemplo.
+		{
 			return true;
-			
+		}	
 		return false;
 	
 	}

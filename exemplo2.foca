@@ -18,25 +18,42 @@ int main()
 	
 	//show(soma);
 	//codigo meio bugado
-	/*var a = "a";
-	//var b = "aaa";
-	//a = "abc" + b;*/
+	/*var a = "pe";
+	var b = "dra";
+	a = "eh " + b;*/
+
+	//outro código muito bugado. Loop infinito
+	/*var c = 's';
 	
-/*	var a;
+ 	read(c:char);
+
+	show(c);*/
+	
+	var a,b;
+	read(a:string);
+	read(b:string);
+  
+  	var c = a + b;
+  	
+  	show(c);
+	
+	/*var a;
 	
 	show("Diga-me o seu nome: ");
 	read(a:string);
 	show(a);
 	
-	show("Ola, " + a);
-*/
+	show("Ola, " + a);*/
 
-	var a;
-	var b;
-	read(a:string);
-	read(b:string);
+
+
+
+//	var a;
+//	var b = "a";
+//	read(a:string);
+	//read(b:string);
 	
-	show(a + b);
+//	show(a + b);
 
 //	show("abc" + b);
 	
