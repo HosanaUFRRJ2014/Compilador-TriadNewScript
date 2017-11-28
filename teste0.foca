@@ -1,0 +1,6 @@
+int main(){
+	var a;
+
+	
+	read(a:string);
+}

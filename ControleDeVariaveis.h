@@ -95,7 +95,8 @@ namespace ControleDeVariaveis
 				variavel.tamanho = tamanho;
 				variavel.tipo = tipo;
 				variavel.escopo = numeroEscopoAtual;
-				
+				/*cout << variavel.nome;
+				cout << variavel.ehDinamica;*/
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
 				return true;
 			}
@@ -113,6 +114,10 @@ namespace ControleDeVariaveis
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
 					return true;
+				}
+				
+				if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_string){
+					mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
 				}
 			}
 			return false;
@@ -210,16 +215,18 @@ namespace ControleDeVariaveis
 			//verificação a mais inserida pq havia problema na hora de definir o tipo de uma variavel global
 			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno			
 			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
-			
+			//cout << "label5.1.1\n";
 			DADOS_VARIAVEL metadata;
 			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
 				
 				while(escopo > 0){
+			//		cout << "label5.1.1.1\n";
 					metadata = recuperarDadosVariavel(id, escopo);
+			//		cout << "label5.1.1.2\n";
 					escopo = metadata.escopo;
 					if(metadata.tipo == "")
 					{
-						
+			//			cout << "label5.x\n";	
 						metadata.tipo = tipo;
 						atualizarNoMapa(metadata, escopo);
 						break;
@@ -234,6 +241,8 @@ namespace ControleDeVariaveis
 				*/
 				tipoProvisorio = montarTagTipoProvisorio(id, escopo);
 			}
+			
+			//cout << "label5.1.2\n";
 				
 			if(tipo == constante_tipo_string)
 			{

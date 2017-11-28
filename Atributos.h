@@ -21,6 +21,7 @@ namespace Atributos
 		int escopoDeAcesso = -1;
 		int tamanho = 0;
 		bool ehDinamica = false;
+		string labelTamanhoDinamicoString;
 		
 	};
 

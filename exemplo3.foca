@@ -54,7 +54,8 @@ int main()
 	*/
 	
 	//Exemplo de calculadora simples.
-		
+	
+	/*
 	var num1,num2,op,result,c;
 		
 	while(true)
@@ -103,10 +104,10 @@ int main()
 			break;
 		
 	}
+	*/
 	
-	
-	/*
-		var op = '+',num1 = 10,num2 = 5,result;
+
+		var op = '&',num1 = 10,num2 = 5,result;
 	
 		switch(op){
 		
@@ -134,12 +135,13 @@ int main()
 				break;
 			}
 			default:{
-				show("Operando inválido.Por favor, reescreva a operacao.");
+				show("Operando inválido.");
 			}
 		}
 		
 		show(result);
-	*/
+	
+	
 	
 	
 	
