@@ -312,53 +312,7 @@ TIPO: TK_TIPO_INT
 	|
 	TK_TIPO_STRING
 	;
-/*
-TIPO			:  TK_TIPO_INT     //criar tipo flutuante
-			{
-				//cout << "//Entrou em TK_TIPO_INT\n";
-			//	cout << $$.label;
-				//cout << $1.label;
-			//	cout << $2.label;
-				//cout << $3.label;
-				
-				$1.tipo = constante_tipo_inteiro;
-				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
-			//	cout << $$.label << "********";
-				
-			
-			}
-			|
-			 TK_TIPO_FLOAT 
-			{
-				$1.tipo = constante_tipo_flutuante;
-				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
-			}
-			|
-			TK_TIPO_CHAR
-			{
-				$1.tipo = constante_tipo_caracter;
-				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
-			
-			}
-			|
-			TK_TIPO_BOOL
-			{
-				//TODO - Implementar o booleano corretamente
-				$1.tipo = constante_tipo_inteiro;
-				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
-			}
-			|
-			TK_TIPO_STRING
-			{
-				//TODO - Implementar String dinâmica
-				cout << "TK_STRING\n";
-				$1.tipo = constante_tipo_caracter;
-				$$.traducaoDeclaracaoDeVariaveis = construirTraducaoEntrada($$.label, $1.label, $1.tipo, $1.tamanho);
-			
-			}
-			;
-*/		
-			
+					
 //Para declaração de variáveis globais.
 DECLARACOES_GLOBAIS: INICIO_DECLARACAO DECLARACOES_GLOBAIS
 			{
@@ -415,6 +369,7 @@ ATRIBUICAO_VARIAVEL_CRIACAO	:  TK_ID '=' VALOR_ATRIBUICAO
 										
 ATRIBUICAO_VARIAVEL	:  ID '=' VALOR_ATRIBUICAO
 					{
+						cout << "//Entrou em ID '=' VALOR_ATRIBUICAO\n";
 						$$ = tratarAtribuicaoVariavel($1,$3);
 						/*cout << "--ATRIBUICAO_VARIAVEL----------------\n";
 						//cout << "label1: " << dolar1.label << " tamaho: " << dolar1.tamanho << endl;
@@ -560,8 +515,7 @@ VALOR_ATRIBUICAO: E
 					string params[2] = {$2.tipo, $1.tipo};
 					yyerror(montarMensagemDeErro(MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA, params, 2));
 				}
-			}
-			
+			}		
 			;
 
 E 			: E '+' E
@@ -762,6 +716,7 @@ TERMO_REL	: E //------> Isso é uma regra inútil. Mas se quiser colocar pra leg
 
 E_REL	: TERMO_REL TK_OP_RELACIONAL TERMO_REL
 			{
+				cout << "//Entrou em TERMO_REL TK_OP_RELACIONAL TERMO_REL\n";
 				$$ = tratarExpressaoRelacional($2.label,$1,$3);	
 			}
 			|
@@ -1165,6 +1120,7 @@ int main( int argc, char* argv[] )
 
 ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
+	//cout << "Entrou em exp arti\n";
 	ATRIBUTOS dolarDolar;
 	
 	dolarDolar.label = gerarNovaVariavel();
@@ -1191,6 +1147,7 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	
 	if(resultado == constante_erro)
 	{
+		//cout << "Deu erro no mapa\n";
 		string params[3] = {op,dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 	}
@@ -1200,7 +1157,7 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	*Tratar conversão para tipo String
 	*
 	*/
-	else if(dolar1.tipo == constante_tipo_string && dolar3.tipo == constante_tipo_string)
+	if(resultado == constante_tipo_string)
 	{
 			
 		string traducao = realizarOperacaoAritmeticaString(op, &dolarDolar,&dolar1,&dolar3);
@@ -1220,30 +1177,38 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 			
 	
 	}
+	
+	else
+	{
 		
-	else if((dolar1.tipo == dolar3.tipo) /*&& (dolar1.tipo == resultado)*/) //se não houver necessidade de conversão
-	{	
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + dolar1.tipo + " " + dolarDolar.label + ";\n";
-	}
+		if((dolar1.tipo == dolar3.tipo) /*&& (dolar1.tipo == resultado)*/) //se não houver necessidade de conversão
+		{
+			//cout << "label0\n";	
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + dolar1.tipo + " " + dolarDolar.label + ";\n";
+		}
 	
 	
-	else if(dolar3.tipo == resultado) 
-	{
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
+		else if(dolar1.tipo != resultado) 
+		{
+			//cout << "label1\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
 		
-		dolarDolar.label = gerarNovaVariavel();
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + label_old +  ";\n" + "\t" + resultado + " " + dolarDolar.label +  ";\n";
+			dolarDolar.label = gerarNovaVariavel();
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + label_old +  ";\n" + "\t" + resultado + " " + dolarDolar.label +  ";\n";
 		
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + label_old + " " + op + " " + dolar3.label + ";\n";
-	}
-	else if(dolar1.tipo == resultado)
-	{
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
-		dolarDolar.label = gerarNovaVariavel();
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + label_old +  ";\n" + "\t" + resultado + " " + dolarDolar.label +  ";\n";
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + label_old + ";\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + label_old + " " + op + " " + dolar3.label + ";\n";
+		}
+		else if(dolar3.tipo != resultado)
+		{
+			//cout << "label3\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
+			dolarDolar.label = gerarNovaVariavel();
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + label_old +  ";\n" + "\t" + resultado + " " + dolarDolar.label +  ";\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + label_old + ";\n";
 		
+		}
+	
 	}
 	
 	dolarDolar.tipo = resultado;
@@ -1256,56 +1221,60 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 {
 	ATRIBUTOS dolarDolar;
 	dolarDolar.label = gerarNovaVariavel();
-	dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
-	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + dolarDolar.label + ";\n";
+	dolarDolar.traducaoDeclaracaoDeVariaveis += dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
+	/*dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + dolarDolar.label + ";\n";*/
 	
-	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
+	//dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
 	
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo,op);
 	
-	string label_old = dolarDolar.label;
+	//string label_old = dolarDolar.label;
+	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + dolarDolar.label + ";\n";
 	string operador = op;
 	
-	string varConvert = gerarNovaVariavel();
-	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-	
 	//FIXME - remover a verificação de string daqui, após a implementação dessa operações corretamente.
-	if(resultado == constante_erro || dolar1.tipo == constante_tipo_string || dolar3.tipo == constante_tipo_string)
+	if(resultado == constante_erro || resultado == constante_tipo_string)
 	{
 		
 		string params[3] = {op, dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 	}
 		
-	else if(dolar1.tipo == dolar3.tipo)
+	if(dolar1.tipo == dolar3.tipo)
 	{	
 		if(dolar1.tipo == constante_tipo_caracter) //se char,ambos são convertidos pra int
 		{
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
 	
-			dolar1.label = varConvert;
-			varConvert = gerarNovaVariavel();
+			//dolar1.label = dolarDolar.label;
+			string novaVariavel = gerarNovaVariavel();
 	
-			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
-			dolar3.label = varConvert;
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + novaVariavel + ";\n";
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + novaVariavel + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
+			dolar3.label = novaVariavel;
 		}
 							
 	}
 	
-	
-	else if(dolar3.tipo == resultado)
+	else
 	{
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
-		
-		dolar1.label = varConvert;
-	}
+		string varConvert = gerarNovaVariavel();
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + resultado + " " + varConvert + ";\n";
 	
-	else if(dolar1.tipo == resultado)
-	{
-		dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
-		dolar3.label = varConvert;
+		if(dolar1.tipo != resultado)
+		{
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
 		
+			dolar1.label = varConvert;
+		}
+	
+		else if(dolar3.tipo != resultado)
+		{
+			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + resultado + ")" + dolar3.label + ";\n";							
+			dolar3.label = varConvert;
+		
+		}
+	
 	}
 	
 	dolarDolar.traducao = dolarDolar.traducao + "\t\t" + dolarDolar.label + " = " + dolar1.label +" "+ op +" "+ dolar3.label + ";\n";
@@ -1455,6 +1424,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 				atualizarNoMapa(metaData, dolar1.escopoDeAcesso);
 			}
 			else{
+				cout << "//Entrou else " << tipo << endl;;
 				adicionarDefinicaoDeTipo(dolar1.label, tipo,dolar3.tamanho,ehDinamico);
 				atualizarNoMapa(metaData);
 			}

@@ -1,61 +1,25 @@
 int main()
 {
-	//var inocente = 3;
+	/*var a = 1;
 	
-//	var a = "alok";
-	
-	//var a = "eita";
-	
-	//show(a + "\tatras\tde\t" + a);
-	//read(inocente:string);
-	//show(inocente);
-
-	//var a;
-	//a = "sabe de nada";
+	var b = 1.2;
 	
 	
-	//var soma = inocente + "oi";
+	var c = a + b;
 	
-	//show(soma);
-	//codigo meio bugado
-	/*var a = "pe";
-	var b = "dra";
-	a = "eh " + b;*/
-
-	//outro código muito bugado. Loop infinito
-	/*var c = 's';
+	show(c);
 	
- 	read(c:char);
-
-	show(c);*/
+	var i, d = 1;
 	
-	var a,b;
-	read(a:string);
-	read(b:string);
-  
-  	//var c = a + b;
-  	
-  	show(a + b);
+	i = d + 10.5 * 4;
+	show(i);*/
 	
-	/*var a;
+	var h;
 	
-	show("Diga-me o seu nome: ");
-	read(a:string);
-	show(a);
+	h = 1.0 < 3;
 	
-	show("Ola, " + a);*/
-
-
-
-
-//	var a;
-//	var b = "a";
-//	read(a:string);
-	//read(b:string);
+	show(h);
 	
-//	show(a + b);
-
-//	show("abc" + b);
 	
 	
 }

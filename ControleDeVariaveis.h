@@ -116,9 +116,9 @@ namespace ControleDeVariaveis
 					return true;
 				}
 				
-				if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_string){
+				/*if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_string){
 					mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
-				}
+				}*/
 			}
 			return false;
 		}
