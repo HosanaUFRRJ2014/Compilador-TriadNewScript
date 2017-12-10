@@ -1,0 +1,86 @@
+int main()
+{
+
+	var a = 10,b = -10,c,d = 0;
+	
+	do
+	{
+		c = a + b;
+		--a;
+		
+		if(a == 5){
+			for(var l = 0,var w = 0,var h = 0;l < 5;++l,w = w + 5,--h){
+			
+				if(l == 1)
+					continue;
+				
+				show("Valor de l:");
+				show(l);
+			}
+				show("**********************************");			
+				show("Valor final de w:");
+				show(w);
+				show("Valor final de h:");
+				show(w);
+				show("**********************************");
+		}else{
+			d = d + 1;
+		}
+		++b;
+	
+	}while(a > 0 and b < 0);
+	
+	show("Valor de c:");
+	show(c);
+	show("Valor de a:");
+	show(a);
+	show("Valor de b:");
+	show(b);
+	 
+	 
+	/*
+	for(var i = 50,var t = 0;i != 15;i = i - 5)
+	{
+		if(i == 35)
+			continue;
+		
+		while(i > 30) //Passar aqui 5 vezes.
+		{
+			++t;
+			break;
+		}
+	
+	}
+	
+	show("**********************************");
+	show("Valor de t:");
+	show(t);
+	show("Valor de i:");
+	show(i);	
+	show("**********************************");
+	*/
+		
+	/*	
+	var a;
+	a = 10.0;
+	while(a > 0){
+		for(var i = 0;1==1;++i){
+			if(i > a){
+				show("Valor de i:");
+				show(i);
+				break;
+			}else
+				continue;
+		}
+		a = a / 2;
+		if(a>0 and a<1)
+			break;
+	}
+	show("**********************************");
+	show("Valor de a:");
+	show(a);	
+	show("**********************************");
+	*/
+	
+			
+}

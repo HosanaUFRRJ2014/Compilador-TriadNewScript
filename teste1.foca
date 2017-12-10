@@ -1,0 +1,86 @@
+
+	//Cálculo de média
+	
+	var nota1,nota2,media;
+	var anos = 0;
+	
+	while(anos < 5)
+	{
+		show("Diga sua nota1:");
+		read(nota1:float);
+		show("Diga sua nota2:");
+		read(nota2:float);
+		
+		media = (nota1 + nota2) / 2;
+		show("Media final:");
+		show(media);
+		
+		if(media < 5.0){
+			show("Goku: Fracassado...");
+			show("Tente Novamente!");
+			//++anos;
+			anos = anos + 1;
+		}else if(anos + 1 == 5){
+			show("Jubilado. Sinto muito...");
+			show("Faça ENEM novamente! Boa sorte!");
+		}else{
+			show("Ja acabou Jessica?");
+			show("Aprovado! Parabens!");
+			break;
+		}
+	}
+	
+		 
+	//Calculadora simples
+	/*
+	var num1,num2,op,result,c;
+		
+	while(true)
+	{
+		show("Diga-me a operacao desejada (+,-,*,/): ");
+		read(op:char);
+		show("Diga-me o operando 1: ");
+		read(num1:int);		
+		show("Diga-me o operando 2: ");
+		read(num2:int);	
+		
+		switch(op){
+		
+			case '+':{
+				result = num1 + num2;
+				break;
+			}
+					
+			case '-':{
+				result = num1 - num2;
+				break;
+			}
+			
+			case '*':{
+				result = num1 * num2;
+				break;
+			}
+			
+			case '/':{
+				result = num1 / num2;
+				break;
+			}
+			default:{
+				show("Operando inválido.Por favor, reescreva a operacao.");
+				continue;
+			}
+		}
+		
+		show("Resultado: ");
+		show(result);
+		
+		show("Deseja continuar? Digite 's' ou 'n':");
+		read(c:char);
+		
+		if(c == 'n')
+			break;
+		
+	}
+	*/
+		
+

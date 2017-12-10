@@ -1,0 +1,316 @@
+//var a = 2,b;
+
+//a = 8;b = 5;
+
+//var abc;
+//var a = true;
+
+//Colocar ; no fim de todas as labels de fim; consertar o continue no comando for; colocar mensagem de erro na condição não declarada no for
+
+int main()
+{
+
+		//--------------------------------------------------------------------------------------------------------------------------------	 
+	
+	//If / if-else
+	
+	/*
+	var hue,contador = 0,zueira = "";
+	
+	show("Quantas vezes vc esta afim de zuar hoje?");
+	read(hue:int);
+	
+	if(hue != 0){
+		show("*********INICIO DA ZUEIRA*********");
+	
+		while(contador < hue){
+	
+			zueira = zueira + "hue";
+			show(zueira);
+			++contador;
+		}
+	
+		show(zueira); 
+	}else{
+		show("Poxa,zueira é tão boa...");
+	}
+	*/
+	
+	/*
+	var luaDeCristal = "Lua de Cristal";
+	var verso = "Que me faz sonhar!";
+	var vezesOuvir = 0;
+	var amo = "AMO", queroMais = "QUERO MAIS!";
+	
+	for(var i = 0;i < 10;++i,++vezesOuvir){
+		show("Eu ouvi esta música: ");
+		show(vezesOuvir);
+		
+		if(i < 5)
+			show(queroMais);
+		else
+			show(amo);
+	}
+	*/
+	
+	//Exemplo de calculadora simples.
+		
+	var num1,num2,op,result,c;
+		
+	while(true)
+	{
+		show("Diga-me a operacao desejada (+,-,*,/): ");
+		read(op:char);
+		show("Diga-me o operando 1: ");
+		read(num1:int);		
+		show("Diga-me o operando 2: ");
+		read(num2:int);	
+		
+		switch(op){
+		
+			case '+':{
+				result = num1 + num2;
+				break;
+			}
+					
+			case '-':{
+				result = num1 - num2;
+				break;
+			}
+			
+			case '*':{
+				result = num1 * num2;
+				break;
+			}
+			
+			case '/':{
+				result = num1 / num2;
+				break;
+			}
+			default:{
+				show("Operando inválido.Por favor, reescreva a operacao.");
+				continue;
+			}
+		}
+		
+		show("Resultado: ");
+		show(result);
+		
+		show("Deseja continuar? Digite 's' ou 'n':");
+		read(c:char);
+		
+		if(c == 'n')
+			break;
+		
+	}
+	
+	
+	/*
+		var op = '+',num1 = 10,num2 = 5,result;
+	
+		switch(op){
+		
+			case '+':{
+				result = num1 + num2;
+				//2 + 2;
+				break;
+			}
+					
+			case '-':{
+				result = num1 - num2;
+				//2 - 2;
+				break;
+			}
+			
+			case '*':{
+				result = num1 * num2;
+				//9 * 9;
+				break;
+			}
+			
+			case '/':{
+				result = num1 / num2;
+				//10 + 90;
+				break;
+			}
+			default:{
+				show("Operando inválido.Por favor, reescreva a operacao.");
+			}
+		}
+		
+		show(result);
+	*/
+	
+	
+	
+	
+
+	/*
+	var a;
+	a = 10.0;
+	while(a > 0){
+		for(var i = 0;1==1;++i){
+			if(i > a)
+				break;
+			else
+				continue;
+		}
+		a = a / 2;
+		if(a>0 and a<1)
+			break;
+	}
+	*/
+
+/*
+var a = 0;
+//do{
+	//++a;
+	switch(a){
+		case 0:{
+			++a;
+			//break;
+		}
+		case 10:{
+			++a;
+			break;
+		}
+		case 20:{
+			++a;
+			//break;
+		}
+		case 30:{
+			++a;
+			break;
+		}
+	}
+	//if(a==30) break;
+//}
+//while(1==1);
+
+show(a);
+*/
+//------------------------------------------------------
+
+	/* //TESTE IF / IF-ELSE
+	if(3 != 9 and 4 == 0){
+		50 - 50;
+	}
+	
+	if((1 < 2 and 4 == 4) or not 20 != 60){
+		50 - 50;
+	}else{
+		10 + 10;
+	}
+	*/
+		
+	/* //TESTE WHILE
+	while((1 < 2 and 4 == 4) or not 20 != 60){
+		50 - 50;
+	}
+	*/
+	
+	/* //TESTE DO-WHILE
+	var a = 9;
+	
+	do{
+		50 - 50;
+	}while(a > 8000 or a < 5 and 3 == 3);
+	*/
+	
+	/* //TESTE SWITCH
+	var funcionaPf = 7;
+	
+	switch(funcionaPf){
+		case 1:{
+			10 - 10;
+		}
+		case 30:{
+			8000 + 9000;
+			break;
+		}
+		case 8000:{
+			5 - 5;
+			break;
+		}
+		default:{
+			8 - 8;
+		}		
+	}
+	*/
+	
+	//TESTE DECLARACOES / MULTI-DECLARACAO
+	/*
+	var a = 9;
+	var b = 8;
+	var c;
+	
+	c = 9000;
+	
+	var a = 10,b;
+	b = 8000;
+	
+	var c,d = -1,e,f = 25;
+	*/
+	
+	//TESTE FOR
+	
+	/*
+	var a = 7, b = -9, c = -10, d = 100, e = 9000;
+
+	for(;;){
+		8000 + 8000;
+		7 + 7;
+	}
+	*/
+
+	/*	
+	for(e = -1,b = 10;e < 0;-e){
+		8000 + 8000;
+		while(1==1){
+			continue;
+		}
+		break;
+	}
+	*/
+	
+	
+	
+	
+	//TESTE BREAK-CONTINUE
+	
+	/*
+	if(3 == 9){
+		break;
+		continue;
+	}
+	*/
+	
+	/*
+	while(2 == 2 and 3 != 4){
+		4 + 4;
+		if(0 < 0){
+			break;
+		}
+		9 - 0;		
+		do{
+			9000 - 9000;
+			continue;
+		}while(3 < 9);
+	}
+	*/
+	
+	/*
+	do{
+		1 - 1;
+		4 + 4;
+		continue;
+	
+	}while(0 == 0);	
+	*/
+	
+	
+	
+	
+	
+	
+}
