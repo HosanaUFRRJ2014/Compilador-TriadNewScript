@@ -1,25 +1,20 @@
-int main()
-{
-	/*var a = 1;
-	
-	var b = 1.2;
-	
-	
-	var c = a + b;
-	
-	show(c);
-	
-	var i, d = 1;
-	
-	i = d + 10.5 * 4;
-	show(i);*/
-	
-	var h;
-	
-	h = 1.0 < 3;
-	
-	show(h);
-	
-	
-	
-}
+
+/*var a = 1;
+
+var b = 1.2;
+
+
+var c = a + b;
+
+show(c);
+
+var i, d = 1;
+
+i = d + 10.5 * 4;
+show(i);*/
+
+//dúvidas se a concatenação deverá gerar o resultado conforme gera no código abaixo
+var i = "eita";
+var h  = i + " atras de " + 1;
+
+show(h);
