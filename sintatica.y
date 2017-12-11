@@ -12,7 +12,7 @@
 #include "Atributos.h"
 #include "TratamentoString.h"
 #include "EntradaESaida.h"
-#include "controleDeFluxo.h"
+#include "ControleDeFluxo.h"
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
