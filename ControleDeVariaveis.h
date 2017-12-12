@@ -174,9 +174,9 @@ namespace ControleDeVariaveis
 		}
 
 		string recuperarNomeTraducao(string nome, int escopo){
-			if(variavelJaDeclarada(adicionaPrefixo(nome), true, escopo))
+			if(variavelJaDeclarada(nome, true, escopo))
 			{
-				return recuperarDadosVariavel(adicionaPrefixo(nome), escopo).nomeTraducao;
+				return recuperarDadosVariavel(nome, escopo).nomeTraducao;
 			}
 			return nome;
 		}

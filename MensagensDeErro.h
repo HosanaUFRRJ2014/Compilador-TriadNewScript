@@ -31,6 +31,11 @@ namespace MensagensDeErro{
 	#define MSG_ERRO_UPDATE_FOR_SEM_ATRIBUICAO "Erro: Termos de atualização do for não correspondentes."
 	#define MSG_ERRO_FOR_SEM_CONDICAO "Erro: Condição no comando for inexistente."
 	
+	
+	//****** erros da parte de tratamento de erros ***********
+	
+	#define MSG_ERRO_OPERADOR_UNARIO_INVALIDO_PARA_OPERANDO "Erro: o operador \"\t\" não pode ser utilizado no operando especificado, porque \t."
+	
 	string montarMensagemDeErro(string, string*, int);
 	void yywarnning(string);
 	

@@ -55,6 +55,7 @@ int conta;
 %token TK_CHAR
 %token TK_STRING
 
+%token TK_OP_ARIT_UNA
 %token TK_OP_ARIT_PRIO1
 %token TK_OP_ARIT_PRIO2
 %token TK_OP_ARIT_PRIO3
@@ -78,8 +79,8 @@ int conta;
 %token TK_BREAK
 %token TK_CONTINUE
 
-%token TK_MAIN TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_PALAVRA_PRINT TK_PALAVRA_SCAN
-%token TK_FIM TK_ERROR
+%token TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_PALAVRA_PRINT TK_PALAVRA_SCAN
+//%token TK_FIM TK_ERROR //estes tokens só tinham uma referência nesse sintatica se quebrar descomentar
 %token TK_CONVERSAO_EXPLICITA
 //*********** F
 
@@ -91,6 +92,7 @@ int conta;
 %nonassoc IFX
 %nonassoc TK_ELSE //Eliminar a ambiguidade inerente do if-else. O yacc por naturalidade já o faz, mas isso evita o reconhecimento do mesmo do conflito de shift/reduce.
 
+%nonassoc TK_OP_ARIT_UNA // ++, --
 %nonassoc TK_OP_ARIT_COMP // +=, -=, *=, /=, etc... vide slides LP
 %left TK_OP_LOG_BIN_PRIO1 // or
 %left TK_OP_LOG_BIN_PRIO2 // and
@@ -207,27 +209,57 @@ E			: E TK_OP_ARIT_PRIO1 E
 			{
 				$$ = $2;
 			}
-/*			|
+/*
+	//tratar este caso em especifico depois ... teste : var a = 1; (-a); gera sintax error	
+			|
 			'(' '-' E ')'
 			{
 
 			}
+*/
 			|
+			//por enquanto ambos fazem a msm coisa, mas a ideia seria trocar a ordem das operaçõesç
 			TK_OP_ARIT_UNA E
 			{
-
+				if($2.estruturaDoConteudo == constante_estrutura_variavel)
+				{
+					$$ = $2;
+					$$.traducao = $2.traducao + "\t" + $2.label + " = " + $2.label + " " + $1.label[0] + " 1;\n";
+				}
+				else
+				{
+					string params[2] = {
+						$1.label,
+						"o operando não é uma variável"
+					};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERADOR_UNARIO_INVALIDO_PARA_OPERANDO, params, 2));
+				}
 			}
 			|
 			E TK_OP_ARIT_UNA
 			{
-
-			}*/
+				if($1.estruturaDoConteudo == constante_estrutura_variavel)
+				{
+					$$ = $1;
+					$$.traducao = "\t" + $1.label + " = " + $1.label + " " + $2.label[0] + " 1;\n" + $1.traducao;
+				}
+				else
+				{
+					string params[2] = {
+						$2.label,
+						"o operando não é uma variável"
+					};
+					yyerror(montarMensagemDeErro(MSG_ERRO_OPERADOR_UNARIO_INVALIDO_PARA_OPERANDO, params, 2));
+				}
+			}
 			|
 			VALOR
 			{
 				$$ = $1;
-				if($$.estruturaDoConteudo == constante_estrutura_variavel)
-					$$.label = recuperarNomeTraducao($$.label);
+				cout << $1.estruturaDoConteudo;
+				if($1.estruturaDoConteudo == constante_estrutura_variavel)
+					$$.label = recuperarNomeTraducao($1.label);
+
 			}
 			;
 
@@ -283,6 +315,7 @@ VALOR		: TK_NUM
 				*/
 				$1.ehDinamica = metadata.ehDinamica;
 				$1.tamanho = metadata.tamanho;
+				$$ = $1;
 				//$1.tipo = metadata.tipo; //pode ser que precise
 			}
 			|
@@ -593,7 +626,7 @@ COMANDO_IF	: TK_IF '(' E ')' COMANDO %prec IFX
 					//dispara erro ...
 
 				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis + "\t" +
+				$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis +
 													constante_tipo_inteiro + " " + $$.label + ";\n";
 
 				string tagFim = gerarNovaTagIf(true);
@@ -610,7 +643,7 @@ COMANDO_IF	: TK_IF '(' E ')' COMANDO %prec IFX
 
 				$$.label = gerarNovaVariavel();
 				$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis +
-													$7.traducaoDeclaracaoDeVariaveis + "\t" +
+													$7.traducaoDeclaracaoDeVariaveis +
 													constante_tipo_inteiro + " " + $$.label + ";\n";
 
 				//Criar tag para pular o bloco do else (que ficara logo em seguida no cod. interm.)
@@ -644,7 +677,7 @@ COMANDO_WHILE	: EMPILHAR_TAG_WHILE TK_WHILE '(' E ')' COMANDO
 
 					$$.label = gerarNovaVariavel();
 					$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + $6.traducaoDeclaracaoDeVariaveis +
-														"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+														constante_tipo_inteiro + " " + $$.label + ";\n";
 
 					$$.traducao = "\t" + tagInicio + ":\n" + $4.traducao + "\t" + $$.label + " = " + "!" + $4.label + ";\n" +
 									"\t" + "if" + "(" + $$.label + ")\n" + "\t\t" + "goto " + tagFim + ";\n" +
@@ -676,7 +709,7 @@ COMANDO_DOWHILE	: EMPILHAR_TAG_DOWHILE TK_DO COMANDO TK_WHILE '(' E ')' ';' //PR
 
 					$$.label = gerarNovaVariavel();
 					$$.traducaoDeclaracaoDeVariaveis = $6.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis +
-														"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+														constante_tipo_inteiro + " " + $$.label + ";\n";
 
 					$$.traducao = "\t" + tagInicio + ":\n" + $3.traducao +
 									$6.traducao + "\t" + $$.label + " = " + "!" + $6.label + ";\n" +
@@ -822,8 +855,8 @@ COMANDO_FOR	: EMPILHAR_TAG_FOR TK_FOR '(' INIT ';' CONDICAO ';' UPDATE ')' COMAN
 
 				$$.label = gerarNovaVariavel();
 				$$.traducaoDeclaracaoDeVariaveis = $4.traducaoDeclaracaoDeVariaveis + $6.traducaoDeclaracaoDeVariaveis +
-													$8.traducaoDeclaracaoDeVariaveis + $10.traducaoDeclaracaoDeVariaveis +
-													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+													$8.traducaoDeclaracaoDeVariaveis + $10.traducaoDeclaracaoDeVariaveis
+													+ constante_tipo_inteiro + " " + $$.label + ";\n";
 
 				//if($6.tipo != constante_tipo_condicao_vazia_for){
 
@@ -945,8 +978,8 @@ CASE	: TK_CASE E ':' COMANDO
 
 				$$.label = gerarNovaVariavel();
 
-				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $4.traducaoDeclaracaoDeVariaveis +
-													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n";
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $4.traducaoDeclaracaoDeVariaveis
+															+ constante_tipo_inteiro + " " + $$.label + ";\n";
 				$$.tipo = $2.tipo;
 
 				//Adicionar a tag do inicio do case antes do comando em si.
@@ -1140,7 +1173,7 @@ ATRIBUTOS tratarExpressaoLogicaBinaria(string op, ATRIBUTOS dolar1, ATRIBUTOS do
 	if(dolar1.tipo == constante_tipo_booleano && dolar3.tipo == constante_tipo_booleano){
 		dolarDolar.label = gerarNovaVariavel();
 		dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + tipoCodigoIntermediario(constante_tipo_booleano) + " " + dolarDolar.label + ";\n";
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(constante_tipo_booleano) + " " + dolarDolar.label + ";\n";
 		dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
 		dolarDolar.traducao = dolarDolar.traducao + "\t\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
 		dolarDolar.tipo = constante_tipo_booleano;
@@ -1163,7 +1196,7 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo,op);
 
 	//string label_old = dolarDolar.label;
-	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + tipoCodigoIntermediario(constante_tipo_booleano) + " " + dolarDolar.label + ";\n";
+	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(constante_tipo_booleano) + " " + dolarDolar.label + ";\n";
 	string operador = op;
 
 	//FIXME - remover a verificação de string daqui, após a implementação dessa operações corretamente.
@@ -1276,7 +1309,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 			if(dolar4.ehDinamica)
 			{
 				tipo = constante_tipo_caracter;
-					dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " * " + label+ "; //" + labelPrefix + "\n";
+					dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipo + " * " + label+ "; //" + labelPrefix + "\n";
 
 					//TENTATIVA ATRIBUICAO COM MALLOC
 					//dolarDolar.traducao = dolar4.traducao + "\t" + label +" = (char*) malloc(" + to_string(dolar4.tamanho) + ");\n\t" + montarCopiarString(label, dolar4.label) + ";\n";
@@ -1288,7 +1321,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 			else
 			{
 				tipo = constante_tipo_caracter;
-				dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "[" + to_string(dolar4.tamanho) + "]; //" + labelPrefix + "\n";
+				dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipo + " " + label + "[" + to_string(dolar4.tamanho) + "]; //" + labelPrefix + "\n";
 				dolarDolar.traducao = dolar4.traducao + montarCopiarString(label, dolar4.label) + ";\n";
 
 			}
@@ -1297,7 +1330,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 
 		else
 		{
-			dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + label + "; //" + labelPrefix + "\n";
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipo + " " + label + "; //" + labelPrefix + "\n";
 			dolarDolar.traducao = dolar4.traducao + "\t" + label + " = " + dolar4.label + ";\n";
 		}
 
@@ -1372,7 +1405,12 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 		{
 
 			string strPrefixoVarUsuario = prefixo_variavel_usuario;
-			string params[3] = {dolar1.label.replace(0, strPrefixoVarUsuario.length(), ""), dolar1.tipo, dolar3.tipo};
+			string labelVar = dolar1.label;
+			//para remover o prefixo só se tiver prefixo
+			if(dolar1.label.find(strPrefixoVarUsuario) == 0)
+				labelVar = dolar1.label.replace(0, strPrefixoVarUsuario.length(), "");
+			
+			string params[3] = {labelVar, dolar1.tipo, dolar3.tipo};
 			yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
 		}
 

@@ -30,7 +30,6 @@ STRING \"([^\"\n]|\\\")*\"
 
 {DELIM} 	{}
 
-"main"		{return TK_MAIN;}
 "int"		{yylval.label = "int"; yylval.tipo = constante_tipo_inteiro; return TK_TIPO_INT;}
 "float"		{yylval.label = "float"; yylval.tipo = constante_tipo_flutuante; return TK_TIPO_FLOAT;}
 "char"		{yylval.label = "char"; yylval.tipo = constante_tipo_caracter; return TK_TIPO_CHAR;}
@@ -56,7 +55,10 @@ STRING \"([^\"\n]|\\\")*\"
 "(char)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CONVERSAO_EXPLICITA;}
 "(string)"  { yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_CONVERSAO_EXPLICITA;}
 
-[(){}[\];,:]	{ return *yytext; }
+[(){}\[\];,:]	{ return *yytext; }
+
+"++"	{yylval.label = yytext; return TK_OP_ARIT_UNA;}
+"--"	{yylval.label = yytext; return TK_OP_ARIT_UNA;}
 [+\-]	{ yylval.label = yytext; return TK_OP_ARIT_PRIO1; }
 [*/]	{ yylval.label = yytext; return TK_OP_ARIT_PRIO2; }
 [=]	{ return *yytext; }
