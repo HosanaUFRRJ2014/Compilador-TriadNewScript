@@ -887,12 +887,12 @@ EMPILHAR_TAG_SWITCH	:
 					;
 
 COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' E ')' '{' CASES DEFAULT'}'
-				{
+				{	
 					if($4.estruturaDoConteudo != constante_estrutura_variavel)
 					{
 						//dispara erro... precisa ser variavel
 					}
-
+				
 					//$3.tipo != constante_tipo_string && $3.tipo != constante_tipo_flutuante
 					if($4.tipo == $7.tipo) {
 						//(...)
@@ -900,12 +900,13 @@ COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' E ')' '{' CASES DEFAULT'}'
 						//string tagCaseAtual = tag_case_inicio + to_string(tagFimENumProx.second);
 						pair<string,int> tagFimENumProx = gerarNovaTagSwitch(true);
 						string tagCaseAtual = tag_case_inicio + to_string(tagFimENumProx.second-1);
-
-
+						pair<string,string> condicaoCase = gerarNovaTagCondicaoCase();
+						
+						
 						//string tagFim = gerarNovaTagSwitch(false).first;
-
+						
 						//$$.label = gerarNovaVariavel();
-
+						
 						//Outra parte da árvore já tera a $3.traducaoDeclaracaoDeVariaveis salva. Portanto, teríamos repetição.
 						$$.traducaoDeclaracaoDeVariaveis = $7.traducaoDeclaracaoDeVariaveis + $8.traducaoDeclaracaoDeVariaveis;
 
@@ -915,21 +916,22 @@ COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' E ')' '{' CASES DEFAULT'}'
 										//"\t" + "goto " + tagFim + ";\n"
 										//"\t" + tagFimENumProx.first + ":\n";
 										"\t" + obterTopoPilhaFim() + ":;\n";
-
+												
 						}else{
 							$$.traducao = $4.traducao + $7.traducao + $8.traducao +
 										//"\t" + "goto " + tagFim + ";\n"
+										"\t" + condicaoCase.first + ":\n" +
 										"\t" + tagCaseAtual + ":\n" +
 										//"\t" + tagFimENumProx.first + ":\n";
 										"\t" + obterTopoPilhaFim() + ":;\n";
 						}
-
+															
 						$$.traducao = substituirVariaveisCase($$.traducao, $4.label);
-						removerTopoTagFim();
-
+						removerTopoTagFim();									
+						
 					}
 					else{
-						yyerror(MSG_ERRO_TIPO_CASE_DISTINTO);
+						yyerror(MSG_ERRO_TIPO_CASE_DISTINTO);	
 					}
 				}
 				;
@@ -938,9 +940,11 @@ DEFAULT	: TK_DEFAULT ':' COMANDO
 		{
 			pair<string,int> tagFimENumProx = gerarNovaTagSwitch(true);
 			string tagCaseAtual = tag_case_inicio + to_string(tagFimENumProx.second-1);
-
+			pair<string,string> condicaoCase = gerarNovaTagCondicaoCase();
+			
 			$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis;
-			$$.traducao = "\t" + tagCaseAtual + ":\n" + $3.traducao;
+			$$.traducao = "\t" + condicaoCase.first + ":\n" + 
+							"\t" + tagCaseAtual + ":\n" + $3.traducao;
 			$$.tipo = constante_tipo_default;
 		}
 		| //MESMO PROBLEMA DO BLOCO REPETIDO NO FINAL!
@@ -951,6 +955,7 @@ DEFAULT	: TK_DEFAULT ':' COMANDO
 			//$$.tipo = "";
 		}
 		;
+
 
 
 CASES	: CASE CASES
@@ -970,27 +975,39 @@ CASE	: TK_CASE E ':' COMANDO
 				//dispara erro ...
 			}
 			//Regra TERMO possui produção que leva em ID, o que não pode.
-			if( ($2.tipo == constante_tipo_inteiro || $2.tipo == constante_tipo_caracter) &&
+			if( ($2.tipo == constante_tipo_inteiro || $2.tipo == constante_tipo_caracter) && 
 				$2.label.find(prefixo_variavel_usuario) == std::string::npos){
-
+				
 				pair<string,int> tagCaseENumProx = gerarNovaTagSwitch(true);
 				string proxCase = tag_case_inicio + to_string(tagCaseENumProx.second);
-
+			
+				//Para referenciar o inicio do teste da condição de cada case. Serve como controle para quando devemos executar
+				//todos os cases quando algo for verdadeiro.
+				pair<string,string> condicaoCase = gerarNovaTagCondicaoCase(); 
+				string proxCondicaoCase = tag_condicao_case + condicaoCase.second;
+											
+				//Gerar primeira label que receberá o resultado da condição de igualdade.
 				$$.label = gerarNovaVariavel();
+				//Gerar segunda label que receberá a negação da condição de igualdade.
+				string tempIrProxCondCase = gerarNovaVariavel();
 
-				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $4.traducaoDeclaracaoDeVariaveis
-															+ constante_tipo_inteiro + " " + $$.label + ";\n";
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $4.traducaoDeclaracaoDeVariaveis +
+													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n" + 
+													"\t" + constante_tipo_inteiro + " " + tempIrProxCondCase + ";\n";
 				$$.tipo = $2.tipo;
-
+								
 				//Adicionar a tag do inicio do case antes do comando em si.
-				string salvadorDaPatria = "\t";
-				$4.traducao = salvadorDaPatria + "{\n" + "\t" + tagCaseENumProx.first + ":\n" + $4.traducao +
-													"\t" + "goto " + proxCase + ";\n" + "\t" + "}\n";
+				$4.traducao = "\t" + tagCaseENumProx.first + ":\n" + $4.traducao + 
+													"\t" + "goto " + proxCase + ";\n"; 
 
-				$$.traducao =  $2.traducao + "\t" + $$.label + " = " + tarja_variavel + " == " + $2.label + ";\n" +
-								"\t" + "if" + "(" + $$.label + ")\n" + $4.traducao; //+
-								//"\t" + "goto " + proxCase + ":\n"; //+
-								//"\t" + "goto " + tarja_tagFim + ";\n";
+				$$.traducao = "\t" + condicaoCase.first + ":\n" + 
+								$2.traducao + "\t" + $$.label + " = " + tarja_variavel + " == " + $2.label + ";\n" +
+								"\t" + tempIrProxCondCase + " = " + "!" + $$.label + ";\n" +  
+								"\t" + "if" + "(" + tempIrProxCondCase + ")\n" + 
+								"\t\t" + "goto " + proxCondicaoCase + ";\n" + 
+								$4.traducao; //+
+								//"\t" + "goto " + proxCase + ":\n"; //+  
+								//"\t" + "goto " + tarja_tagFim + ";\n";			
 			}else{
 				yyerror(MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO);
 			}

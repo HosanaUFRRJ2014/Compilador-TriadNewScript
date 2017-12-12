@@ -19,6 +19,7 @@ namespace ControleDeFluxo
 		#define tag_for_fim "FIM_FOR"
 		#define tag_switch_fim "FIM_SWITCH"
 		#define tag_case_inicio "INICIO_CASE"
+		#define tag_condicao_case "CONDICAO_CASE"
 		#define tag_update_for "UPDATE_FOR"
 		//(...)
 		
@@ -29,7 +30,9 @@ namespace ControleDeFluxo
 		string gerarNovaTagUpdateFor();
 		pair<string,int> gerarNovaTagSwitch(bool tagCase);
 
-		/*
+		pair<string,string> gerarNovaTagCondicaoCase();
+
+		
 		string criarNovaTag(int *num1,int *num2,string tagCmd1,string tagCmd2,bool fim){
 
 			string numInt, tag;
@@ -50,18 +53,19 @@ namespace ControleDeFluxo
 			return tag + numInt;
 
 		}
-		*/
+		
 		
 		
 		string gerarNovaTagIf(bool fim){
 			static int numFim = 0;
 			static int numElse = 0;
-			string tag;
-			string numInt;
-			//string resultado;
+			//string tag;
+			//string numInt;
+			string resultado;
 			
-			//resultado = criarNovaTag(&numFim,&numElse,tag_if_fim,tag_if_else,fim);
+			resultado = criarNovaTag(&numFim,&numElse,tag_if_fim,tag_if_else,fim);
 
+			/*
 			if(fim)
 			{
 				numFim++;
@@ -74,17 +78,24 @@ namespace ControleDeFluxo
 				tag = tag_if_else;
 				numInt = to_string(numElse);
 			}
-	
+			
 			return tag + numInt;
+			*/
+			
+			return resultado;
 			
 		}
 
 		string gerarNovaTagWhile(bool fim){
 			static int numFim = 0;
 			static int numInicio = 0;
-			string tag;
-			string numInt;
-
+			//string tag;
+			//string numInt;
+			string resultado;
+			
+			resultado = criarNovaTag(&numFim,&numInicio,tag_while_fim,tag_while_inicio,fim);
+			
+			/*
 			if(fim)
 			{
 				numFim++;
@@ -99,14 +110,21 @@ namespace ControleDeFluxo
 			}
 	
 			return tag + numInt;
+			*/
+			
+			return resultado;
 		}
 
 		string gerarNovaTagDoWhile(bool fim){
 			static int numFim = 0;
 			static int numInicio = 0;
-			string tag;
-			string numInt;
+			//string tag;
+			//string numInt;
+			string resultado;
+			
+			resultado = criarNovaTag(&numFim,&numInicio,tag_dowhile_fim,tag_dowhile_inicio,fim);
 
+			/*
 			if(fim)
 			{
 				numFim++;
@@ -121,14 +139,22 @@ namespace ControleDeFluxo
 			}
 	
 			return tag + numInt;
+			
+			*/
+			
+			return resultado;
 		}
 
 		string gerarNovaTagFor(bool fim){
 			static int numFim = 0;
 			static int numInicio = 0;
-			string tag;
-			string numInt;
+			//string tag;
+			//string numInt;
+			string resultado;
+			
+			resultado = criarNovaTag(&numFim,&numInicio,tag_for_fim,tag_for_inicio,fim);
 
+			/*
 			if(fim)
 			{
 				numFim++;
@@ -143,6 +169,9 @@ namespace ControleDeFluxo
 			}
 	
 			return tag + numInt;
+			*/
+			
+			return resultado;
 		}
 		
 		string gerarNovaTagUpdateFor(){
@@ -184,6 +213,22 @@ namespace ControleDeFluxo
 			return resultado;
 			//return tag + numInt;
 		}
+		
+		pair<string,string> gerarNovaTagCondicaoCase(){
+			static int numCondicao = 0;
+			string tag;
+			string numInt;
+			pair<string,string> resultado;
+
+			numCondicao++;
+			tag = tag_condicao_case;
+			numInt = to_string(numCondicao);
+			
+			resultado.first = tag + numInt;
+			resultado.second = to_string(numCondicao + 1);
+			
+			return resultado;
+		}
 
 	}
 
@@ -217,6 +262,7 @@ namespace ControleDeFluxo
 
 		}
 		
+		/*
 		string incluirBreakEContinue(string traducao, string tagInicio, string tagFim, bool ehSwitch)
 		{			
 
@@ -259,6 +305,7 @@ namespace ControleDeFluxo
 			else
 				return false;
 		}
+		*/
 
 	}
 	

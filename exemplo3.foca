@@ -7,8 +7,6 @@
 
 //Colocar ; no fim de todas as labels de fim; consertar o continue no comando for; colocar mensagem de erro na condição não declarada no for
 
-int main()
-{
 
 		//--------------------------------------------------------------------------------------------------------------------------------	 
 	
@@ -54,7 +52,7 @@ int main()
 	*/
 	
 	//Exemplo de calculadora simples.
-		
+	/*
 	var num1,num2,op,result,c;
 		
 	while(true)
@@ -103,9 +101,10 @@ int main()
 			break;
 		
 	}
+	*/
 	
 	
-	/*
+	
 		var op = '+',num1 = 10,num2 = 5,result;
 	
 		switch(op){
@@ -139,7 +138,7 @@ int main()
 		}
 		
 		show(result);
-	*/
+	
 	
 	
 	
@@ -308,9 +307,3 @@ show(a);
 	}while(0 == 0);	
 	*/
 	
-	
-	
-	
-	
-	
-}
