@@ -236,7 +236,7 @@ namespace ControleDeVariaveis
 
 
 		//void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho,  int escopo = numeroEscopoAtual)
-		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho, bool ehDinamico, int escopo = numeroEscopoAtual)
+		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho, bool ehDinamica, int escopo = numeroEscopoAtual)
 		{
 			/*string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string idPrefixado = adicionaPrefixo(id);
@@ -283,8 +283,8 @@ namespace ControleDeVariaveis
 			if(tipo == constante_tipo_string)
 			{
 				string charArray;
-				if(ehDinamico)
-					charArray = "char  *  " + tipoProvisorio;
+				if(ehDinamica)
+					charArray = "char * " + tipoProvisorio;
 
 				else
 					charArray = "char " + tipoProvisorio + "[" + to_string(tamanho) + "]";
@@ -337,7 +337,7 @@ namespace ControleDeVariaveis
 					{
 
 						//-7 para eliminar o char    [*] da string estática
-						declaracoes.replace(pos, key.length() + value.length() -7, value);
+						declaracoes.replace(pos, key.length() + value.length() -8, value);
 					}
 					mapaSubstituicaoDeTipoProvisorio[key] = "";
 

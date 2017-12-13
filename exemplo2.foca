@@ -14,7 +14,21 @@ i = d + 10.5 * 4;
 show(i);*/
 
 //dúvidas se a concatenação deverá gerar o resultado conforme gera no código abaixo
-var i = "eita";
+/*var i = "eita";
 var h  = i + " atras de " + 1;
+*/
 
-show(h);
+//fazer impressão de mensagem de erro em tempo de execução
+//read(h:bool);
+
+//Corrigir problema de não poder mudar tipo de "h" de estático para dinâmico
+/*var h = "hosana";
+read(h:string);
+show(h);*/
+
+//Corrigir problema de nome de variável de usuário com um "oX" a mais, onde X é o número do usuário
+var a,g;
+read(a:string);
+read(g:string);
+var c = a + g;
+show(c);
