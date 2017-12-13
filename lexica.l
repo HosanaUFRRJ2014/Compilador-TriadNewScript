@@ -40,6 +40,7 @@ STRING \"([^\"\n]|\\\")*\"
 "global"		{return TK_PALAVRA_GLOBAL;}
 "show"		{return TK_PALAVRA_PRINT;}
 "read"		{return TK_PALAVRA_SCAN;}
+"func"	{return TK_PALAVRA_FUNC;}
 
 "//".*		{/*Não faça nada. 
 			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}

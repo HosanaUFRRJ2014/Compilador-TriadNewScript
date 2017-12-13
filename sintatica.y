@@ -16,7 +16,6 @@
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
-//#define prefixo_variavel_sistema "temp"
 
 #define YYDEBUG 0
 
@@ -66,8 +65,6 @@ int conta;
 %token TK_OP_REL_PRIO1
 %token TK_OP_REL_PRIO2
 
-//******* I
-
 %token TK_IF
 %token TK_ELSE
 %token TK_WHILE
@@ -82,9 +79,8 @@ int conta;
 %token TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_PALAVRA_PRINT TK_PALAVRA_SCAN
 //%token TK_FIM TK_ERROR //estes tokens só tinham uma referência nesse sintatica se quebrar descomentar
 %token TK_CONVERSAO_EXPLICITA
-//*********** F
 
-%token TK_PALAVRA_VAR TK_ID
+%token TK_PALAVRA_VAR TK_ID TK_PALAVRA_FUNC
 %token TK_BACKSCOPE TK_PALAVRA_GLOBAL
 
 %start S
@@ -152,7 +148,66 @@ COMANDO 	: E ';'
 			E_FLUXO_CONTROLE
 			|
 			E_BREAK_CONTINUE ';'
+			|
+			DECLARACAO_FUNCAO
+//			|
+//			CHAMADA_FUNCAO ';'
 			;
+
+DECLARACAO_FUNCAO:	TK_PALAVRA_FUNC NOME_FUNC PARAMETROS BLOCO
+			{
+				cout << "final declaracao funcao ... " << endl;
+			}
+			;
+
+NOME_FUNC:	FUNC_ID
+				{
+				}
+				|
+				{
+				}
+				;
+					
+FUNC_ID:		TK_ID 
+				{
+					cout << "nome funcao ... " << endl;
+				}
+				;
+
+PARAMETROS:	'(' ARGS_FUNC ')'
+				{}
+				|
+				'(' ')'
+				{
+					cout << "sem paramentro ... " << endl;
+				}
+				;
+				
+ARGS_FUNC:	ARGS_FUNC ',' ARG_FUNC
+				{
+					cout << "vaios paramentros ... " << endl;
+				}
+				|
+				ARG_FUNC
+				{
+					cout << "1 paramentro ... " << endl;
+				}
+				;
+				
+ARG_FUNC:	TK_ID
+				{
+					cout << "paramentro ... " << endl;
+				}
+				;
+/*			
+CHAMADA_FUNCAO:	FUNC_ID PARAMETROS
+						{
+						}
+						|
+						DECLARACAO_FUNCAO PARAMETROS
+						{}
+						;
+*/
 
 E			: E TK_OP_ARIT_PRIO1 E
 			{
@@ -256,7 +311,6 @@ E			: E TK_OP_ARIT_PRIO1 E
 			VALOR
 			{
 				$$ = $1;
-				cout << $1.estruturaDoConteudo;
 				if($1.estruturaDoConteudo == constante_estrutura_variavel)
 					$$.label = recuperarNomeTraducao($1.label);
 
