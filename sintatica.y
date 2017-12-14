@@ -1044,6 +1044,8 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	{
 		string params[3] = {op,dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+		dolarDolar.tipo = constante_erro;
+		return dolarDolar;
 	}
 
 	/*
@@ -1062,6 +1064,8 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		{
 			string params[3] = {op,dolar1.tipo, dolar3.tipo};
 			yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
+			dolarDolar.tipo = constante_erro;
+			return dolarDolar;
 
 		}
 
@@ -1159,6 +1163,8 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 
 		string params[3] = {op, dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+		dolarDolar.tipo = constante_erro;
+		return dolarDolar;
 	}
 
 	if(dolar1.tipo == dolar3.tipo)

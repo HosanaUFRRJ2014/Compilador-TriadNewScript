@@ -26,13 +26,11 @@ var h  = i + " atras de " + 1;
 read(h:string);
 show(h);*/
 
-
-
 var a,g;
 read(a:string);
 read(g:string);
 //a = "eita atras de eita meus amores";
-//g = " nossa, essa jossa eh muito chata , eu queria estar vendo series. socorro!";
+//g = " nossa,  eu queria estar vendo series. socorro!";
 
 var c = a + g;
 show(c);
