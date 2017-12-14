@@ -226,8 +226,10 @@ E			: E TK_OP_ARIT_PRIO1 E
 			VALOR
 			{
 				$$ = $1;
+		//		cout << "//Entrou em E: VALOR\n" << "label1: " << $1.label << "\nlabel$: " << $$.label << endl;
 				if($$.estruturaDoConteudo == constante_estrutura_variavel)
 					$$.label = recuperarNomeTraducao($$.label);
+
 			}
 			;
 
@@ -262,6 +264,7 @@ VALOR		: TK_NUM
 			STRING
 			{
 				$$ = $1;
+				//cout << "//Entrou em VALOR: STRING\n" << "label1: " << $1.label << "\nlabel$: " << $$.label << endl;
 				$$.estruturaDoConteudo = constante_estrutura_tipoPrimitivo;
 
 			}
@@ -280,6 +283,7 @@ VALOR		: TK_NUM
 				DADOS_VARIAVEL metadata = recuperarDadosVariavel($1.label);
 				$1.ehDinamica = metadata.ehDinamica;
 				$1.tamanho = metadata.tamanho;
+
 				//$1.tipo = metadata.tipo; //pode ser que precise
 			}
 			|
@@ -313,6 +317,7 @@ ID			: TK_ID
 					$$.estruturaDoConteudo = constante_estrutura_variavel;
 					$$.tamanho = metaData.tamanho;
 					$$.ehDinamica = metaData.ehDinamica;
+			//		cout << "//Entrou em ID: TK_ID\n" << "metaData.nome: " << metaData.nome << "\nlabel$: " << $$.label << "label1: " << $1.label << endl;
 				}
 				else
 				{
@@ -373,6 +378,7 @@ STRING	: TK_STRING
 			{
 			//	cout << "Entrou em TK_STRING\n";
 			//	$$.label = gerarNovaVariavel();
+			//	cout << "//Entrou em STRING: TK_STRING\n" << "label1: " << $1.label << "\nlabel$: " << $$.label << endl;
 				$$.tamanho = atualizarTamanhoString($1.label.length()); //tamanho modificado pelo \0 e pelas aspas
 		//		$$.traducaoDeclaracaoDeVariaveis = "char " + $$.label + "[" + to_string($$.tamanho) + "];\n";
 				$$.label = $1.label;
@@ -396,6 +402,7 @@ MULTI_DECLARACAO	: ATRIBUICAO_VARIAVEL_CRIACAO ',' MULTI_DECLARACAO
 					{
 						$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 						$$.traducao = $1.traducao + $3.traducao;
+				//		cout << "//Entrou em MULTI_DECLARACAO: ATRIBUICAO_VARIAVEL_CRIACAO , MULTI_DECLARACAO\n" << "label1: " << $1.label << "\nlabel$: " << $$.label << "\nlabel3" << $3.label <<endl;
 					}
 					|
 					ATRIBUICAO_VARIAVEL_CRIACAO
@@ -406,6 +413,7 @@ CRIACAO_VARIAVEL	: TK_PALAVRA_VAR TK_ID
 						$$ = tratarDeclaracaoSemAtribuicao($2);
 						$$.tipo = constante_tipo_criacao_sem_atribuicao;
 						$$.label = $2.label;
+				//		cout << "//Entrou em CRIACAO_VARIAVEL TK_PALAVRA_VAR TK_ID\n" << "label2: " << $2.label << "\nlabel$: " << $$.label << endl;
 					}
 					|
 					TK_PALAVRA_VAR TK_ID '=' E
@@ -427,7 +435,7 @@ ATRIBUICAO_VARIAVEL_CRIACAO	:  TK_ID '=' E
 
 ATRIBUICAO_VARIAVEL	:  ID '=' E
 					{
-						cout << "//Entrou em ID '=' VALOR_ATRIBUICAO\n";
+				//		cout << "//Entrou em ID '=' VALOR_ATRIBUICAO\n";
 						$$ = tratarAtribuicaoVariavel($1,$3);
 						/*cout << "--ATRIBUICAO_VARIAVEL----------------\n";
 						//cout << "label1: " << dolar1.label << " tamaho: " << dolar1.tamanho << endl;
@@ -465,7 +473,7 @@ SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'
 
 ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN
 			{
-				//cout << $3.traducao << " *******\n";
+				//cout << $1.traducaoDeclaracaoDeVariaveis << " *******\n";
 				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $1.traducaoDeclaracaoDeVariaveis;
 				$$.traducao = $2.traducao + $1.traducao;
 
@@ -537,9 +545,12 @@ ARG_SCAN		: ID ':' TIPO
 				{
 					//adicionarDefinicaoDeTipo($1.label, $3.tipo,tamanho,ehDinamica);
 
+					string labelRecuperada = recuperarNomeTraducao($1.label, escopo);
 					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "char * " + $$.label + ";\n";
-					$$ = traducaoStringDinamica($$, recuperarNomeTraducao($1.label, escopo));
-					$$.traducao = $$.traducao + montarCopiarString(recuperarNomeTraducao($1.label, escopo), $$.label) + ";\n";
+					$$ = traducaoStringDinamica($$, labelRecuperada);
+					$$.traducao = $$.traducao + montarCopiarString(labelRecuperada, $$.label) + ";\n";
+					//cout << labelRecuperada << " <<< \n";
+					//cout << $1.label << "\n";
 				}
 
 				else
@@ -1027,26 +1038,10 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
 
-	/*
-	a + b
-	if(erro)
-		print erro;
-
-	if(resultado == string)
-		tratarString(op, a, b);
-	else
-		if(a.tipo != resultado)
-			escreve conversao;
-		if(b.tipo != resultado)
-			escreve convesao;
-	*/
-
-
 	string label_old = dolarDolar.label;
 
 	if(resultado == constante_erro)
 	{
-		//cout << "Deu erro no mapa\n";
 		string params[3] = {op,dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
 	}
@@ -1268,7 +1263,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 			if(dolar4.ehDinamica)
 			{
 				tipo = constante_tipo_caracter;
-					dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " * " + label+ "; //" + labelPrefix + "\n";
+					dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipo + " * " + label+ "; //" + labelPrefix + "\n";
 
 					//TENTATIVA ATRIBUICAO COM MALLOC
 					//dolarDolar.traducao = dolar4.traducao + "\t" + label +" = (char*) malloc(" + to_string(dolar4.tamanho) + ");\n\t" + montarCopiarString(label, dolar4.label) + ";\n";
@@ -1312,6 +1307,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 	string tipo = "";
 	int tamanho = 0;
 	string labelRecuperada = recuperarNomeTraducao(dolar1.label);
+
 	//bool ehDinamica = false;
 	/*std::cout << "sin dolar1.ehDinamica:" << dolar1.ehDinamica << '\n';
 	std::cout << "sin dolar3.ehDinamica:" << dolar3.ehDinamica << '\n';

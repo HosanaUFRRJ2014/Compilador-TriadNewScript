@@ -103,8 +103,6 @@ namespace ControleDeVariaveis
 				variavel.escopo = numeroEscopoAtual;
 				variavel.nomeTraducao = gerarNomeTraducaoVariavelUsuario();
 				dicionarioNomeTraducaoParaNome.insert(pair<string, string>(variavel.nomeTraducao, nome));
-				/*cout << variavel.nome;
-				cout << variavel.ehDinamica;*/
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
 				return true;
 			}
@@ -189,9 +187,30 @@ namespace ControleDeVariaveis
 
 	}
 
+
+		namespace ControleSubstituicaoDeVariaveis
+		{
+				int calcularTamanhoSubstituicao(int , string );
+
+		    int calcularTamanhoSubstituicao(int posInicial, string sustituivel)
+		    {
+		        int i = posInicial;
+		        int tamSubstituicao = 0;
+		        while (sustituivel[i] != ';')
+		        {
+		            tamSubstituicao++;
+		            i++;
+		        }
+		        return tamSubstituicao;
+
+		    }
+
+		}
+
 	namespace DeclaracaoProvisoriaInferenciaTipo
 	{
 		using namespace MapaDeContexto;
+		using namespace ControleSubstituicaoDeVariaveis;
 
 		#define constante_subst_tipo_declaracao_variavel "//#TIPOP_VAR_\t_\t#"
 		#define constante_sufixo_escopo "SCOPE"
@@ -251,18 +270,15 @@ namespace ControleDeVariaveis
 			//verificação a mais inserida pq havia problema na hora de definir o tipo de uma variavel global
 			//pq o escopo da variavel global é 0 mas o C++ só aceita definição de valor de variavel global em algum escopo interno
 			//então na hora de substituir o escopo é 1, mas deveria ser 0 ... então essa busca acha o lugar correto
-			//cout << "label5.1.1\n";
+
 			DADOS_VARIAVEL metadata;
 			if(mapaSubstituicaoDeTipoProvisorio.find(tipoProvisorio) == mapaSubstituicaoDeTipoProvisorio.end()){
 
 				while(escopo >= 0){
-			//		cout << "label5.1.1.1\n";
 					metadata = recuperarDadosVariavel(id, escopo);
-			//		cout << "label5.1.1.2\n";
 					escopo = metadata.escopo;
 					if(metadata.tipo == "")
 					{
-			//			cout << "label5.x\n";
 						metadata.tipo = tipo;
 						atualizarNoMapa(metadata, escopo);
 						break;
@@ -277,8 +293,6 @@ namespace ControleDeVariaveis
 				*/
 				tipoProvisorio = recuperarNomeTraducao(id, escopo);
 			}
-
-			//cout << "label5.1.2\n";
 
 			if(tipo == constante_tipo_string)
 			{
@@ -335,9 +349,8 @@ namespace ControleDeVariaveis
 					}
 					else
 					{
+						declaracoes.replace(pos, calcularTamanhoSubstituicao(pos, declaracoes), value);
 
-						//-7 para eliminar o char    [*] da string estática
-						declaracoes.replace(pos, key.length() + value.length() -8, value);
 					}
 					mapaSubstituicaoDeTipoProvisorio[key] = "";
 
@@ -372,5 +385,6 @@ namespace ControleDeVariaveis
 	using namespace VariaveisTemporarias;
 	using namespace MapaDeContexto;
 	using namespace DeclaracaoProvisoriaInferenciaTipo;
+	using namespace ControleSubstituicaoDeVariaveis;
 
 }

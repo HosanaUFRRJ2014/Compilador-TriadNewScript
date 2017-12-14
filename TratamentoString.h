@@ -68,10 +68,10 @@ namespace TratamentoString
 
 		if(necessidaDeclaracaoDinamica(*dolar1, *dolar3))
 		{
-			retorno = "\tchar * " + dolarDolar->label + ";\n";
-			retorno += "\tint " + varTamDolar1 + ";\n";
-			retorno += "\tint " + varTamDolar3+ ";\n";
-			retorno += "\tint " + varTamDolarDolar + ";\n";
+			retorno = "char * " + dolarDolar->label + ";\n";
+			retorno += "int " + varTamDolar1 + ";\n";
+			retorno += "int " + varTamDolar3+ ";\n";
+			retorno += "int " + varTamDolarDolar + ";\n";
 
 			dolarDolar->ehDinamica = true;
 		}

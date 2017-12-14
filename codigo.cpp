@@ -35,11 +35,11 @@ int temp17;
 int temp18;
 int temp19;
 int temp20;
-	char * temp21;
-	int temp22;
-	int temp23;
-	int temp24;
-	char * variavelDoUsuario3; //VARUSER_c
+char * temp21;
+int temp22;
+int temp23;
+int temp24;
+char * variavelDoUsuario3; //VARUSER_c
 
 
 

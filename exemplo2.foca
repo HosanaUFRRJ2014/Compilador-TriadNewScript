@@ -26,9 +26,13 @@ var h  = i + " atras de " + 1;
 read(h:string);
 show(h);*/
 
-//Corrigir problema de nome de variável de usuário com um "oX" a mais, onde X é o número do usuário
+
+
 var a,g;
 read(a:string);
 read(g:string);
+//a = "eita atras de eita meus amores";
+//g = " nossa, essa jossa eh muito chata , eu queria estar vendo series. socorro!";
+
 var c = a + g;
 show(c);
