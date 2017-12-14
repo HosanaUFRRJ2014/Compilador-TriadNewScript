@@ -233,19 +233,11 @@ namespace ControleDeFluxo
 	}
 
 	namespace TraducaoControleFluxo{
-
-		//#define qtd_elementos_tarja_tempUSER 5 //.....
-		//#define qtd_elementos_tarja_tagFim 5 //**********
-		//#define qtd_elementos_tarja_break 5 //**********
-		//#define qtd_elementos_tarja_continue 5 //**********
 		
 		#define qtd_elementos_tarja 5		
 
 		#define tarja_variavel "....."  //.....
 		#define tarja_tagFim "*****"  //**********
-
-		#define tarja_break "%%%%%"  //**********
-		#define tarja_continue "#####"  //**********
 
 		string substituirVariaveisCase(string traducao, string varUser){
 
@@ -261,52 +253,6 @@ namespace ControleDeFluxo
 			return novaTraducao;
 
 		}
-		
-		/*
-		string incluirBreakEContinue(string traducao, string tagInicio, string tagFim, bool ehSwitch)
-		{			
-
-			string novaTraducao;
-			int index = traducao.find(tarja_break);
-			
-			//Substituir as tarjas do Break.
-			while(index != std::string::npos){
-				traducao.replace(index,qtd_elementos_tarja,tagFim);
-				index = traducao.find(tarja_break);
-			}
-			
-			if(!ehSwitch) //Switches não suportam continue.
-			{
-				index = traducao.find(tarja_continue);
-				
-				//Substituir as tarjas do Continue.
-				while(index != std::string::npos){
-					traducao.replace(index,qtd_elementos_tarja,tagInicio);
-					index = traducao.find(tarja_continue);
-				}
-			}
-			novaTraducao = traducao;
-
-			return novaTraducao; 
-		}
-		
-		bool haBreakNoBloco(string traducao)
-		{
-			if(traducao.find(tarja_break) != std::string::npos)
-				return true;
-			else
-				return false;
-		}
-
-		bool haContinueNoBloco(string traducao)
-		{
-			if(traducao.find(tarja_continue) != std::string::npos)
-				return true;
-			else
-				return false;
-		}
-		*/
-
 	}
 	
 	namespace PilhaControleFluxo{
@@ -349,108 +295,6 @@ namespace ControleDeFluxo
 		string obterTopoPilhaFim(){
 			return pilhaTagFim.at(pilhaTagFim.size() -1);
 		}
-		/*
-		struct no
-		{
-			string data;
-			no *next;
-		};
-
-		class PilhaTagsControleFluxo
-		{
-			no *top;
-			public:
-				PilhaTagsControleFluxo(){ 
-					top = NULL;
-				}
-				void empilhar(string s);
-				void desempilhar();
-				bool vazia();
-				void display();
-				string obterTopo();
-				~PilhaTagsControleFluxo();
-		};
-
-		bool PilhaTagsControleFluxo::vazia()
-		{
-			if(top != NULL)
-				return false;
-			else
-				return true;
-		}
-
-		void PilhaTagsControleFluxo::empilhar(string s)
-		{
-			no *temp;
-			temp = new no;
-			temp->data = s;
-			temp->next = top;
-			top = temp;
-		}
-
-		void PilhaTagsControleFluxo::desempilhar()
-		{
-			if(top != NULL)
-			{
-				no *temp = top;
-				top = top->next;
-				//cout << endl << temp->data << ": Deletado" << endl;
-				delete temp;
-			}
-			else
-				cout << "Pilha Vazia. Operação que não deveria acontecer.";
-		}
-
-		void PilhaTagsControleFluxo::display()
-		{
-			no *temp = top;
-
-			while(temp != NULL)
-			{
-				cout << temp->data << " " << endl;
-				temp = temp->next;
-			}
-		}
-
-		PilhaTagsControleFluxo::~PilhaTagsControleFluxo()
-		{
-			while(top != NULL)
-			{
-				no *temp = top;
-				top = top->next;
-				delete temp;
-			}
-		}
-
-		string PilhaTagsControleFluxo::obterTopo()
-		{
-			return top->data;
-		}
-
-		PilhaTagsControleFluxo *pilhaTagsBreak = new PilhaTagsControleFluxo();
-		PilhaTagsControleFluxo *pilhaTagsContinue = new PilhaTagsControleFluxo();
-		*/
-
-		
-
-
-		/*
-		#define qtd_elementos_tarja_tempUSER 5 //.....
-		#define qtd_elementos_tarja_tagFim 10 //**********
-		#define qtd_elementos_tarja_break 10 //**********
-		#define qtd_elementos_tarja_continue 10 //**********		
-
-		#define tarja_variavel "....."  //.....
-		#define tarja_tagFim "**********"  //**********
-
-		#define tarja_break "----------"  //**********
-		#define tarja_continue "$$$$$$$$$$"  //**********
-
-		void incluirContinue(string traducao,string inicio)
-		{
-		}
-		*/
-
 	}
 	
 	using namespace PilhaControleFluxo;

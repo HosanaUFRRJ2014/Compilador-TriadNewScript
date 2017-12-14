@@ -22,8 +22,7 @@ namespace Atributos
 		int tamanho = 0;
 		bool ehDinamica = false;
 		string estruturaDoConteudo;
-		string labelTamanhoDinamicoString;
-		
+		string labelTamanhoDinamicoString;		
 	};
 	
 //	recuperarLabelCodigoIntermediario($x.label)

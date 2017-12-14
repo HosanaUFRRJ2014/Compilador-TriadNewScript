@@ -10,12 +10,14 @@ namespace ControleDeVariaveis
 {
 	struct DADOS_VARIAVEL
 	{
-		string tipo;
-		string nome;
-		string nomeTraducao;
-		int tamanho = 0;
-		bool ehDinamica = false;
+		string tipo; //Tipo da variável.
+		string nome; //Nome que o usuário deu a variável no programa.
+		string nomeTraducao; //Nome da variável no código intermediário.
+		int tamanho = 0; //Para string
+		bool ehDinamica = false; //Para string
 		int escopo;
+		vector<string> pilhaTamanhoDimensoesArray; //Para arrays
+		
 	};
 
 

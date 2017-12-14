@@ -13,6 +13,7 @@
 #include "TratamentoString.h"
 #include "EntradaESaida.h"
 #include "ControleDeFluxo.h"
+#include "TratamentoArray.h"
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
@@ -29,6 +30,7 @@ using namespace Atributos;
 using namespace TratamentoString;
 using namespace EntradaESaida;
 using namespace ControleDeFluxo;
+using namespace TratamentoArray;
 
 int yylex(void);
 void yyerror(string);
@@ -261,7 +263,72 @@ E			: E TK_OP_ARIT_PRIO1 E
 					$$.label = recuperarNomeTraducao($1.label);
 
 			}
+			|
+			ARRAY
 			;
+
+ARRAY	: '[' DIMENSOES_INDICES ']' //Criação de array
+		{
+			$$ = $2;
+			
+			
+			//$$.estruturaDoConteudo = constante_estrutura_array;
+		}
+		/*
+		|
+		'{' ELEMENTOS '}' //Criação de array com elementos definidos
+		{
+			$$ = $2;
+		}
+		|
+		ID '[' DIMENSOES_INDICES ']'
+		*/
+		;
+
+DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
+					{
+						if(!($1.tipo == constante_tipo_inteiro && $3.tipo == constante_tipo_inteiro))
+						{
+							//dispara erro ...
+						}						
+					}
+					|
+					VALOR
+					{
+						if($1.tipo != constante_tipo_inteiro && $1.estruturaDoConteudo != constante_estrutura_variavel)
+						{
+							//dispara erro ...
+						}
+						
+						if($1.estruturaDoConteudo == constante_estrutura_variavel);						
+					}
+					;
+		
+
+/*
+
+		void adicionarIndiceDimensaoArray(int);
+		void removerTopoIndiceDimensaoArray();
+		bool pilhaIndiceDimensaoArrayVazia()
+		int obterTopoIndiceDimensaoArray();
+
+	struct ATRIBUTOS
+	{
+		string label;
+		string traducaoDeclaracaoDeVariaveis;
+		string traducao;
+		string tipo;Hosana...
+		int escopoDeAcesso = -1;
+		int tamanho = 0;
+		bool ehDinamica = false;
+		string estruturaDoConteudo;
+		string labelTamanhoDinamicoString;
+		int valorIndiceDimensaoArray;
+		
+	};
+	
+	//	recuperarLabelCodigoIntermediario($x.label)
+*/
 
 VALOR		: TK_NUM
 			{
@@ -438,7 +505,8 @@ MULTI_DECLARACAO	: ATRIBUICAO_VARIAVEL_CRIACAO ',' MULTI_DECLARACAO
 CRIACAO_VARIAVEL	: TK_PALAVRA_VAR TK_ID
 					{
 						$$ = tratarDeclaracaoSemAtribuicao($2);
-						$$.tipo = constante_tipo_criacao_sem_atribuicao;
+						//$$.tipo = constante_tipo_criacao_sem_atribuicao;
+						$$.estruturaDoConteudo = constante_estrutura_variavelSemTipo;
 						$$.label = $2.label;
 					}
 					|
@@ -470,7 +538,6 @@ ATRIBUICAO_VARIAVEL	:  ID '=' E
 						cout << "------------------\n";*/
 					}
 					;
-
 
 PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')'
 			{
@@ -744,7 +811,8 @@ INIT_VAR	: INITS ',' INIT_VAR
 
 INITS	: CRIACAO_VARIAVEL
 		{
-			if($1.tipo == constante_tipo_criacao_sem_atribuicao){
+			//$1.tipo == constante_tipo_criacao_sem_atribuicao
+			if($1.estruturaDoConteudo == constante_estrutura_variavelSemTipo){
 
 				string params[1] = {$1.label};
 				yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_SEM_ATRIBUICAO_FOR,params,1));
@@ -975,8 +1043,10 @@ CASE	: TK_CASE E ':' COMANDO
 				//dispara erro ...
 			}
 			//Regra TERMO possui produção que leva em ID, o que não pode.
+			//constante_estrutura_variavel
+			//$2.label.find(prefixo_variavel_usuario) == std::string::npos
 			if( ($2.tipo == constante_tipo_inteiro || $2.tipo == constante_tipo_caracter) && 
-				$2.label.find(prefixo_variavel_usuario) == std::string::npos){
+				$2.estruturaDoConteudo == constante_estrutura_variavel){
 				
 				pair<string,int> tagCaseENumProx = gerarNovaTagSwitch(true);
 				string proxCase = tag_case_inicio + to_string(tagCaseENumProx.second);
@@ -1305,7 +1375,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 		string params[1] = {dolar2.label};
 		yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
 	}
-	else
+	else //Você cria a variável e inclui no mapaDeContexto.
 	{
 		//cout << "Entrou no else: \n\n\n";
 		int tamanho = 0;
