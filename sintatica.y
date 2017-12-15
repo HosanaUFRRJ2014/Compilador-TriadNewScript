@@ -52,6 +52,8 @@ int conta;
 
 %}
 
+%token TK_PALAVRA_FUNC
+
 %token TK_NUM
 %token TK_BOOL
 %token TK_CHAR
@@ -154,6 +156,10 @@ COMANDO 	: E ';'
 			E_FLUXO_CONTROLE
 			|
 			E_BREAK_CONTINUE ';'
+			|
+			DECLARACAO_FUNCAO
+			|
+			AUTO_CHAMADA
 			;
 
 E			: E TK_OP_ARIT_PRIO1 E
@@ -265,7 +271,7 @@ E			: E TK_OP_ARIT_PRIO1 E
 			|
 			ARRAY
 			;
-
+			
 ARRAY	: '[' DIMENSOES_INDICES ']' //Criação de array
 		{
 			$$ = $2;
@@ -286,37 +292,57 @@ ARRAY	: '[' DIMENSOES_INDICES ']' //Criação de array
 
 DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
 					{
-						if(!($1.tipo == constante_tipo_inteiro && $3.tipo == constante_tipo_inteiro))
-						{
-							//dispara erro ...
-						}						
-					}
-					|
-					VALOR
-					{
-						if($1.tipo != constante_tipo_inteiro && $1.estruturaDoConteudo != constante_estrutura_variavel)
+						if($3.tipo != constante_tipo_inteiro)
 						{
 							//dispara erro ...
 						}
 						
-						if($1.estruturaDoConteudo == constante_estrutura_variavel);						
+						if($3.estruturaDoConteudo == constante_estrutura_variavel)
+						{
+							//Fazer lógica para índice como variável.
+						}
+						else //Ele será inteiro de TK_NUM
+						{
+							//Fazer lógica para índice como sendo numero inteiro.
+						}					
+					}
+					|
+					VALOR
+					{
+						if($1.tipo != constante_tipo_inteiro)
+						{
+							//dispara erro ...
+						}
+						
+						if($1.estruturaDoConteudo == constante_estrutura_variavel)
+						{
+							//Fazer lógica para índice como variável.
+						}
+						else //Ele será inteiro de TK_NUM
+						{
+							//Fazer lógica para índice como sendo numero inteiro.
+							$$ = $1;
+							adicionarTamanhoDimensoesArray($1.label);
+							
+							
+							
+						}
+
 					}
 					;
-		
-
 /*
-
-		void adicionarIndiceDimensaoArray(int);
-		void removerTopoIndiceDimensaoArray();
-		bool pilhaIndiceDimensaoArrayVazia()
-		int obterTopoIndiceDimensaoArray();
+		void adicionarTamanhoDimensoesArray(string,vector<string>*,bool);
+		void removerTopoTamanhoDimensoesArray(vector<string>*,bool);
+		bool pilhaTamanhoDimensoesArrayVazia(vector<string>*,bool);
+		string obterTopoTamanhoDimensoesArray(vector<string>*,bool);
+		string obterElementoTamanhoDimensoesArray(int,vector<string>*,bool);
 
 	struct ATRIBUTOS
 	{
 		string label;
 		string traducaoDeclaracaoDeVariaveis;
 		string traducao;
-		string tipo;Hosana...
+		string tipo;
 		int escopoDeAcesso = -1;
 		int tamanho = 0;
 		bool ehDinamica = false;

@@ -68,44 +68,73 @@ namespace TratamentoArray
 	
 	}
 	
-	namespace PilhaIndiceDimensaoArray{
-		vector<string> pilhaIndiceDimensaoArray(0);
+	namespace PilhaTamanhoDimensoesArray{
+		//Pilha global para obter os valores durante o parser do código e depois passar para a pilha de DADOS_VARIAVEL associado ao Array.
+		vector<string> pilhaTamanhoDimensoesArray(0);
 
-		void adicionarIndiceDimensaoArray(string);
-		void removerTopoIndiceDimensaoArray();
-		bool pilhaIndiceDimensaoArrayVazia();
-		string obterTopoIndiceDimensaoArray();
-		string obterElementoIndiceDimensaoArray(int);
-		int obterDimensaoArray();
+		void adicionarTamanhoDimensoesArray(string,vector<string>*,bool);
+		void removerTopoTamanhoDimensoesArray(vector<string>*,bool);
+		bool pilhaTamanhoDimensoesArrayVazia(vector<string>*,bool);
+		string obterTopoTamanhoDimensoesArray(vector<string>*,bool);
+		string obterElementoTamanhoDimensoesArray(int,vector<string>*,bool);
+		//int obterDimensaoArray();
 
-		void adicionarIndiceDimensaoArray(ATRIBUTOS *dolardolar,string indiceDimensao){
-			pilhaIndiceDimensaoArray.push_back(indiceDimensao);
+		void adicionarTamanhoDimensoesArray(string indiceDimensao,vector<string> *pilhaDadosVar = NULL, bool acaoPilhaVar = false){
+		
+			if(!acaoPilhaVar)
+				pilhaTamanhoDimensoesArray.push_back(indiceDimensao);
+			else
+				pilhaDadosVar->push_back(indiceDimensao);
+	
 		}
 		
-		void removerTopoIndiceDimensaoArray(ATRIBUTOS *dolardolar){
-			pilhaIndiceDimensaoArray.pop_back();
+		void removerTopoTamanhoDimensoesArray(vector<string> *pilhaDadosVar = NULL, bool acaoPilhaVar = false){
+		
+			if(!acaoPilhaVar)
+				pilhaTamanhoDimensoesArray.pop_back();
+			else
+				pilhaDadosVar->pop_back();
 		}
 		
-		bool pilhaIndiceDimensaoArrayVazia(ATRIBUTOS *dolardolar){
-			return pilhaIndiceDimensaoArray.empty();
+		bool pilhaTamanhoDimensoesArrayVazia(vector<string> *pilhaDadosVar = NULL, bool acaoPilhaVar = false){
+		
+			if(!acaoPilhaVar)
+				return pilhaTamanhoDimensoesArray.empty();
+			else
+				return pilhaDadosVar->empty();
 		}
 				
-		string obterTopoIndiceDimensaoArray(ATRIBUTOS *dolardolar){
-			return pilhaIndiceDimensaoArray.at(pilhaIndiceDimensaoArray.size() -1);
+		string obterTopoTamanhoDimensoesArray(vector<string> *pilhaDadosVar = NULL, bool acaoPilhaVar = false){
+		
+			if(!acaoPilhaVar)
+				return pilhaTamanhoDimensoesArray.at(pilhaTamanhoDimensoesArray.size() -1);
+			else
+				return pilhaDadosVar.at(pilhaDadosVar.size() -1);
 		}
 		
-		string obterElementoIndiceDimensaoArray(ATRIBUTOS* dolardolar,int ind){
-			if(!(ind < 0 && ind >= pilhaIndiceDimensaoArray.size()))
-				return pilhaIndiceDimensaoArray.at(ind);
+		string obterElementoTamanhoDimensoesArray(int ind,vector<string> *pilhaDadosVar = NULL, bool acaoPilhaVar = false){
+		
+			if(!acaoPilhaVar)
+			{
+				if(!(ind < 0 && ind >= pilhaTamanhoDimensoesArray.size()))
+					return pilhaTamanhoDimensoesArray.at(ind);
+				else
+					cout << "ERRO NO ACESSO AO ÍNDICE" << endl << endl;
+			}
 			else
-				cout << "ERRO NO ACESSO AO ÍNDICE" << endl << endl;
+			{
+				if(!(ind < 0 && ind >= pilhaDadosVar.size()))
+					return pilhaDadosVar.at(ind);
+				else
+					cout << "ERRO NO ACESSO AO ÍNDICE" << endl << endl;
+			}
 		}
 		
 		//int obterDimensaoArray(ATRIBUTOS* dolar); 
 		
 	}
 	
-	using namespace PilhaIndiceDimensaoArray;
+	using namespace PilhaTamanhoDimensoesArray;
 	using namespace TraducaoArray;
 
 }
