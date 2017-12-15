@@ -52,8 +52,6 @@ int conta;
 
 %}
 
-%token TK_PALAVRA_FUNC
-
 %token TK_NUM
 %token TK_BOOL
 %token TK_CHAR
@@ -156,10 +154,6 @@ COMANDO 	: E ';'
 			E_FLUXO_CONTROLE
 			|
 			E_BREAK_CONTINUE ';'
-			|
-			DECLARACAO_FUNCAO
-			|
-			AUTO_CHAMADA
 			;
 
 E			: E TK_OP_ARIT_PRIO1 E

@@ -109,7 +109,7 @@ namespace TratamentoArray
 			if(!acaoPilhaVar)
 				return pilhaTamanhoDimensoesArray.at(pilhaTamanhoDimensoesArray.size() -1);
 			else
-				return pilhaDadosVar.at(pilhaDadosVar.size() -1);
+				return pilhaDadosVar->at(pilhaDadosVar->size() -1);
 		}
 		
 		string obterElementoTamanhoDimensoesArray(int ind,vector<string> *pilhaDadosVar = NULL, bool acaoPilhaVar = false){
@@ -123,8 +123,8 @@ namespace TratamentoArray
 			}
 			else
 			{
-				if(!(ind < 0 && ind >= pilhaDadosVar.size()))
-					return pilhaDadosVar.at(ind);
+				if(!(ind < 0 && ind >= pilhaDadosVar->size()))
+					return pilhaDadosVar->at(ind);
 				else
 					cout << "ERRO NO ACESSO AO ÍNDICE" << endl << endl;
 			}
