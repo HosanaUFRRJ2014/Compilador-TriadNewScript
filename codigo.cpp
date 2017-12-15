@@ -106,7 +106,8 @@ FIMWHILESTRtemp11:
 	strcpy(temp21,"");
 	strcat(temp21,variavelDoUsuario1);
 	strcat(temp21,variavelDoUsuario2);
-	variavelDoUsuario3 = temp21; //VARUSER_c
+	variavelDoUsuario3 = (char*) malloc(sizeof(temp21));
+		strcpy(variavelDoUsuario3,temp21);
 
 
 	std::cout << variavelDoUsuario3 <<  "\n";

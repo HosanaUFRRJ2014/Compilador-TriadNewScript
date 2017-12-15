@@ -377,9 +377,11 @@ VALOR		: TK_NUM
 				}
 
 				DADOS_VARIAVEL metadata = recuperarDadosVariavel($1.label);
-				$1.ehDinamica = metadata.ehDinamica;
-				$1.tamanho = metadata.tamanho;
-				$$ = $1;
+
+				//IMPORTANTE: comentando essas duas linhas pq o william falou que poderia dar problemas na parte dele.
+				/*$1.ehDinamica = metadata.ehDinamica;
+				$1.tamanho = metadata.tamanho;*/
+
 				//$1.tipo = metadata.tipo; //pode ser que precise
 			}
 			|
@@ -439,6 +441,8 @@ ID			: TK_ID
 				if(variavelJaDeclarada($5.label, true, escopo)){
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($5.label, escopo);
 					$$.tipo = metaData.tipo;
+					$$.tamanho = metaData.tamanho;
+					$$.ehDinamica = metaData.ehDinamica;
 
 					if($$.tipo == "")
 						$$.estruturaDoConteudo = constante_estrutura_variavelSemTipo;
@@ -457,6 +461,8 @@ ID			: TK_ID
 				if(variavelJaDeclarada($4.label, false, 0)){
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($4.label, 0);
 					$$.tipo = metaData.tipo;
+					$$.tamanho = metaData.tamanho;
+					$$.ehDinamica = metaData.ehDinamica;
 					if($$.tipo == "")
 						$$.estruturaDoConteudo = constante_estrutura_variavelSemTipo;
 					else
@@ -1388,10 +1394,10 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 					dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipo + " * " + label+ "; //" + labelPrefix + "\n";
 
 					//TENTATIVA ATRIBUICAO COM MALLOC
-					//dolarDolar.traducao = dolar4.traducao + "\t" + label +" = (char*) malloc(" + to_string(dolar4.tamanho) + ");\n\t" + montarCopiarString(label, dolar4.label) + ";\n";
+					dolarDolar.traducao = dolar4.traducao + "\t" + label +" = (char*) malloc(sizeof(" + dolar4.label + "));\n\t" + montarCopiarString(label, dolar4.label) + ";\n";
 
 					//TENTATIVA ATRIBUINDO PONTEIRO
-					dolarDolar.traducao = dolar4.traducao + "\t" + label +" = "+ dolar4.label + "; //" + labelPrefix + "\n";
+					//dolarDolar.traducao = dolar4.traducao + "\t" + label +" = "+ dolar4.label + "; //" + labelPrefix + "\n";
 
 			}
 			else
