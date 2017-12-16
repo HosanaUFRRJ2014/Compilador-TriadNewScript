@@ -23,9 +23,9 @@ namespace Atributos
 		bool ehDinamica = false;
 		string estruturaDoConteudo;
 		string labelTamanhoDinamicoString;
-		
+
 	};
-	
+
 //	recuperarLabelCodigoIntermediario($x.label)
 
 	#endif

@@ -9,8 +9,9 @@ namespace ConstanteTipos
 	#define constante_tipo_booleano "boolean"
 	#define constante_tipo_caracter "char"
 	#define constante_tipo_string "string"
+	#define constante_tipo_array "array"	
 	#define constante_erro "erro"
-	
+		
 	#define constante_estrutura_variavel "variavel"
 	#define constante_estrutura_variavelSemTipo "variavelSemTipo"
 	#define constante_estrutura_tipoPrimitivo "primitivo"
@@ -21,7 +22,7 @@ namespace ConstanteTipos
 	#define constante_tipo_default "default"
 	#define constante_tipo_break "break"
 	#define constante_tipo_continue "continue"
-	#define constante_tipo_criacao_sem_atribuicao "semAtribuicao"
+	//#define constante_tipo_criacao_sem_atribuicao "semAtribuicao"
 	#define constante_tipo_condicao_vazia_for "condicaoVazia"
 	
 	using namespace std;

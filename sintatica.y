@@ -13,9 +13,12 @@
 #include "TratamentoString.h"
 #include "EntradaESaida.h"
 #include "ControleDeFluxo.h"
+#include "TratamentoArray.h"
+#include "TratamentoOperadoresCompostos.h"
 
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_NAO_BOOLEAN "Os operandos de expressões lógicas precisam ser do tipo boolean"
 #define MSG_ERRO_OPERADOR_LOGICO_COM_OPERANDOS_TIPOS_DIFERENTES "Os operandos de expressões relacionais precisam ser do mesmo tipo"
+//#define prefixo_variavel_sistema "temp"
 
 #define YYDEBUG 0
 
@@ -28,6 +31,8 @@ using namespace Atributos;
 using namespace TratamentoString;
 using namespace EntradaESaida;
 using namespace ControleDeFluxo;
+using namespace TratamentoArray;
+using namespace TratamentoOperadoresCompostos;
 
 int yylex(void);
 void yyerror(string);
@@ -36,14 +41,16 @@ string definicoesDeFuncoes();
 bool verificarPossibilidadeDeConversaoExplicita(string, string);
 string verificarTipoResultanteDeCoercao(string, string, string);
 ATRIBUTOS tratarExpressaoAritmetica(string, ATRIBUTOS, ATRIBUTOS);
+ATRIBUTOS tratarExpressaoAritmeticaComposta(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoLogicaBinaria(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoLogicaUnaria(string, ATRIBUTOS);
+ATRIBUTOS tratarExpressaoLogicaComposta(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 //string gerarNovaVariavel();
 
 ATRIBUTOS tratarDeclaracaoSemAtribuicao(ATRIBUTOS);
 ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS, ATRIBUTOS);
-ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS, ATRIBUTOS, bool ehDinamico = false);
+ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS, ATRIBUTOS, bool ehDinamica = false);
 
 int conta;
 
@@ -58,12 +65,17 @@ int conta;
 %token TK_OP_ARIT_PRIO1
 %token TK_OP_ARIT_PRIO2
 %token TK_OP_ARIT_PRIO3
-%token TK_OP_ARIT_COMP
+%token TK_OP_ARIT_COMP_PRIO1
+%token TK_OP_ARIT_COMP_PRIO2
 %token TK_OP_LOG_BIN_PRIO1
 %token TK_OP_LOG_BIN_PRIO2
+%token TK_OP_LOG_COMP_PRIO1
+%token TK_OP_LOG_COMP_PRIO2
 %token TK_OP_LOG_UNA
 %token TK_OP_REL_PRIO1
 %token TK_OP_REL_PRIO2
+
+//******* I
 
 %token TK_IF
 %token TK_ELSE
@@ -75,10 +87,12 @@ int conta;
 %token TK_DEFAULT
 %token TK_BREAK
 %token TK_CONTINUE
+%token TK_LEN
 
 %token TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_PALAVRA_PRINT TK_PALAVRA_SCAN
 //%token TK_FIM TK_ERROR //estes tokens só tinham uma referência nesse sintatica se quebrar descomentar
 %token TK_CONVERSAO_EXPLICITA
+//*********** F
 
 %token TK_PALAVRA_VAR TK_ID TK_PALAVRA_FUNC
 %token TK_BACKSCOPE TK_PALAVRA_GLOBAL
@@ -89,7 +103,10 @@ int conta;
 %nonassoc TK_ELSE //Eliminar a ambiguidade inerente do if-else. O yacc por naturalidade já o faz, mas isso evita o reconhecimento do mesmo do conflito de shift/reduce.
 
 %nonassoc TK_OP_ARIT_UNA // ++, --
-%nonassoc TK_OP_ARIT_COMP // +=, -=, *=, /=, etc... vide slides LP
+%nonassoc TK_OP_ARIT_COMP_PRIO1 // +=, -= vide slides LP
+%nonassoc TK_OP_ARIT_COMP_PRIO2 //*=, /=
+%nonassoc TK_OP_LOG_COMP_PRIO1 //or=
+%nonassoc TK_OP_LOG_COMP_PRIO2 //and=
 %left TK_OP_LOG_BIN_PRIO1 // or
 %left TK_OP_LOG_BIN_PRIO2 // and
 %nonassoc TK_OP_REL_PRIO1 // ==, !=
@@ -98,7 +115,6 @@ int conta;
 %left TK_OP_ARIT_PRIO2 // *, /
 %right TK_OP_LOG_UNA // not
 %left TK_OP_ARIT_PRIO3 //**
-%right TK_CONVERSAO_EXPLICITA
 
 %%
 
@@ -107,7 +123,7 @@ S	 		: COMANDOS
 			{
 
 //				cout << "/*Compilador TriadNewScript*/\n" << "#include <stdio.h>\n#include <stdlib.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n#define TAMANHO_INICIAL_STRING 10\n#define FATOR_MULTIPLICADOR_STRING 2\n#define FATOR_CARGA_STRING 1\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\nint main(void)\n{\n" << $1.traducao << endl << $6.traducao << "FIMCODINTER:\treturn 0;\n}" << endl;
-				cout << "/*Compilador TriadNewScript*/\n" << "#include <stdio.h>\n#include <stdlib.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n" << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\n\n" << definicoesDeFuncoes() << "\nint main(void)\n{\n" << $1.traducao << "FIMCODINTER:\treturn 0;\n}" << endl;
+				cout << "/*Compilador TriadNewScript*/\n" << "#include <stdio.h>\n#include <stdlib.h>\n#include <iostream>\n#include <string.h>\n#include <sstream>\n\n#define TRUE 1\n#define FALSE 0\n\n" << constroiDefinesParaStringDinamica() << substituirTodasAsDeclaracoesProvisorias($1.traducaoDeclaracaoDeVariaveis) << "\n\n" << definicoesDeFuncoes() << "\nint main(void)\n{\n" << $1.traducao << "FIMCODINTER:\treturn 0;\n}" << endl;
 			}
 			;
 
@@ -148,66 +164,7 @@ COMANDO 	: E ';'
 			E_FLUXO_CONTROLE
 			|
 			E_BREAK_CONTINUE ';'
-			|
-			DECLARACAO_FUNCAO
-//			|
-//			CHAMADA_FUNCAO ';'
 			;
-
-DECLARACAO_FUNCAO:	TK_PALAVRA_FUNC NOME_FUNC PARAMETROS BLOCO
-			{
-				cout << "final declaracao funcao ... " << endl;
-			}
-			;
-
-NOME_FUNC:	FUNC_ID
-				{
-				}
-				|
-				{
-				}
-				;
-					
-FUNC_ID:		TK_ID 
-				{
-					cout << "nome funcao ... " << endl;
-				}
-				;
-
-PARAMETROS:	'(' ARGS_FUNC ')'
-				{}
-				|
-				'(' ')'
-				{
-					cout << "sem paramentro ... " << endl;
-				}
-				;
-				
-ARGS_FUNC:	ARGS_FUNC ',' ARG_FUNC
-				{
-					cout << "vaios paramentros ... " << endl;
-				}
-				|
-				ARG_FUNC
-				{
-					cout << "1 paramentro ... " << endl;
-				}
-				;
-				
-ARG_FUNC:	TK_ID
-				{
-					cout << "paramentro ... " << endl;
-				}
-				;
-/*			
-CHAMADA_FUNCAO:	FUNC_ID PARAMETROS
-						{
-						}
-						|
-						DECLARACAO_FUNCAO PARAMETROS
-						{}
-						;
-*/
 
 E			: E TK_OP_ARIT_PRIO1 E
 			{
@@ -257,12 +214,32 @@ E			: E TK_OP_ARIT_PRIO1 E
 				$$.estruturaDoConteudo = constante_estrutura_expressao;
 			}
 			|
-			E TK_OP_ARIT_COMP E
-			{}
-			|
-			'(' E ')'
+			E TK_OP_ARIT_COMP_PRIO1 E
 			{
-				$$ = $2;
+				$$ = tratarExpressaoAritmeticaComposta($2.label, $1, $3);
+				$$.estruturaDoConteudo = constante_estrutura_expressao;
+
+			}
+			|
+			E TK_OP_ARIT_COMP_PRIO2 E
+			{
+				$$ = tratarExpressaoAritmeticaComposta($2.label, $1, $3);
+				$$.estruturaDoConteudo = constante_estrutura_expressao;
+
+			}
+			|
+			E TK_OP_LOG_COMP_PRIO1 E
+			{
+				$$ = tratarExpressaoLogicaComposta($2.label, $1, $3);
+				$$.estruturaDoConteudo = constante_estrutura_expressao;
+
+			}
+			|
+			E TK_OP_LOG_COMP_PRIO2 E
+			{
+				$$ = tratarExpressaoLogicaComposta($2.label, $1, $3);
+				$$.estruturaDoConteudo = constante_estrutura_expressao;
+
 			}
 /*
 	//tratar este caso em especifico depois ... teste : var a = 1; (-a); gera sintax error	
@@ -312,10 +289,112 @@ E			: E TK_OP_ARIT_PRIO1 E
 			{
 				$$ = $1;
 				if($1.estruturaDoConteudo == constante_estrutura_variavel)
-					$$.label = recuperarNomeTraducao($1.label);
+					$$.label = recuperarNomeTraducao($$.label);
 
 			}
+			|
+			TK_CONVERSAO_EXPLICITA VALOR
+			{
+				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
+				$$.traducao = $2.traducao;
+				if(verificarPossibilidadeDeConversaoExplicita($2.tipo, $1.tipo)){
+					$$.label = gerarNovaVariavel();
+					$$.tipo = $1.tipo;
+					$$.tamanho = $1.tamanho;
+					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $$.tipo + " " + $$.label + ";\n";
+
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + $2.label + ";\n";
+				}else{
+					string params[2] = {$2.tipo, $1.tipo};
+					yyerror(montarMensagemDeErro(MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA, params, 2));
+				}
+			}
+			|
+			ARRAY
 			;
+			
+ARRAY	: '[' DIMENSOES_INDICES ']' //Criação de array
+		{
+			$$ = $2;
+			
+			
+			//$$.estruturaDoConteudo = constante_estrutura_array;
+		}
+		/*
+		|
+		'{' ELEMENTOS '}' //Criação de array com elementos definidos
+		{
+			$$ = $2;
+		}
+		|
+		ID '[' DIMENSOES_INDICES ']'
+		*/
+		;
+
+DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
+					{
+						if($3.tipo != constante_tipo_inteiro)
+						{
+							//dispara erro ...
+						}
+						
+						if($3.estruturaDoConteudo == constante_estrutura_variavel)
+						{
+							//Fazer lógica para índice como variável.
+						}
+						else //Ele será inteiro de TK_NUM
+						{
+							//Fazer lógica para índice como sendo numero inteiro.
+						}					
+					}
+					|
+					VALOR
+					{
+						if($1.tipo != constante_tipo_inteiro)
+						{
+							//dispara erro ...
+						}
+						
+						if($1.estruturaDoConteudo == constante_estrutura_variavel)
+						{
+							//Fazer lógica para índice como variável.
+						}
+						else //Ele será inteiro de TK_NUM
+						{
+							//Fazer lógica para índice como sendo numero inteiro.
+							$$ = $1;
+							adicionarTamanhoDimensoesArray($1.label);
+							
+							
+							
+						}
+
+					}
+					;
+/*
+		void adicionarTamanhoDimensoesArray(string,vector<string>*,bool);
+		void removerTopoTamanhoDimensoesArray(vector<string>*,bool);
+		bool pilhaTamanhoDimensoesArrayVazia(vector<string>*,bool);
+		string obterTopoTamanhoDimensoesArray(vector<string>*,bool);
+		string obterElementoTamanhoDimensoesArray(int,vector<string>*,bool);
+
+	struct ATRIBUTOS
+	{
+		string label;
+		string traducaoDeclaracaoDeVariaveis;
+		string traducao;
+		string tipo;
+		int escopoDeAcesso = -1;
+		int tamanho = 0;
+		bool ehDinamica = false;
+		string estruturaDoConteudo;
+		string labelTamanhoDinamicoString;
+		int valorIndiceDimensaoArray;
+		
+	};
+	
+	//	recuperarLabelCodigoIntermediario($x.label)
+*/
 
 VALOR		: TK_NUM
 			{
@@ -348,12 +427,14 @@ VALOR		: TK_NUM
 			STRING
 			{
 				$$ = $1;
+				//cout << "//Entrou em VALOR: STRING\n" << "label1: " << $1.label << "\nlabel$: " << $$.label << endl;
 				$$.estruturaDoConteudo = constante_estrutura_tipoPrimitivo;
 
 			}
 			|
 			ID
 			{
+				//cout << "//Entrou em VALOR: ID" << "\n";
 				//se for variavel aqui sempre vai existir, pq vai ter que ter passado pela verificação da regra ID: TK_ID
 				//e por passar nessa regra terá o tipo já buscado
 				if($1.tipo == ""){
@@ -363,37 +444,45 @@ VALOR		: TK_NUM
 				}
 
 				DADOS_VARIAVEL metadata = recuperarDadosVariavel($1.label);
-				/*
-				if(metadata.ehDinamica > 1) //caso o metadata recuperado não existisse, bugava, colocando valor como 255
-					metadata.ehDinamica = 0;
-				*/
-				$1.ehDinamica = metadata.ehDinamica;
-				$1.tamanho = metadata.tamanho;
-				$$ = $1;
+
+				//IMPORTANTE: comentando essas duas linhas pq o william falou que poderia dar problemas na parte dele.
+				/*$1.ehDinamica = metadata.ehDinamica;
+				$1.tamanho = metadata.tamanho;*/
+
 				//$1.tipo = metadata.tipo; //pode ser que precise
 			}
 			|
-			TK_CONVERSAO_EXPLICITA VALOR
+			'(' E ')'
 			{
-				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
-				$$.traducao = $2.traducao;
-				if(verificarPossibilidadeDeConversaoExplicita($2.tipo, $1.tipo)){
-					$$.label = gerarNovaVariavel();
-					$$.tipo = $1.tipo;
-					$$.tamanho = $1.tamanho;
-					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $$.tipo + " " + $$.label + ";\n";
-
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + $2.label + ";\n";
-				}else{
-					string params[2] = {$2.tipo, $1.tipo};
-					yyerror(montarMensagemDeErro(MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA, params, 2));
-				}
+				$$ = $2;
+			}
+			|
+			FUNCAO
+			|
+			VALOR '.' TK_LEN '(' ')'
+			{
+				cout << "entrou len " << endl; 
 			}
 			;
 
 
+FUNCAO: DECLARACAO_FUNCAO | DECLARACAO_FUNCAO PARAMETROS_CHAMADA | FUNC_ID PARAMETROS_CHAMADA ;
+
+DECLARACAO_FUNCAO:	TK_PALAVRA_FUNC NOME_DECLARACAO_FUNC PARAMETROS_DECLARACAO BLOCO ;
+NOME_DECLARACAO_FUNC: TK_ID | ;
+
+FUNC_ID: TK_ID ;
+
+PARAMETROS_DECLARACAO: '(' ARGS_FUNC_DECLARACAO ')' | '(' ')' ;
+PARAMETROS_CHAMADA: '(' ARGS_FUNC_CHAMADA ')' | '(' ')' ;
+
+ARGS_FUNC_DECLARACAO: ARGS_FUNC_DECLARACAO ',' TK_ID | TK_ID ;
+ARGS_FUNC_CHAMADA: ARGS_FUNC_CHAMADA ',' E | E ;
+
+
 ID			: TK_ID
 			{
+			//	cout << "//Entrou em ID: TK_ID\n";
 				if(variavelJaDeclarada($1.label))
 				{
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
@@ -401,6 +490,8 @@ ID			: TK_ID
 					$$.tipo = metaData.tipo;
 					$$.estruturaDoConteudo = constante_estrutura_variavel;
 					$$.tamanho = metaData.tamanho;
+					$$.ehDinamica = metaData.ehDinamica;
+			//		cout << "//Entrou em ID: TK_ID\n" << "metaData.nome: " << metaData.nome << "\nlabel$: " << $$.label << "label1: " << $1.label << endl;
 				}
 				else
 				{
@@ -426,6 +517,8 @@ ID			: TK_ID
 				if(variavelJaDeclarada($5.label, true, escopo)){
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($5.label, escopo);
 					$$.tipo = metaData.tipo;
+					$$.tamanho = metaData.tamanho;
+					$$.ehDinamica = metaData.ehDinamica;
 
 					if($$.tipo == "")
 						$$.estruturaDoConteudo = constante_estrutura_variavelSemTipo;
@@ -444,6 +537,8 @@ ID			: TK_ID
 				if(variavelJaDeclarada($4.label, false, 0)){
 					DADOS_VARIAVEL metaData = recuperarDadosVariavel($4.label, 0);
 					$$.tipo = metaData.tipo;
+					$$.tamanho = metaData.tamanho;
+					$$.ehDinamica = metaData.ehDinamica;
 					if($$.tipo == "")
 						$$.estruturaDoConteudo = constante_estrutura_variavelSemTipo;
 					else
@@ -461,6 +556,7 @@ STRING	: TK_STRING
 			{
 			//	cout << "Entrou em TK_STRING\n";
 			//	$$.label = gerarNovaVariavel();
+			//	cout << "//Entrou em STRING: TK_STRING\n" << "label1: " << $1.label << "\nlabel$: " << $$.label << endl;
 				$$.tamanho = atualizarTamanhoString($1.label.length()); //tamanho modificado pelo \0 e pelas aspas
 		//		$$.traducaoDeclaracaoDeVariaveis = "char " + $$.label + "[" + to_string($$.tamanho) + "];\n";
 				$$.label = $1.label;
@@ -484,6 +580,7 @@ MULTI_DECLARACAO	: ATRIBUICAO_VARIAVEL_CRIACAO ',' MULTI_DECLARACAO
 					{
 						$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 						$$.traducao = $1.traducao + $3.traducao;
+				//		cout << "//Entrou em MULTI_DECLARACAO: ATRIBUICAO_VARIAVEL_CRIACAO , MULTI_DECLARACAO\n" << "label1: " << $1.label << "\nlabel$: " << $$.label << "\nlabel3" << $3.label <<endl;
 					}
 					|
 					ATRIBUICAO_VARIAVEL_CRIACAO
@@ -492,8 +589,10 @@ MULTI_DECLARACAO	: ATRIBUICAO_VARIAVEL_CRIACAO ',' MULTI_DECLARACAO
 CRIACAO_VARIAVEL	: TK_PALAVRA_VAR TK_ID
 					{
 						$$ = tratarDeclaracaoSemAtribuicao($2);
-						$$.tipo = constante_tipo_criacao_sem_atribuicao;
+						//$$.tipo = constante_tipo_criacao_sem_atribuicao;
+						$$.estruturaDoConteudo = constante_estrutura_variavelSemTipo;
 						$$.label = $2.label;
+				//		cout << "//Entrou em CRIACAO_VARIAVEL TK_PALAVRA_VAR TK_ID\n" << "label2: " << $2.label << "\nlabel$: " << $$.label << endl;
 					}
 					|
 					TK_PALAVRA_VAR TK_ID '=' E
@@ -515,7 +614,7 @@ ATRIBUICAO_VARIAVEL_CRIACAO	:  TK_ID '=' E
 
 ATRIBUICAO_VARIAVEL	:  ID '=' E
 					{
-						cout << "//Entrou em ID '=' VALOR_ATRIBUICAO\n";
+				//		cout << "//Entrou em ID '=' VALOR_ATRIBUICAO\n";
 						$$ = tratarAtribuicaoVariavel($1,$3);
 						/*cout << "--ATRIBUICAO_VARIAVEL----------------\n";
 						//cout << "label1: " << dolar1.label << " tamaho: " << dolar1.tamanho << endl;
@@ -524,7 +623,6 @@ ATRIBUICAO_VARIAVEL	:  ID '=' E
 						cout << "------------------\n";*/
 					}
 					;
-
 
 PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')'
 			{
@@ -553,7 +651,7 @@ SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'
 
 ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN
 			{
-				//cout << $3.traducao << " *******\n";
+				//cout << $1.traducaoDeclaracaoDeVariaveis << " *******\n";
 				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $1.traducaoDeclaracaoDeVariaveis;
 				$$.traducao = $2.traducao + $1.traducao;
 
@@ -611,12 +709,11 @@ ARG_SCAN		: ID ':' TIPO
 					string params[3] = {$1.label.replace(0, strPrefixoVarUsuario.length(), ""), $1.tipo, $3.tipo};
 				yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
 				}*/
-
-				$$ = tratarAtribuicaoVariavel($1, $3, true);
+				bool ehDinamica = true;
+				$$ = tratarAtribuicaoVariavel($1, $3, ehDinamica);
 				$$.label = gerarNovaVariavel();
 				string dolarDolar = $$.label;
 				int tamanho = 0;
-				bool ehDinamica = true;
 				$$.traducao = "";
 				int escopo = numeroEscopoAtual;
 				if($$.escopoDeAcesso >= 0)
@@ -624,11 +721,14 @@ ARG_SCAN		: ID ':' TIPO
 
 				if($3.tipo == constante_tipo_string)
 				{
-					//adicionarDefinicaoDeTipo($1.label, $3.tipo,tamanho,ehDinamico);
+					//adicionarDefinicaoDeTipo($1.label, $3.tipo,tamanho,ehDinamica);
 
+					string labelRecuperada = recuperarNomeTraducao($1.label, escopo);
 					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "char * " + $$.label + ";\n";
-					$$ = traducaoStringDinamica($$, recuperarNomeTraducao($1.label, escopo));
-					$$.traducao = $$.traducao + montarCopiarString(recuperarNomeTraducao($1.label, escopo), $$.label) + ";\n";
+					$$ = traducaoStringDinamica($$, labelRecuperada);
+					$$.traducao = $$.traducao + montarCopiarString(labelRecuperada, $$.label) + ";\n";
+					//cout << labelRecuperada << " <<< \n";
+					//cout << $1.label << "\n";
 				}
 
 				else
@@ -642,7 +742,7 @@ ARG_SCAN		: ID ':' TIPO
 					}
 
 
-					//adicionarDefinicaoDeTipo($1.label, $3.label,tamanho,ehDinamico);
+					//adicionarDefinicaoDeTipo($1.label, $3.label,tamanho,ehDinamica);
 					$$.traducao = $$.traducao + "\t" + recuperarNomeTraducao($1.label, escopo) + " = " + dolarDolar + ";\n";
 
 				}
@@ -798,7 +898,8 @@ INIT_VAR	: INITS ',' INIT_VAR
 
 INITS	: CRIACAO_VARIAVEL
 		{
-			if($1.tipo == constante_tipo_criacao_sem_atribuicao){
+			//$1.tipo == constante_tipo_criacao_sem_atribuicao
+			if($1.estruturaDoConteudo == constante_estrutura_variavelSemTipo){
 
 				string params[1] = {$1.label};
 				yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_SEM_ATRIBUICAO_FOR,params,1));
@@ -1029,8 +1130,10 @@ CASE	: TK_CASE E ':' COMANDO
 				//dispara erro ...
 			}
 			//Regra TERMO possui produção que leva em ID, o que não pode.
+			//constante_estrutura_variavel
+			//$2.label.find(prefixo_variavel_usuario) == std::string::npos
 			if( ($2.tipo == constante_tipo_inteiro || $2.tipo == constante_tipo_caracter) && 
-				$2.label.find(prefixo_variavel_usuario) == std::string::npos){
+				$2.estruturaDoConteudo == constante_estrutura_variavel){
 				
 				pair<string,int> tagCaseENumProx = gerarNovaTagSwitch(true);
 				string proxCase = tag_case_inicio + to_string(tagCaseENumProx.second);
@@ -1133,28 +1236,14 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo, op);
 
-	/*
-	a + b
-	if(erro)
-		print erro;
-
-	if(resultado == string)
-		tratarString(op, a, b);
-	else
-		if(a.tipo != resultado)
-			escreve conversao;
-		if(b.tipo != resultado)
-			escreve convesao;
-	*/
-
-
 	string label_old = dolarDolar.label;
 
 	if(resultado == constante_erro)
 	{
-		//cout << "Deu erro no mapa\n";
 		string params[3] = {op,dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+		dolarDolar.tipo = constante_erro;
+		return dolarDolar;
 	}
 
 	/*
@@ -1164,44 +1253,40 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	*/
 	if(resultado == constante_tipo_string)
 	{
-
-		string traducao = realizarOperacaoAritmeticaString(op, &dolarDolar,&dolar1,&dolar3);
+		string varTamDolar1 = gerarNovaVariavel();
+		string varTamDolar3 = gerarNovaVariavel();
+		string varTamDolarDolar = gerarNovaVariavel();
+		string traducao = realizarOperacaoAritmeticaString(op, &dolarDolar,&dolar1,&dolar3, varTamDolarDolar, varTamDolar1, varTamDolar3);
 
 		if(traducao == "") //o operador ainda não está implementado. Fiz assim para não alterar no mapa, vou apagar o if
 		{
 			string params[3] = {op,dolar1.tipo, dolar3.tipo};
 			yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
+			dolarDolar.tipo = constante_erro;
+			return dolarDolar;
 
 		}
 
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
-
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoDeString(op, dolarDolar, dolar1,dolar3);
-
-
-
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoDeStringConcatenada(op, &dolarDolar, &dolar1,&dolar3, varTamDolarDolar, varTamDolar1, varTamDolar3);
 
 	}
 
 	else
 	{
-
-		if((dolar1.tipo == dolar3.tipo) /*&& (dolar1.tipo == resultado)*/) //se não houver necessidade de conversão
+		if(dolar1.tipo == dolar3.tipo) //se não houver necessidade de conversão
 		{
 			//cout << "label0\n";
 			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + dolar1.label + " " + op + " " + dolar3.label + ";\n";
 			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + dolar1.tipo + " " + dolarDolar.label + ";\n";
 		}
 
-
 		else if(dolar1.tipo != resultado)
 		{
 			//cout << "label1\n";
 			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
-
 			dolarDolar.label = gerarNovaVariavel();
 			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + resultado + " " + label_old +  ";\n" + resultado + " " + dolarDolar.label +  ";\n";
-
 			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " + label_old + " " + op + " " + dolar3.label + ";\n";
 		}
 		else if(dolar3.tipo != resultado)
@@ -1220,6 +1305,15 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	return dolarDolar;
 }
 
+ATRIBUTOS tratarExpressaoAritmeticaComposta(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
+{
+	ATRIBUTOS dolarDolar;
+	string operadorSimples = removerSimboloIgualdade(op);
+	dolarDolar = tratarExpressaoAritmetica(operadorSimples, dolar1, dolar3);
+	dolarDolar.traducao += "\t" + dolar1.label +  " = " + dolarDolar.label + ";\n";
+	return dolarDolar;
+
+}
 
 ATRIBUTOS tratarExpressaoLogicaUnaria(string op, ATRIBUTOS dolar2)
 {
@@ -1255,6 +1349,16 @@ ATRIBUTOS tratarExpressaoLogicaBinaria(string op, ATRIBUTOS dolar1, ATRIBUTOS do
 	}
 }
 
+ATRIBUTOS tratarExpressaoLogicaComposta(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
+{
+	ATRIBUTOS dolarDolar;
+	string operadorSimples = removerSimboloIgualdade(op);
+	dolarDolar = tratarExpressaoLogicaBinaria(operadorSimples, dolar1, dolar3);
+	dolarDolar.traducao += "\t" + dolar1.label +  " = " + dolarDolar.label + ";\n";
+	return dolarDolar;
+
+}
+
 ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
 	ATRIBUTOS dolarDolar;
@@ -1276,6 +1380,8 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 
 		string params[3] = {op, dolar1.tipo, dolar3.tipo};
 		yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS, params, 3));
+		dolarDolar.tipo = constante_erro;
+		return dolarDolar;
 	}
 
 	if(dolar1.tipo == dolar3.tipo)
@@ -1359,7 +1465,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 		string params[1] = {dolar2.label};
 		yyerror(montarMensagemDeErro(MSG_ERRO_DUPLA_DECLARACAO_DE_VARIAVEL, params, 1));
 	}
-	else
+	else //Você cria a variável e inclui no mapaDeContexto.
 	{
 		//cout << "Entrou no else: \n\n\n";
 		int tamanho = 0;
@@ -1383,10 +1489,10 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 					dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipo + " * " + label+ "; //" + labelPrefix + "\n";
 
 					//TENTATIVA ATRIBUICAO COM MALLOC
-					//dolarDolar.traducao = dolar4.traducao + "\t" + label +" = (char*) malloc(" + to_string(dolar4.tamanho) + ");\n\t" + montarCopiarString(label, dolar4.label) + ";\n";
+					dolarDolar.traducao = dolar4.traducao + "\t" + label +" = (char*) malloc(sizeof(" + dolar4.label + "));\n\t" + montarCopiarString(label, dolar4.label) + ";\n";
 
 					//TENTATIVA ATRIBUINDO PONTEIRO
-					dolarDolar.traducao = dolar4.traducao + "\t" + label +" = "+ dolar4.label + "; //" + labelPrefix + "\n";
+					//dolarDolar.traducao = dolar4.traducao + "\t" + label +" = "+ dolar4.label + "; //" + labelPrefix + "\n";
 
 			}
 			else
@@ -1408,6 +1514,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis;
 		dolarDolar.label = label;
 		dolarDolar.tipo = dolar4.tipo;
+		dolarDolar.ehDinamica = dolar4.ehDinamica;
 		dolarDolar.tamanho = dolar4.tamanho;
 	}
 
@@ -1417,13 +1524,18 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 }
 
 //ID '=' VALOR_ATRIBUICAO ';'
-ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDinamico)
+ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDinamica)
 {
 	ATRIBUTOS dolarDolar;
 	string tipo = "";
 	int tamanho = 0;
 	string labelRecuperada = recuperarNomeTraducao(dolar1.label);
-	//bool ehDinamico = false;
+
+	//bool ehDinamica = false;
+	/*std::cout << "sin dolar1.ehDinamica:" << dolar1.ehDinamica << '\n';
+	std::cout << "sin dolar3.ehDinamica:" << dolar3.ehDinamica << '\n';
+	std::cout << "sin ehDinamica:" << ehDinamica << '\n';*/
+
 	if(dolar1.label != dolar3.label)
 	{
 		DADOS_VARIAVEL metaData;
@@ -1451,12 +1563,13 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 				metaData.tamanho = dolar3.tamanho;
 			}
 
+			metaData.ehDinamica = ehDinamica;
 			if(dolar1.escopoDeAcesso >= 0){
-				adicionarDefinicaoDeTipo(dolar1.label, tipo, dolar3.tamanho,ehDinamico, dolar1.escopoDeAcesso);
+				adicionarDefinicaoDeTipo(dolar1.label, tipo, dolar3.tamanho,ehDinamica, dolar1.escopoDeAcesso);
 				atualizarNoMapa(metaData, dolar1.escopoDeAcesso);
 			}
 			else{
-				adicionarDefinicaoDeTipo(dolar1.label, tipo,dolar3.tamanho,ehDinamico);
+				adicionarDefinicaoDeTipo(dolar1.label, tipo,dolar3.tamanho,ehDinamica);
 				atualizarNoMapa(metaData);
 			}
 
@@ -1488,7 +1601,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 		dolarDolar.label = dolar1.label;
 		dolarDolar.tipo = dolar1.tipo;
 		dolarDolar.tamanho = dolar3.tamanho;
-		dolarDolar.ehDinamica = dolar3.ehDinamica;
+		dolarDolar.ehDinamica = ehDinamica;
 		dolarDolar.escopoDeAcesso = dolar1.escopoDeAcesso;
 
 	}

@@ -14,7 +14,39 @@ i = d + 10.5 * 4;
 show(i);*/
 
 //dúvidas se a concatenação deverá gerar o resultado conforme gera no código abaixo
-var i = "eita";
+/*var i = "eita";
 var h  = i + " atras de " + 1;
+*/
 
-show(h);
+//fazer impressão de mensagem de erro em tempo de execução
+//read(h:bool);
+
+//Corrigir problema de não poder mudar tipo de "h" de estático para dinâmico
+/*var h = "hosana";
+read(h:string);
+show(h);*/
+
+/*String dinâmica segue bugada
+var a,g;
+read(a:string);
+read(g:string);
+//a = "eita atras de eita meus amores";
+//g = " nossa,  eu queria estar vendo series. socorro!";
+
+var c = a + g;
+show(c);
+*/
+
+//O tamanho da string receptora fica desatualizado. Trocar a atribuição final por strcpy
+/*
+var senh = "->ar";
+
+senh += "ar" + "ara";
+show(senh);
+*/
+
+
+var a;
+a = 1.0;
+
+a -= 5;
