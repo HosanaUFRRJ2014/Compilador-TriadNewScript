@@ -1,4 +1,16 @@
+//var b = 3;
+//var a = int[2,3,4,5];
+
 var a;
+a = string[5];
+
+var b = string[2,3,4];
+b = string[5];
+
+var c = float[6,6];
+c = float[15];
+
+
 
 /*
 var a;

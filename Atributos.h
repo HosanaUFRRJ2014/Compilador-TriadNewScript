@@ -22,9 +22,11 @@ namespace Atributos
 		int tamanho = 0;
 		bool ehDinamica = false;
 		string estruturaDoConteudo;
-		string labelTamanhoDinamicoString;		
+		string labelTamanhoDinamicoString;
+		int valorNum = -1; //Retornar valor tipoPrimitivo TK_NUM inteiro.
+
 	};
-	
+
 //	recuperarLabelCodigoIntermediario($x.label)
 
 	#endif

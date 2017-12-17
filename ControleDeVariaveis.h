@@ -16,7 +16,8 @@ namespace ControleDeVariaveis
 		int tamanho = 0; //Para string
 		bool ehDinamica = false; //Para string
 		int escopo;
-		vector<string> pilhaTamanhoDimensoesArray; //Para arrays
+		vector<string> pilhaTamanhoDimensoesArray; //Para arrays -> Guarda as dimensões do array.
+		string tipoArray; //Para arrays -> Tipo primitivo do Arrar.
 		
 	};
 
@@ -31,7 +32,7 @@ namespace ControleDeVariaveis
 		map<string, string> dicionarioNomeTraducaoParaNome;
 
 		void inicializarMapaDeContexto();
-		bool incluirNoMapa(string,int, string);
+		bool incluirNoMapa(string,int, string,vector<string>*);
 		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
 		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
@@ -93,8 +94,8 @@ namespace ControleDeVariaveis
 			return nome;
 		}
 
-		bool incluirNoMapa(string nome, int tamanho, string tipo = "")
-		{
+		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<string> dim = {})
+		{		
 			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
@@ -104,10 +105,14 @@ namespace ControleDeVariaveis
 				variavel.tipo = tipo;
 				variavel.escopo = numeroEscopoAtual;
 				variavel.nomeTraducao = gerarNomeTraducaoVariavelUsuario();
+				variavel.pilhaTamanhoDimensoesArray = dim; //Para o Array.
+				variavel.tipoArray = tipoArray; //Para o Array.
 				dicionarioNomeTraducaoParaNome.insert(pair<string, string>(variavel.nomeTraducao, nome));
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
+				
 				return true;
 			}
+					
 			return false;
 		}
 
@@ -118,6 +123,7 @@ namespace ControleDeVariaveis
 			{
 				mapaDeContexto->at(variavel.nome).tamanho = variavel.tamanho;
 				mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
+				mapaDeContexto->at(variavel.nome).pilhaTamanhoDimensoesArray = variavel.pilhaTamanhoDimensoesArray;
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
@@ -220,7 +226,7 @@ namespace ControleDeVariaveis
 		map<string, string> mapaSubstituicaoDeTipoProvisorio;
 		string construirDeclaracaoProvisoriaDeInferenciaDeTipo(string);
 
-		void adicionarDefinicaoDeTipo(string, string, int,bool, int);
+		void adicionarDefinicaoDeTipo(string, string, int,bool, int,string);
 		string substituirTodasAsDeclaracoesProvisorias(string);
 		string montarTagTipoProvisorio(string, int);
 		string recuperarIdPelaTag(string);
@@ -257,7 +263,7 @@ namespace ControleDeVariaveis
 
 
 		//void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho,  int escopo = numeroEscopoAtual)
-		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho, bool ehDinamica, int escopo = numeroEscopoAtual)
+		void adicionarDefinicaoDeTipo(string id, string tipo, int tamanho, bool ehDinamica, int escopo = numeroEscopoAtual, string tipoArray = "")
 		{
 			/*string constanteMarcacao = constante_subst_tipo_declaracao_variavel;
 			string idPrefixado = adicionaPrefixo(id);
@@ -306,6 +312,29 @@ namespace ControleDeVariaveis
 					charArray = "char " + tipoProvisorio + "[" + to_string(tamanho) + "]";
 
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = charArray;
+			}
+			else if(tipo == constante_tipo_array)
+			{
+				string varArray;
+				string asteristicoDeCristal = " *";
+				string asteristicoDuploDeCristal = " **";
+								
+				if(tipoArray == constante_tipo_inteiro)
+					varArray = constante_tipo_inteiro + asteristicoDeCristal + tipoProvisorio;
+				
+				if(tipoArray == constante_tipo_flutuante)
+					varArray = constante_tipo_flutuante + asteristicoDeCristal + tipoProvisorio;
+					
+				if(tipoArray == constante_tipo_booleano)
+					varArray = constante_tipo_inteiro + asteristicoDeCristal + tipoProvisorio;
+					
+				if(tipoArray == constante_tipo_caracter)
+					varArray = constante_tipo_caracter + asteristicoDeCristal + tipoProvisorio;
+					
+				if(tipoArray == constante_tipo_string)
+					varArray = constante_tipo_caracter + asteristicoDuploDeCristal + tipoProvisorio;
+				
+				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = varArray;
 			}
 			else
 			{

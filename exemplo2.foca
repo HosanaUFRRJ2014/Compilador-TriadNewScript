@@ -26,6 +26,7 @@ var h  = i + " atras de " + 1;
 read(h:string);
 show(h);*/
 
+/*String dinâmica segue bugada
 var a,g;
 read(a:string);
 read(g:string);
@@ -34,3 +35,18 @@ read(g:string);
 
 var c = a + g;
 show(c);
+*/
+
+//O tamanho da string receptora fica desatualizado. Trocar a atribuição final por strcpy
+/*
+var senh = "->ar";
+
+senh += "ar" + "ara";
+show(senh);
+*/
+
+
+var a;
+a = 1.0;
+
+a -= 5;
