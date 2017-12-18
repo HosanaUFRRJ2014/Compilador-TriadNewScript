@@ -9,7 +9,8 @@ namespace ConstanteTipos
 	#define constante_tipo_booleano "boolean"
 	#define constante_tipo_caracter "char"
 	#define constante_tipo_string "string"
-	#define constante_tipo_array "array"	
+	#define constante_tipo_array "array"
+	#define constante_tipo_funcao "função"
 	#define constante_erro "erro"
 		
 	#define constante_estrutura_variavel "variavel"
@@ -17,6 +18,7 @@ namespace ConstanteTipos
 	#define constante_estrutura_tipoPrimitivo "primitivo"
 	#define constante_estrutura_expressao "expressao"
 	#define constante_estrutura_funcao "funcao"
+	#define constante_estrutura_chamadaFuncao "chamadaFuncao"
 	#define constante_estrutura_bloco "BLOCO"
 
 	#define constante_tipo_default "default"
@@ -30,13 +32,17 @@ namespace ConstanteTipos
 	string tipoCodigoIntermediario(string tipo)
 	{
 		if(tipo == constante_tipo_booleano)
-		{
 			return constante_tipo_inteiro;
+	
+		if(tipo == constante_tipo_string){
+			string t = constante_tipo_caracter;
+			return t + "*";
 		}
-		else
-		{
-			return tipo;
+		if(tipo == constante_tipo_funcao){
+			string t = constante_tipo_caracter;
+			return t + "*";
 		}
+		return tipo;
 		
 	}
 }

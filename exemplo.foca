@@ -36,9 +36,14 @@ while(a < 10)
 		
 }
 */
+{
+var a = 1;
+func f(a:int, b:float, c:string(3), d:bool, e:char) : int, bool, string, string(10) {
+	a + b;
+};//(1,(float)2,"aaa", true, 'a');
 
-
-
-
+f(1,(float)2,"aaa", true, 'a'); //+ 2; não tentar isso ...
+}
+//(1,2,"aaa", true, 'a');
 
 //}
