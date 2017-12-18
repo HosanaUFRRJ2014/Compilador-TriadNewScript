@@ -3,6 +3,7 @@
 #include <sstream>
 #include <map>
 #include <utility>
+#include <vector>
 
 using namespace Atributos;
 using namespace ControleDeVariaveis;
@@ -16,10 +17,12 @@ namespace TratamentoString
 	string montarMallocString(string, string );
 	string montarCopiarString(string, string);
 	string montarConcatenarString(string, string);
-	string tratarCaracteresEspeciais(string, string, int *, int *);
+	string montarCompararString(string ,string );
 	int atualizarTamanhoString(int );
-	string realizarTraducaoDeclaracaoDeStringConcatenada(string, ATRIBUTOS *, ATRIBUTOS *, ATRIBUTOS *, string, string, string);
-	string realizarOperacaoAritmeticaString(string, ATRIBUTOS *, ATRIBUTOS *, ATRIBUTOS *, string, string, string);
+	void gerarVetorNovasVariaveis(string, vector<string> *);
+	string realizarTraducaoDeclaracaoOperacaoAritmeticaString(string , ATRIBUTOS * , ATRIBUTOS * , ATRIBUTOS * , vector <string> );
+	string realizarTraducaoDeclaracaoOperacaoRelacionalString(string , ATRIBUTOS * , ATRIBUTOS * , ATRIBUTOS * , vector <string> );
+	string realizarOperacaoString(string , ATRIBUTOS * , ATRIBUTOS * , ATRIBUTOS * , vector <string>);
 	ATRIBUTOS tratarConversaoImplicitaString(string , ATRIBUTOS , ATRIBUTOS );
 	bool necessidaDeclaracaoDinamica(ATRIBUTOS , ATRIBUTOS );
 	string constroiDefinesParaStringDinamica();
@@ -39,41 +42,59 @@ namespace TratamentoString
 
 	string montarCopiarString(string str1, string str2)
 	{
-		string retorno = "\tstrcpy(" + str1 + "," + str2 + ")";
+		return "\tstrcpy(" + str1 + "," + str2 + ")";
 
-		return retorno;
 	}
 
 	string montarConcatenarString(string str1, string str2)
 	{
+		return  "\tstrcat(" + str1 + "," + str2 + ")";
 
-		string retorno = "\tstrcat(" + str1 + "," + str2 + ")";
 
-		return retorno;
+	}
 
+	string montarCompararString(string str1, string str2)
+	{
+		return "strcmp(" + str1 + "," + str2 + ");\n";
 	}
 
 	int atualizarTamanhoString(int tamString)
 	{
 		int novoTamanhoString = 0;
-
 		novoTamanhoString = tamString - 2 + 1; //tirando as duas aspas e colocando o \0
-
 		return novoTamanhoString;
 
 	}
 
+	void gerarVetorNovasVariaveis(string operacao, vector<string> *vetorTemporarias)
+	{
+		int numVariaveis = 3;
+		//vector<string> vetorTemporarias;
+		for (int i = 0; i < numVariaveis; i++)
+		{
+			vetorTemporarias->push_back(gerarNovaVariavel());
+		}
 
-	string realizarTraducaoDeclaracaoDeStringConcatenada(string operacao, ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3, string varTamDolarDolar, string varTamDolar1, string varTamDolar3)
+		if(operacao == "==")
+		{
+			vetorTemporarias->push_back(gerarNovaVariavel());
+		}
+
+	}
+
+	/*Função responsável por gerar as declarações das variáveis de usuário e das temporárias para as operações aritméticas */
+	string realizarTraducaoDeclaracaoOperacaoAritmeticaString(string operacao, ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3, vector <string>  vetorTemporarias )
 	{
 		string retorno = "";
 
 		if(necessidaDeclaracaoDinamica(*dolar1, *dolar3))
 		{
-			retorno = "char * " + dolarDolar->label + ";\n";
-			retorno += "int " + varTamDolar1 + ";\n";
-			retorno += "int " + varTamDolar3+ ";\n";
-			retorno += "int " + varTamDolarDolar + ";\n";
+
+
+			retorno = "char * " + dolarDolar->label + ";\n"; //remover na relacional
+			retorno += "int " + vetorTemporarias.at(0) + ";\n";
+			retorno += "int " + vetorTemporarias.at(1)+ ";\n";
+			retorno += "int " + vetorTemporarias.at(2) + ";\n";
 
 			dolarDolar->ehDinamica = true;
 		}
@@ -84,38 +105,69 @@ namespace TratamentoString
 		return retorno;
 	}
 
-/*	string gerarDeclaracaoTamanhoConcatenacaoString()
+	/*Função responsável por gerar as declarações das variáveis de usuário e das temporárias para as operações relacionais */
+	string realizarTraducaoDeclaracaoOperacaoRelacionalString(string operacao, ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3, vector <string>  vetorTemporarias )
 	{
+		string retorno = "";
 
+		//retorno = "char * " + dolarDolar->label + ";\n"; //remover na relacional
+		retorno += "int " + vetorTemporarias.at(0) + ";\n";
+		retorno += "int " + vetorTemporarias.at(1)+ ";\n";
+		retorno += "int " + vetorTemporarias.at(2) + ";\n";
+
+		if(operacao == "==")
+		{
+		//	vetorTemporarias->push_back(gerarNovaVariavel());
+			retorno += "int " + vetorTemporarias.at(3) + ";\n";
+		}
+
+/*
+		else
+			retorno = "\tchar " + dolarDolar->label + "[" +  to_string(dolarDolar->tamanho) + "]" + ";\n";*/
+
+		return retorno;
 	}
-*/
-	string realizarOperacaoAritmeticaString(string operacao,ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3,
-		string varTamDolarDolar, string varTamDolar1, string varTamDolar3)
+
+	/*Função responsável por gerar o código intermediário das operações aritméticas e relacionais*/
+	string realizarOperacaoString(string operacao,ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3, vector<string>  vetorTemporarias)
 	{
 		string retorno = "";
 
 		//não dá para fazer switch case com string em C++. Essa funcionalidade é do Java 7 +;
 
-		if(necessidaDeclaracaoDinamica(*dolar1,*dolar3))
-		{
-			retorno = "\t" + varTamDolar1 + " = sizeof("+ dolar1->label +");\n";
-			retorno += "\t" + varTamDolar3 + " = sizeof("+ dolar3->label +");\n";
-			retorno += "\t" + varTamDolarDolar + " = " + varTamDolar1 + " + " + varTamDolar3 + ";\n";
-			retorno += montarMallocString(dolarDolar->label,varTamDolarDolar);
-		}
-
-
 		if (operacao == "+")
 		{
+			if(necessidaDeclaracaoDinamica(*dolar1,*dolar3))
+			{
+				//FIXME esses sizeofs podem estar bugando assim como o no .len com a string dinâmica
+				/****TODO colocar isso dentro de uma função***/
+				retorno = "\t" + vetorTemporarias.at(0) + " = sizeof("+ dolar1->label +");\n";
+				retorno += "\t" + vetorTemporarias.at(1) + " = sizeof("+ dolar3->label +");\n";
+				retorno += "\t" + vetorTemporarias.at(2) + " = " + vetorTemporarias.at(0) + " + " + vetorTemporarias.at(1) + ";\n";
+				retorno += montarMallocString(dolarDolar->label,vetorTemporarias.at(2));
+				/********/
+			}
+
 			retorno += montarCopiarString(dolarDolar->label,"\"\"") + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar1->label) + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar3->label) + ";\n";
 			dolarDolar->tamanho = dolar1->tamanho + dolar3->tamanho - 1; //para remover um dos '\0'
 
+		}
+		//TODO - fazer para outras operações aritméticas ...
 
+
+		if (operacao == "==")
+		{
+			retorno = '\t' + vetorTemporarias.at(0) + " = 0;\n";
+			retorno += '\t' + vetorTemporarias.at(1) + " = " + montarCompararString(dolar1->label, dolar3->label);
+			retorno += '\t' + vetorTemporarias.at(2) + " = " + vetorTemporarias.at(0) + " == " + vetorTemporarias.at(1) + ";\n";
+			retorno += '\t' + vetorTemporarias.at(3) + " =! " + vetorTemporarias.at(2) +  ";\n";
 
 		}
-		//TODO - fazer para outras operações aritméticas
+
+
+
 
 		return retorno;
 
@@ -140,6 +192,7 @@ namespace TratamentoString
 
 	}
 
+	/*Função responsável por montar o código intermediário de uma string lida do teclado*/
 	ATRIBUTOS traducaoStringDinamica(ATRIBUTOS atrib, string labelUsuario)
 	{
 

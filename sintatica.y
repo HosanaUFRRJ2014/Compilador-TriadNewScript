@@ -1269,16 +1269,14 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 	}
 
 	/*
-	*TODO
-	*Tratar conversão para tipo String
+	*TODO Tratar conversão para tipo String
 	*
 	*/
 	if(resultado == constante_tipo_string)
 	{
-		string varTamDolar1 = gerarNovaVariavel();
-		string varTamDolar3 = gerarNovaVariavel();
-		string varTamDolarDolar = gerarNovaVariavel();
-		string traducao = realizarOperacaoAritmeticaString(op, &dolarDolar,&dolar1,&dolar3, varTamDolarDolar, varTamDolar1, varTamDolar3);
+		vector<string> vetorTemporarias;
+		gerarVetorNovasVariaveis(op, &vetorTemporarias);
+		string traducao = realizarOperacaoString(op, &dolarDolar,&dolar1,&dolar3, vetorTemporarias);
 
 		if(traducao == "") //o operador ainda não está implementado. Fiz assim para não alterar no mapa, vou apagar o if
 		{
@@ -1290,7 +1288,7 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		}
 
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoDeStringConcatenada(op, &dolarDolar, &dolar1,&dolar3, varTamDolarDolar, varTamDolar1, varTamDolar3);
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoOperacaoAritmeticaString(op, &dolarDolar, &dolar1,&dolar3,vetorTemporarias);
 
 	}
 
@@ -1384,20 +1382,10 @@ ATRIBUTOS tratarExpressaoLogicaComposta(string op, ATRIBUTOS dolar1, ATRIBUTOS d
 ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
 	ATRIBUTOS dolarDolar;
-	dolarDolar.label = gerarNovaVariavel();
-	dolarDolar.traducaoDeclaracaoDeVariaveis += dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
-	/*dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t\t" + constante_tipo_inteiro + " " + dolarDolar.label + ";\n";*/
-
-	dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
-
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo,op);
-
-	//string label_old = dolarDolar.label;
-	dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(constante_tipo_booleano) + " " + dolarDolar.label + ";\n";
 	string operador = op;
 
-	//FIXME - remover a verificação de string daqui, após a implementação dessa operações corretamente.
-	if(resultado == constante_erro || resultado == constante_tipo_string)
+	if(resultado == constante_erro)
 	{
 
 		string params[3] = {op, dolar1.tipo, dolar3.tipo};
@@ -1406,44 +1394,76 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 		return dolarDolar;
 	}
 
-	if(dolar1.tipo == dolar3.tipo)
+	if(resultado == constante_tipo_string)
 	{
-		if(dolar1.tipo == constante_tipo_caracter) //se char,ambos são convertidos pra int
+		vector<string> vetorTemporarias;
+		gerarVetorNovasVariaveis(op, &vetorTemporarias);
+		string traducao = realizarOperacaoString(op, &dolarDolar,&dolar1,&dolar3, vetorTemporarias);
+
+		if(traducao == "") //o operador ainda não está implementado. Fiz assim para não alterar no mapa, vou apagar o if
 		{
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
+			string params[3] = {op,dolar1.tipo, dolar3.tipo};
+			yyerror(montarMensagemDeErro(MSG_ERRO_OPERACAO_PROIBIDA_ENTRE_TIPOS	, params, 3));
+			dolarDolar.tipo = constante_erro;
+			return dolarDolar;
 
-			//dolar1.label = dolarDolar.label;
-			string novaVariavel = gerarNovaVariavel();
-
-			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + resultado + " " + novaVariavel + ";\n";
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + novaVariavel + " = " +"(" + resultado + ")" + dolar3.label + ";\n";
-			dolar3.label = novaVariavel;
 		}
+
+		dolarDolar.traducao = dolarDolar.traducao + traducao;
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoOperacaoRelacionalString(op, &dolarDolar, &dolar1,&dolar3, vetorTemporarias);
 
 	}
 
 	else
 	{
-		string varConvert = gerarNovaVariavel();
-		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(resultado) + " " + varConvert + ";\n";
+		dolarDolar.label = gerarNovaVariavel();
+		dolarDolar.traducaoDeclaracaoDeVariaveis += dolar1.traducaoDeclaracaoDeVariaveis + dolar3.traducaoDeclaracaoDeVariaveis;
+		dolarDolar.traducao = dolar1.traducao + dolar3.traducao;
+		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(constante_tipo_booleano) + " " + dolarDolar.label + ";\n";
 
-		if(dolar1.tipo != resultado)
+
+
+		if(dolar1.tipo == dolar3.tipo)
 		{
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + tipoCodigoIntermediario(resultado) + ")" + dolar1.label + ";\n";
+			if(dolar1.tipo == constante_tipo_caracter) //se char,ambos são convertidos pra int
+			{
+				dolarDolar.traducao = dolarDolar.traducao + "\t" + dolarDolar.label + " = " +"(" + resultado + ")" + dolar1.label + ";\n";
 
-			dolar1.label = varConvert;
+				//dolar1.label = dolarDolar.label;
+				string novaVariavel = gerarNovaVariavel();
+
+				dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + resultado + " " + novaVariavel + ";\n";
+				dolarDolar.traducao = dolarDolar.traducao + "\t" + novaVariavel + " = " +"(" + resultado + ")" + dolar3.label + ";\n";
+				dolar3.label = novaVariavel;
+			}
+
 		}
 
-		else if(dolar3.tipo != resultado)
+		else
 		{
-			dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + tipoCodigoIntermediario(resultado) + ")" + dolar3.label + ";\n";
-			dolar3.label = varConvert;
+			string varConvert = gerarNovaVariavel();
+			dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(resultado) + " " + varConvert + ";\n";
+
+			if(dolar1.tipo != resultado)
+			{
+				dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + tipoCodigoIntermediario(resultado) + ")" + dolar1.label + ";\n";
+
+				dolar1.label = varConvert;
+			}
+
+			else if(dolar3.tipo != resultado)
+			{
+				dolarDolar.traducao = dolarDolar.traducao + "\t" + varConvert + " = " +"(" + tipoCodigoIntermediario(resultado) + ")" + dolar3.label + ";\n";
+				dolar3.label = varConvert;
+
+			}
 
 		}
 
+		dolarDolar.traducao = dolarDolar.traducao + "\t\t" + dolarDolar.label + " = " + dolar1.label +" "+ op +" "+ dolar3.label + ";\n";
 	}
 
-	dolarDolar.traducao = dolarDolar.traducao + "\t\t" + dolarDolar.label + " = " + dolar1.label +" "+ op +" "+ dolar3.label + ";\n";
+
 
 	dolarDolar.tipo = constante_tipo_booleano;
 

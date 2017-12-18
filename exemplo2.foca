@@ -51,8 +51,16 @@ var a;
 a = 1.0;
 a -= 5;
 */
-var a;// = "uva";
+
+//Não funciona para string dinâmica
+/*var a;// = "uva";
 read(a:string);
 var b = a.len();
 show(a);
 show(b);
+*/
+
+if("banana" == "jaca")
+  show("Palavras iguais");
+else
+  show("Palavras diferentes");
