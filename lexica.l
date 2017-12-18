@@ -32,6 +32,7 @@ STRING \"([^\"\n]|\\\")*\"
 %%
 
 {STRING}	{yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_STRING;}
+"len"		{return TK_LEN;}
 
 "\n"		{}
 
@@ -43,7 +44,7 @@ STRING \"([^\"\n]|\\\")*\"
 "bool"		{yylval.label = "int"; yylval.tipo = constante_tipo_booleano; return TK_TIPO_BOOL;}
 "string"	{yylval.label = "char *"; yylval.tipo = constante_tipo_string; return TK_TIPO_STRING;}
 
-"len"		{return TK_LEN;}
+
 "var"		{return TK_PALAVRA_VAR;}
 "backscope" {return TK_BACKSCOPE;}
 "global"		{return TK_PALAVRA_GLOBAL;}

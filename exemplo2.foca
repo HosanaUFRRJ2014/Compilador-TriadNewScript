@@ -45,8 +45,14 @@ senh += "ar" + "ara";
 show(senh);
 */
 
-
+//Não funciona apenas para o caso da string.
+/*
 var a;
 a = 1.0;
-
 a -= 5;
+*/
+var a;// = "uva";
+read(a:string);
+var b = a.len();
+show(a);
+show(b);

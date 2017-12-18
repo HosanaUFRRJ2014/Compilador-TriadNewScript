@@ -4,9 +4,9 @@
 #include <map>
 #include <utility>
 
-
-
 using namespace Atributos;
+using namespace ControleDeVariaveis;
+using namespace EntradaESaida;
 using namespace MapaTipos;
 
 
@@ -22,6 +22,8 @@ namespace TratamentoString
 	string realizarOperacaoAritmeticaString(string, ATRIBUTOS *, ATRIBUTOS *, ATRIBUTOS *, string, string, string);
 	ATRIBUTOS tratarConversaoImplicitaString(string , ATRIBUTOS , ATRIBUTOS );
 	bool necessidaDeclaracaoDinamica(ATRIBUTOS , ATRIBUTOS );
+	string constroiDefinesParaStringDinamica();
+	ATRIBUTOS traducaoStringDinamica(ATRIBUTOS, string);
 
 	bool ehStringVazia(int tamanhoString)
 	{
@@ -109,7 +111,7 @@ namespace TratamentoString
 			retorno += montarConcatenarString(dolarDolar->label, dolar1->label) + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar3->label) + ";\n";
 			dolarDolar->tamanho = dolar1->tamanho + dolar3->tamanho - 1; //para remover um dos '\0'
-		
+
 
 
 		}
@@ -131,6 +133,67 @@ namespace TratamentoString
 		return false;
 
 	}
+
+	string constroiDefinesParaStringDinamica()
+	{
+		return "#define TAMANHO_INICIAL_STRING 10\n#define FATOR_CARGA_STRING 1\n#define FATOR_MULTIPLICADOR_STRING 2\n\n\n";
+
+	}
+
+	ATRIBUTOS traducaoStringDinamica(ATRIBUTOS atrib, string labelUsuario)
+	{
+
+		ATRIBUTOS atributos;
+		//string tempa, tempb,tempc,tempd;
+		int numVariaveis = 9, i;
+		string temps[numVariaveis];
+		string label = atrib.label;
+		atributos = atrib;
+
+
+		for(i = 0 ; i < numVariaveis; i++)
+		{
+			temps[i] = gerarNovaVariavel();
+
+			if(i == 1)
+				atributos.traducaoDeclaracaoDeVariaveis +=  "char " + temps[i] + ";\n";
+			else
+				atributos.traducaoDeclaracaoDeVariaveis +=  "int " + temps[i] + ";\n";
+
+		}
+
+		atributos.traducao += constroiTraducaoAtribuicao(temps[0], "0");
+		atributos.traducao += constroiTraducaoAtribuicao(temps[2], "1");
+		atributos.traducao += constroiTraducaoAtribuicao(temps[3], "TAMANHO_INICIAL_STRING");
+		atributos.traducao += "\t" + label    + " = (char *) malloc(TAMANHO_INICIAL_STRING);\n";
+		atributos.traducao += constroiTraducaoAtribuicao(temps[1], "1");
+		atributos.traducao += constroiTraducaoAtribuicao(temps[4], "1");
+		atributos.traducao += constroiTraducaoAtribuicao(temps[8], "\'\\n\'");
+
+		atributos.traducao += "\nWHILESTR" + label + ":\n";
+		atributos.traducao += "\tscanf(\"%c\",&" + temps[1] + ");\n";
+		atributos.traducao += "\t" + label + "[" + temps[0] + "] = " + temps[1] +";\n";
+		atributos.traducao += constroiTraducaoOperacao(temps[0], temps[0], temps[2], "+");
+		atributos.traducao += constroiTraducaoOperacao(temps[5], temps[3], "FATOR_CARGA_STRING", "*");
+		atributos.traducao += constroiTraducaoOperacao(temps[6], temps[0], temps[5], "<");
+
+		atributos.traducao += constroiTraducaoIF(temps[6], "TAMINALTR" + label);
+		atributos.traducao += "\t" + constroiTraducaoOperacao(temps[3], temps[3], "FATOR_MULTIPLICADOR_STRING", "*");
+		atributos.traducao += "\t\t" + label + " = (char *) realloc(" + label + "," + temps[3] + ");\n";
+		atributos.traducao += "TAMINALTR" + label + ":\n";
+		atributos.traducao += constroiTraducaoOperacao(temps[7], temps[1], temps[8], "==");
+		atributos.traducao += constroiTraducaoIF(temps[7], "FIMWHILESTR" + label);
+		atributos.traducao += constroiTraducaoIF(temps[4], "WHILESTR" + label);
+		atributos.traducao += "FIMWHILESTR" + label + ":\n\n";
+		atributos.traducao += "\t" + label + "[" + temps[0] + "] = " + "\'\\0\'" +";\n";
+		atributos.traducao += "\t" + labelUsuario + " = (char *) realloc(" + label + "," + temps[3] + ");\n";
+
+
+		atributos.labelTamanhoDinamicoString = temps[0];
+		return atributos;
+
+	}
+
 
 
 }

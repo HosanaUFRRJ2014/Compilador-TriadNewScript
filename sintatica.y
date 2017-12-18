@@ -10,8 +10,8 @@
 #include "MensagensDeErro.h"
 #include "ControleDeVariaveis.h"
 #include "Atributos.h"
-#include "TratamentoString.h"
 #include "EntradaESaida.h"
+#include "TratamentoString.h"
 #include "ControleDeFluxo.h"
 #include "TratamentoArray.h"
 #include "TratamentoOperadoresCompostos.h"
@@ -28,8 +28,8 @@ using namespace MapaTipos;
 using namespace ControleDeVariaveis;
 using namespace MensagensDeErro;
 using namespace Atributos;
-using namespace TratamentoString;
 using namespace EntradaESaida;
+using namespace TratamentoString;
 using namespace ControleDeFluxo;
 using namespace TratamentoArray;
 using namespace TratamentoOperadoresCompostos;
@@ -242,7 +242,7 @@ E			: E TK_OP_ARIT_PRIO1 E
 
 			}
 /*
-	//tratar este caso em especifico depois ... teste : var a = 1; (-a); gera sintax error	
+	//tratar este caso em especifico depois ... teste : var a = 1; (-a); gera sintax error
 			|
 			'(' '-' E ')'
 			{
@@ -312,12 +312,12 @@ E			: E TK_OP_ARIT_PRIO1 E
 			|
 			ARRAY
 			;
-			
+
 ARRAY	: '[' DIMENSOES_INDICES ']' //Criação de array
 		{
 			$$ = $2;
-			
-			
+
+
 			//$$.estruturaDoConteudo = constante_estrutura_array;
 		}
 		/*
@@ -337,7 +337,7 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
 						{
 							//dispara erro ...
 						}
-						
+
 						if($3.estruturaDoConteudo == constante_estrutura_variavel)
 						{
 							//Fazer lógica para índice como variável.
@@ -345,7 +345,7 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
 						else //Ele será inteiro de TK_NUM
 						{
 							//Fazer lógica para índice como sendo numero inteiro.
-						}					
+						}
 					}
 					|
 					VALOR
@@ -354,7 +354,7 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
 						{
 							//dispara erro ...
 						}
-						
+
 						if($1.estruturaDoConteudo == constante_estrutura_variavel)
 						{
 							//Fazer lógica para índice como variável.
@@ -364,9 +364,9 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
 							//Fazer lógica para índice como sendo numero inteiro.
 							$$ = $1;
 							adicionarTamanhoDimensoesArray($1.label);
-							
-							
-							
+
+
+
 						}
 
 					}
@@ -390,9 +390,9 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' VALOR
 		string estruturaDoConteudo;
 		string labelTamanhoDinamicoString;
 		int valorIndiceDimensaoArray;
-		
+
 	};
-	
+
 	//	recuperarLabelCodigoIntermediario($x.label)
 */
 
@@ -461,7 +461,18 @@ VALOR		: TK_NUM
 			|
 			VALOR '.' TK_LEN '(' ')'
 			{
-				cout << "entrou len " << endl; 
+			//	DADOS_VARIAVEL metadata = recuperarDadosVariavel($.label, $1.escopoDeAcesso);
+				$$.label = gerarNovaVariavel();
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + constante_tipo_inteiro + ' ' + $$.label + ";\n";
+
+			/*	if($1.ehDinamica)
+					$$.traducao = $1.traducao + '\t' + $$.label + " = " + $1.labelTamanhoDinamicoString + ";\n";
+
+				else*/
+					$$.traducao = $1.traducao + '\t' + $$.label + " = sizeof(" + recuperarNomeTraducao($1.label) + ");\n";
+
+				$$.tipo = constante_tipo_inteiro;
+
 			}
 			;
 
@@ -645,6 +656,7 @@ SCAN			: TK_PALAVRA_SCAN '(' ARGS_SCAN ')'
 				//cout << " // Entrei em TK_PALAVRA_SCAN '(' ARGS_SCAN ')'';' \n";
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducao = $$.traducao + $3.traducao;
+				$$.labelTamanhoDinamicoString = $3.labelTamanhoDinamicoString;
 
 			}
 			;
@@ -654,10 +666,16 @@ ARGS_SCAN		: ARG_SCAN ',' ARGS_SCAN
 				//cout << $1.traducaoDeclaracaoDeVariaveis << " *******\n";
 				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $1.traducaoDeclaracaoDeVariaveis;
 				$$.traducao = $2.traducao + $1.traducao;
+				$$.labelTamanhoDinamicoString = $1.labelTamanhoDinamicoString;
 
 			}
 			|
 			ARG_SCAN
+			{
+				$$.labelTamanhoDinamicoString = $1.labelTamanhoDinamicoString;
+
+
+			}
 
 			;
 
@@ -710,6 +728,11 @@ ARG_SCAN		: ID ':' TIPO
 				yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
 				}*/
 				bool ehDinamica = true;
+		/*		ATRIBUTOS $$;
+				$$ = copiarDadosAtributos($$);
+				$$ = concatenarTraducoesAtributos($$,$$);
+				imprimirAtributos($$);
+				imprimirAtributos($$);*/
 				$$ = tratarAtribuicaoVariavel($1, $3, ehDinamica);
 				$$.label = gerarNovaVariavel();
 				string dolarDolar = $$.label;
@@ -725,10 +748,11 @@ ARG_SCAN		: ID ':' TIPO
 
 					string labelRecuperada = recuperarNomeTraducao($1.label, escopo);
 					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + "char * " + $$.label + ";\n";
-					$$ = traducaoStringDinamica($$, labelRecuperada);
+
+					$$ =  traducaoStringDinamica($$, labelRecuperada);
 					$$.traducao = $$.traducao + montarCopiarString(labelRecuperada, $$.label) + ";\n";
-					//cout << labelRecuperada << " <<< \n";
-					//cout << $1.label << "\n";
+
+
 				}
 
 				else
@@ -741,9 +765,7 @@ ARG_SCAN		: ID ':' TIPO
 
 					}
 
-
-					//adicionarDefinicaoDeTipo($1.label, $3.label,tamanho,ehDinamica);
-					$$.traducao = $$.traducao + "\t" + recuperarNomeTraducao($1.label, escopo) + " = " + dolarDolar + ";\n";
+					$$.traducao = $$.traducao + "\t" + recuperarNomeTraducao($1.label, escopo) + " = " + $$.label + ";\n";
 
 				}
 
@@ -1042,12 +1064,12 @@ EMPILHAR_TAG_SWITCH	:
 					;
 
 COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' E ')' '{' CASES DEFAULT'}'
-				{	
+				{
 					if($4.estruturaDoConteudo != constante_estrutura_variavel)
 					{
 						//dispara erro... precisa ser variavel
 					}
-				
+
 					//$3.tipo != constante_tipo_string && $3.tipo != constante_tipo_flutuante
 					if($4.tipo == $7.tipo) {
 						//(...)
@@ -1056,12 +1078,12 @@ COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' E ')' '{' CASES DEFAULT'}'
 						pair<string,int> tagFimENumProx = gerarNovaTagSwitch(true);
 						string tagCaseAtual = tag_case_inicio + to_string(tagFimENumProx.second-1);
 						pair<string,string> condicaoCase = gerarNovaTagCondicaoCase();
-						
-						
+
+
 						//string tagFim = gerarNovaTagSwitch(false).first;
-						
+
 						//$$.label = gerarNovaVariavel();
-						
+
 						//Outra parte da árvore já tera a $3.traducaoDeclaracaoDeVariaveis salva. Portanto, teríamos repetição.
 						$$.traducaoDeclaracaoDeVariaveis = $7.traducaoDeclaracaoDeVariaveis + $8.traducaoDeclaracaoDeVariaveis;
 
@@ -1071,7 +1093,7 @@ COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' E ')' '{' CASES DEFAULT'}'
 										//"\t" + "goto " + tagFim + ";\n"
 										//"\t" + tagFimENumProx.first + ":\n";
 										"\t" + obterTopoPilhaFim() + ":;\n";
-												
+
 						}else{
 							$$.traducao = $4.traducao + $7.traducao + $8.traducao +
 										//"\t" + "goto " + tagFim + ";\n"
@@ -1080,13 +1102,13 @@ COMANDO_SWITCH	: EMPILHAR_TAG_SWITCH TK_SWITCH '(' E ')' '{' CASES DEFAULT'}'
 										//"\t" + tagFimENumProx.first + ":\n";
 										"\t" + obterTopoPilhaFim() + ":;\n";
 						}
-															
+
 						$$.traducao = substituirVariaveisCase($$.traducao, $4.label);
-						removerTopoTagFim();									
-						
+						removerTopoTagFim();
+
 					}
 					else{
-						yyerror(MSG_ERRO_TIPO_CASE_DISTINTO);	
+						yyerror(MSG_ERRO_TIPO_CASE_DISTINTO);
 					}
 				}
 				;
@@ -1096,9 +1118,9 @@ DEFAULT	: TK_DEFAULT ':' COMANDO
 			pair<string,int> tagFimENumProx = gerarNovaTagSwitch(true);
 			string tagCaseAtual = tag_case_inicio + to_string(tagFimENumProx.second-1);
 			pair<string,string> condicaoCase = gerarNovaTagCondicaoCase();
-			
+
 			$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis;
-			$$.traducao = "\t" + condicaoCase.first + ":\n" + 
+			$$.traducao = "\t" + condicaoCase.first + ":\n" +
 							"\t" + tagCaseAtual + ":\n" + $3.traducao;
 			$$.tipo = constante_tipo_default;
 		}
@@ -1132,39 +1154,39 @@ CASE	: TK_CASE E ':' COMANDO
 			//Regra TERMO possui produção que leva em ID, o que não pode.
 			//constante_estrutura_variavel
 			//$2.label.find(prefixo_variavel_usuario) == std::string::npos
-			if( ($2.tipo == constante_tipo_inteiro || $2.tipo == constante_tipo_caracter) && 
+			if( ($2.tipo == constante_tipo_inteiro || $2.tipo == constante_tipo_caracter) &&
 				$2.estruturaDoConteudo == constante_estrutura_variavel){
-				
+
 				pair<string,int> tagCaseENumProx = gerarNovaTagSwitch(true);
 				string proxCase = tag_case_inicio + to_string(tagCaseENumProx.second);
-			
+
 				//Para referenciar o inicio do teste da condição de cada case. Serve como controle para quando devemos executar
 				//todos os cases quando algo for verdadeiro.
-				pair<string,string> condicaoCase = gerarNovaTagCondicaoCase(); 
+				pair<string,string> condicaoCase = gerarNovaTagCondicaoCase();
 				string proxCondicaoCase = tag_condicao_case + condicaoCase.second;
-											
+
 				//Gerar primeira label que receberá o resultado da condição de igualdade.
 				$$.label = gerarNovaVariavel();
 				//Gerar segunda label que receberá a negação da condição de igualdade.
 				string tempIrProxCondCase = gerarNovaVariavel();
 
 				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + $4.traducaoDeclaracaoDeVariaveis +
-													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n" + 
+													"\t" + constante_tipo_inteiro + " " + $$.label + ";\n" +
 													"\t" + constante_tipo_inteiro + " " + tempIrProxCondCase + ";\n";
 				$$.tipo = $2.tipo;
-								
-				//Adicionar a tag do inicio do case antes do comando em si.
-				$4.traducao = "\t" + tagCaseENumProx.first + ":\n" + $4.traducao + 
-													"\t" + "goto " + proxCase + ";\n"; 
 
-				$$.traducao = "\t" + condicaoCase.first + ":\n" + 
+				//Adicionar a tag do inicio do case antes do comando em si.
+				$4.traducao = "\t" + tagCaseENumProx.first + ":\n" + $4.traducao +
+													"\t" + "goto " + proxCase + ";\n";
+
+				$$.traducao = "\t" + condicaoCase.first + ":\n" +
 								$2.traducao + "\t" + $$.label + " = " + tarja_variavel + " == " + $2.label + ";\n" +
-								"\t" + tempIrProxCondCase + " = " + "!" + $$.label + ";\n" +  
-								"\t" + "if" + "(" + tempIrProxCondCase + ")\n" + 
-								"\t\t" + "goto " + proxCondicaoCase + ";\n" + 
+								"\t" + tempIrProxCondCase + " = " + "!" + $$.label + ";\n" +
+								"\t" + "if" + "(" + tempIrProxCondCase + ")\n" +
+								"\t\t" + "goto " + proxCondicaoCase + ";\n" +
 								$4.traducao; //+
-								//"\t" + "goto " + proxCase + ":\n"; //+  
-								//"\t" + "goto " + tarja_tagFim + ";\n";			
+								//"\t" + "goto " + proxCase + ":\n"; //+
+								//"\t" + "goto " + tarja_tagFim + ";\n";
 			}else{
 				yyerror(MSG_ERRO_TIPO_ID_SWITCH_CASE_INVALIDO);
 			}
@@ -1593,7 +1615,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 			//para remover o prefixo só se tiver prefixo
 			if(dolar1.label.find(strPrefixoVarUsuario) == 0)
 				labelVar = dolar1.label.replace(0, strPrefixoVarUsuario.length(), "");
-			
+
 			string params[3] = {labelVar, dolar1.tipo, dolar3.tipo};
 			yyerror(montarMensagemDeErro(MSG_ERRO_ATRIBUICAO_DE_TIPOS_DIFERENTES, params, 3));
 		}

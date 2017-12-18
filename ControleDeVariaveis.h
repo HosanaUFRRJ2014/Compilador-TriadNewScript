@@ -15,9 +15,10 @@ namespace ControleDeVariaveis
 		string nomeTraducao; //Nome da variável no código intermediário.
 		int tamanho = 0; //Para string
 		bool ehDinamica = false; //Para string
+		string labelTamanhoDinamicoString;
 		int escopo;
 		vector<string> pilhaTamanhoDimensoesArray; //Para arrays
-		
+
 	};
 
 
@@ -118,6 +119,7 @@ namespace ControleDeVariaveis
 			{
 				mapaDeContexto->at(variavel.nome).tamanho = variavel.tamanho;
 				mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
+				mapaDeContexto->at(variavel.nome).labelTamanhoDinamicoString = variavel.labelTamanhoDinamicoString;
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
