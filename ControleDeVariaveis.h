@@ -24,7 +24,8 @@ namespace ControleDeVariaveis
 
 	namespace MapaDeContexto
 	{
-		#define prefixo_variavel_usuario "VARUSER_"
+		//define de prefixo do usuario movido para o sintatica para que todos os arquivos tenham acesso
+//		#define prefixo_funcao_usuario "FUNCUSER_"
 //		#define constante_TamanhoInicialPilha 5
 		int numeroEscopoAtual = 0;
 		vector<map<string, DADOS_VARIAVEL>*> pilhaDeMapas(0);
@@ -105,6 +106,7 @@ namespace ControleDeVariaveis
 				variavel.tipo = tipo;
 				variavel.escopo = numeroEscopoAtual;
 				variavel.nomeTraducao = gerarNomeTraducaoVariavelUsuario();
+				
 				dicionarioNomeTraducaoParaNome.insert(pair<string, string>(variavel.nomeTraducao, nome));
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
 				return true;
@@ -120,10 +122,18 @@ namespace ControleDeVariaveis
 				mapaDeContexto->at(variavel.nome).tamanho = variavel.tamanho;
 				mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
 				mapaDeContexto->at(variavel.nome).labelTamanhoDinamicoString = variavel.labelTamanhoDinamicoString;
+
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
 					return true;
+				}
+				else
+				{
+					if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_funcao)
+					{
+						mapaDeContexto->at(variavel.nome).nomeTraducao = variavel.nomeTraducao;
+					}
 				}
 
 				/*if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_string){

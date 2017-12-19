@@ -36,6 +36,19 @@ namespace MensagensDeErro{
 	
 	#define MSG_ERRO_OPERADOR_UNARIO_INVALIDO_PARA_OPERANDO "Erro: o operador \"\t\" não pode ser utilizado no operando especificado, porque \t."
 	
+	#define MSG_ERRO_TIPO_NAO_INPUTAVEL "Erro: o comando \"read\" não permite leitura de variáveis do tipo \"\t\"."
+	
+	#define MSG_ERRO_VALOR_ATRIBUIDO_NAO_PODE_SER_ATRIBUIDO "Erro: o valor atribuído a \"\t\" não é um tipo atribuível."
+	
+	#define MSG_ERRO_PARAMETRO_ATRIBUIDO_POSSUI_TIPO_DIFERENTE "Erro: em chamada da função \"\t\", o parametro atribuído na posição \t (para o parametro de nome \"\t\"), possuí tipo \"\t\" quando era esperado o tipo \"\t\"." 
+	
+	#define MSG_ERRO_QUANTIDADE_DE_PARAMETROS_INCOPATiVEL "Erro: em chamada da função \"\t\", a quantidade de parametros atribuída (\t parametros), difere da quantidade de parametros esperada (\t parameros)." 
+	
+	
+	#define MSG_ERRO_NOME_DE_FUNCAO_NAO_IDENTIFICADO "Erro: a função chamada não foi encontrada."
+	#define MSG_ERRO_ID_NAO_REFERENTE_A_UMA_FUNCAO "Erro: o id informado não do tipo função"
+	#define MSG_ERRO_A_FUNCAO_CHAMADA_NAO_EXISTE ""
+	
 	string montarMensagemDeErro(string, string*, int);
 	void yywarnning(string);
 	
@@ -46,6 +59,10 @@ namespace MensagensDeErro{
 		for(int i = 0; i < qtdParametros; i++){
 			pos = mensagem.find(SEP_PARAMS);
 			string param = parametros[i];
+			if(param.find(prefixo_variavel_usuario) == 0){
+				string prefix = prefixo_variavel_usuario;
+				param.replace(0, prefix.length(), "");
+			}
 			if(pos > 0)
 				mensagem.replace(pos, SEP_PARAMS.length(), param);
 			else
