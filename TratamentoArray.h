@@ -8,26 +8,22 @@
 using namespace Atributos;
 using namespace ControleDeVariaveis;
 using namespace ConstanteTipos;
+using namespace EntradaESaida;
 //using namespace std;
 
 namespace TratamentoArray
-{	
-
-	string tipoArray = "";
-	string tipoArrayCodInterm = "";
-	//int tamVetorArrayCodInterm = -1;
-	
+{		
 	namespace PilhaTamanhoDimensoesArray{
 		//Pilha global para obter os valores durante o parser do código e depois passar para a pilha de DADOS_VARIAVEL associado ao Array.
 		vector<string> pilhaTamanhoDimensoesArray(0);
+		vector<string> valoresReaisDim(0);
 
 		void adicionarTamanhoDimensoesArray(string,vector<string>*,bool);
 		void removerTopoTamanhoDimensoesArray(vector<string>*,bool);
 		bool pilhaTamanhoDimensoesArrayVazia(vector<string>*,bool);
 		string obterTopoTamanhoDimensoesArray(vector<string>*,bool);
 		string obterElementoTamanhoDimensoesArray(int,vector<string>*,bool);
-		void resetarTamanhoDimensoesArray();
-		//int obterDimensaoArray();
+		void resetarTamanhoDimensoesArray(vector<string>);
 
 		void adicionarTamanhoDimensoesArray(string indiceDimensao,vector<string> *pilhaDadosVar = NULL, bool acaoPilhaVar = false){
 		
@@ -80,8 +76,9 @@ namespace TratamentoArray
 			}
 		}
 		
-		void resetarTamanhoDimensoesArray(){
+		void resetarTamanhoDimensoesArray(vector<string> pilhaDadosVar){
 			pilhaTamanhoDimensoesArray.clear();
+			pilhaDadosVar.clear();
 		}
 		
 		//int obterDimensaoArray(ATRIBUTOS* dolar); 
@@ -90,11 +87,24 @@ namespace TratamentoArray
 	
 	namespace TraducaoArray{
 	
-		string traducaoFree = "\n\n";
+		#define tag_erro_index "INDEX_NEG_ZERO"
+		#define msg_fim_execucao_array "\"Acesso ou alocação de memória indevida (Ternura fault).\""
+	
+		string fimCodInter = "\tFIMCODINTER:\n";
+		string tab = "\t";
+		string traducaoFree = "\n\n" + tab + tag_erro_index + ":\n" + constroiPrint(msg_fim_execucao_array) + fimCodInter;
+		bool acessoArray = false;
+		string tipoArray = "";
+		string tipoArrayCodInterm = "";
+		int count_dim = 0;
+		DADOS_VARIAVEL dadosArray;
+		
+		//+ "\t" + tag_erro_index + ":\n" + constroiPrint(msg_fim_execucao_array)
 	
 		void resetarVarGlobaisArray();
 		void definicaoTipoArray(string, string);
 		pair<string,string> traducaoCriacaoArray(string,vector<string>*,int);
+		pair<string,string> traducaoCalculoIndiceArray(vector<string>,vector<string>,ATRIBUTOS *);
 		void adicionarTraducaoComandosFree(string);
 		string retornarTraducaoFrees();
 		
@@ -104,14 +114,20 @@ namespace TratamentoArray
 		void resetarVarGlobaisArray(){
 			tipoArray = "";
 			tipoArrayCodInterm = "";
-			//tamVetorArrayCodInterm = -1;
+			acessoArray = false;
+			count_dim = 0;
 		}
 		
 		void definicaoTipoArray(string tipo, string tipoCodInterm){
 			tipoArray = tipo;
 			tipoArrayCodInterm = tipoCodInterm;
-			//tamVetorArrayCodInterm = tamanhoVetor;
 		}
+		
+		/*
+		void setarNomeOriginal(string nome){
+			if()
+		}
+		*/
 				
 		/*
 		#define qtd_elementos_tarja 5		
@@ -169,6 +185,15 @@ namespace TratamentoArray
 				
 				traducaoFinal.second = traducaoFinal.second + "\t" + varUser + " = " + "(" + tipoArrayCodInterm + "*) " +
 										"malloc(" + last_label + " * sizeof(" + tipoArrayCodInterm + "));\n";
+										
+				//Adicionar o if para verificação em tempo de execução.
+				string label_if_index = gerarNovaVariavel();
+				string label_cond_if = gerarNovaVariavel();
+				traducaoFinal.first = traducaoFinal.first + constante_tipo_inteiro + " " + label_if_index + ";\n" +
+										constante_tipo_inteiro + " " + label_cond_if + ";\n";						
+				traducaoFinal.second = traducaoFinal.second + "\t" + label_if_index + " = " + last_label + " > 0;\n\t" +
+										label_cond_if + " = !" + label_if_index + ";\n\t" + "if(" + label_cond_if + ")\n\t\t" +
+										"goto " + tag_erro_index + ";\n"; 
 			}
 			else
 			{
@@ -184,12 +209,64 @@ namespace TratamentoArray
 		}
 		
 		string retornarTraducaoFrees(){
+			//traducaoFree = traducaoFree + "\t" + tag_erro_index + ":\n" + constroiPrint(msg_fim_execucao_array); 
+		
 			return traducaoFree;
 		}
-	
-		string traducaoCalculoIndiceArray()
+		
+		//Ver parte do acesso ao array e decidir se abriga aquelas alterações nesta função.(casos dinâmicos --> tempo de execução)
+		string traducaoVerificacaoIndice()
 		{
-			//...
+			
+		}
+	
+		//Cria a tradução do cálculo do índice correspontende do array no código do programa(conversão array --> vetor)
+		pair<string,string> traducaoCalculoIndiceArray(vector<string>labelsInd,vector<string>labelsDim,ATRIBUTOS *dolarDolar)
+		{
+			pair<string,string> traducao; //first = tradVar; second = traducao;
+			string label_mult,label_add,last_label;
+			
+			traducao.first = "";
+			traducao.second = "";
+						
+			label_mult = gerarNovaVariavel();
+			traducao.first = traducao.first + constante_tipo_inteiro + " " + label_mult + ";\n";
+			traducao.second = traducao.second + "\t" + label_mult + " = " + 
+								TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(0,&labelsInd,true) +
+								" * " +
+								TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(1,&labelsDim,true) +
+								";\n";
+			last_label = label_mult;
+						
+			for(int pos = 1;pos < labelsInd.size();pos++) //É válido pq o tam deles sempre será igual na lógica.
+			{
+				
+				if(pos != labelsInd.size() - 1)
+				{
+					label_mult = gerarNovaVariavel();
+					traducao.second = traducao.second + "\t" + label_mult + " = " + 
+								TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos,&labelsInd,true) +
+								" * " +
+								TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos + 1,&labelsDim,true) 									+ ";\n";
+								
+					label_add = gerarNovaVariavel();
+					traducao.second = traducao.second + "\t" + label_add + " = " + label_mult + " + " + last_label + ";\n";
+					traducao.first = traducao.first + constante_tipo_inteiro + " " + label_mult + ";\n" +
+									+ constante_tipo_inteiro + " " + label_add + ";\n";
+					last_label = label_add;
+				}
+				else
+				{
+					label_add = gerarNovaVariavel();
+					traducao.second = traducao.second + "\t" + label_add + " = " + 
+									TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos,&labelsInd,true) 
+									+ " + " + last_label + ";\n";
+					traducao.first = traducao.first + constante_tipo_inteiro + " " + label_add + ";\n";
+				}
+			}
+			
+			dolarDolar->labelIndice = label_add;
+			return traducao;
 
 		}
 

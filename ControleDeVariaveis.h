@@ -16,9 +16,9 @@ namespace ControleDeVariaveis
 		int tamanho = 0; //Para string
 		bool ehDinamica = false; //Para string
 		int escopo;
-		vector<string> pilhaTamanhoDimensoesArray; //Para arrays -> Guarda as dimensões do array.
-		string tipoArray; //Para arrays -> Tipo primitivo do Arrar.
-		
+		vector<string> pilhaTamanhoDimensoesArray; //Para arrays -> Guarda as dimensões do array. Para obter a qtd de dim, só usar o size()
+		string tipoArray; //Para arrays -> Tipo primitivo do Array.
+		vector<string> valoresReaisDim; //Para arrays ---> Para tratamente em tempo de compilação dos erros da indexação(TK_NUM).
 	};
 
 
@@ -32,7 +32,7 @@ namespace ControleDeVariaveis
 		map<string, string> dicionarioNomeTraducaoParaNome;
 
 		void inicializarMapaDeContexto();
-		bool incluirNoMapa(string,int, string,vector<string>*);
+		bool incluirNoMapa(string,int, string,string,vector<string>,vector<string>);
 		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
 		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
@@ -94,7 +94,7 @@ namespace ControleDeVariaveis
 			return nome;
 		}
 
-		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<string> dim = {})
+		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<string> valorReal = {},vector<string> dim = {})
 		{		
 			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
@@ -107,6 +107,7 @@ namespace ControleDeVariaveis
 				variavel.nomeTraducao = gerarNomeTraducaoVariavelUsuario();
 				variavel.pilhaTamanhoDimensoesArray = dim; //Para o Array.
 				variavel.tipoArray = tipoArray; //Para o Array.
+				variavel.valoresReaisDim = valorReal; //Para o Array.
 				dicionarioNomeTraducaoParaNome.insert(pair<string, string>(variavel.nomeTraducao, nome));
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
 				
@@ -124,6 +125,7 @@ namespace ControleDeVariaveis
 				mapaDeContexto->at(variavel.nome).tamanho = variavel.tamanho;
 				mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
 				mapaDeContexto->at(variavel.nome).pilhaTamanhoDimensoesArray = variavel.pilhaTamanhoDimensoesArray;
+				mapaDeContexto->at(variavel.nome).valoresReaisDim = variavel.valoresReaisDim;
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;

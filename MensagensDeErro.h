@@ -36,6 +36,9 @@ namespace MensagensDeErro{
 	
 	#define MSG_ERRO_OPERADOR_UNARIO_INVALIDO_PARA_OPERANDO "Erro: o operador \"\t\" não pode ser utilizado no operando especificado, porque \t."
 	
+	#define MSG_ERRO_VALOR_NEGATIVO_ARRAY "Erro: Dimensão/Índice negativo ou zero no acesso ao Array."
+	#define MSG_FIM_EXECUCAO_ARRAY "Acesso ou alocação de memória indevida (Ternura fault)."
+	
 	string montarMensagemDeErro(string, string*, int);
 	void yywarnning(string);
 	

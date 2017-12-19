@@ -33,6 +33,10 @@ namespace ConstanteTipos
 		{
 			return constante_tipo_inteiro;
 		}
+		else if(tipo == constante_tipo_string) //SE ALGO DER PROBLEMA, VERIFICAR ESTA CONDICAO!!
+		{
+			return "char *";
+		}
 		else
 		{
 			return tipo;
