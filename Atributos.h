@@ -28,7 +28,7 @@ namespace Atributos
 		int valorNum = -1; //Retornar valor tipoPrimitivo TK_NUM inteiro.
 		string labelIndice; //Salvar o label resultado de um cálculo de indice do array.
 		string nomeIdOriginal; //Poder retornar os valores do array corretamente.
-		bool acessoArray = false; //Poder reconhecer o caso ternura[x,y] = luadecristal[z,w].
+		bool acessoArray = false; //Poder reconhecer o caso livia[x,y] = compilador[z,w].
 		bool criacaoArray = false; //Poder tratar os erros de livia[x,y] = int[u,v].
 		string tipoArray; //Se for array de acesso, saber o tipo do mesmo.
 
@@ -60,6 +60,14 @@ namespace Atributos
 		atributosDestino.ehDinamica = atributosOrigem.ehDinamica;
 		atributosDestino.estruturaDoConteudo = atributosOrigem.estruturaDoConteudo;
 		atributosDestino.labelTamanhoDinamicoString = atributosOrigem.labelTamanhoDinamicoString;
+		/*
+		atributosDestino.valorNum = atributosOrigem.valorNum;
+		atributosDestino.labelIndice = atributosOrigem.labelIndice;
+		atributosDestino.nomeIdOriginal = atributosOrigem.nomeIdOriginal;
+		atributosDestino.acessoArray = atributosOrigem.acessoArray;
+		atributosDestino.criacaoArray = atributosOrigem.criacaoArray;
+		atributosDestino.tipoArray = atributosOrigem.tipoArray;
+		*/
 
 		return atributosDestino;
 	}

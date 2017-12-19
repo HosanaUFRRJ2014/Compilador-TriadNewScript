@@ -50,7 +50,7 @@ namespace MensagensDeErro{
 	#define MSG_ERRO_A_FUNCAO_CHAMADA_NAO_EXISTE ""
 
 	#define MSG_ERRO_VALOR_NEGATIVO_ARRAY "Erro: Dimensão/Índice negativo ou zero no acesso ao Array."
-	#define MSG_FIM_EXECUCAO_ARRAY "Acesso ou alocação de memória indevida (Ternura fault)."
+	#define MSG_FIM_EXECUCAO_ARRAY "Acesso ou alocação de memória indevida (Memory fault)."
 
 	string montarMensagemDeErro(string, string*, int);
 	void yywarnning(string);

@@ -97,7 +97,7 @@ namespace ControleDeVariaveis
 		}
 
 		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<string> valorReal = {},vector<string> dim = {})
-		{		
+		{
 			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
@@ -112,10 +112,10 @@ namespace ControleDeVariaveis
 				variavel.valoresReaisDim = valorReal; //Para o Array.
 				dicionarioNomeTraducaoParaNome.insert(pair<string, string>(variavel.nomeTraducao, nome));
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
-				
+
 				return true;
 			}
-					
+
 			return false;
 		}
 
@@ -328,24 +328,24 @@ namespace ControleDeVariaveis
 			else if(tipo == constante_tipo_array)
 			{
 				string varArray;
-				string asteristicoDeCristal = " *";
-				string asteristicoDuploDeCristal = " **";
-								
+				string asteristico = " *";
+				string asteristicoDuplo = " **";
+
 				if(tipoArray == constante_tipo_inteiro)
-					varArray = constante_tipo_inteiro + asteristicoDeCristal + tipoProvisorio;
-				
+					varArray = constante_tipo_inteiro + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_flutuante)
-					varArray = constante_tipo_flutuante + asteristicoDeCristal + tipoProvisorio;
-					
+					varArray = constante_tipo_flutuante + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_booleano)
-					varArray = constante_tipo_inteiro + asteristicoDeCristal + tipoProvisorio;
-					
+					varArray = constante_tipo_inteiro + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_caracter)
-					varArray = constante_tipo_caracter + asteristicoDeCristal + tipoProvisorio;
-					
+					varArray = constante_tipo_caracter + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_string)
-					varArray = constante_tipo_caracter + asteristicoDuploDeCristal + tipoProvisorio;
-				
+					varArray = constante_tipo_caracter + asteristicoDuplo + tipoProvisorio;
+
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = varArray;
 			}
 			else

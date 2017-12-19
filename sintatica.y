@@ -577,6 +577,9 @@ ACESSO_ARRAY	: ID '['
 				{
 					acessoArray = true;
 					dadosArray = recuperarDadosVariavel($1.nomeIdOriginal,0);
+
+					cout << "Label: " << $1.label << endl << "Nome: " << dadosArray.nome << endl << "Tipo: " << dadosArray.tipo << endl;
+
 					$$ = $1;
 					$$.acessoArray = true;
 				}
@@ -827,81 +830,6 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' E
 
 					}
 					;
-/*
-
-
-int count_dimensoes = 0;
-DADOS_VARIAVEL arrayAcessado;
-
-struct DADOS_VARIAVEL
-{
-	string tipo; //Tipo da variável.
-	string nome; //Nome que o usuário deu a variável no programa.
-	string nomeTraducao; //Nome da variável no código intermediário.
-	int tamanho = 0; //Para string
-	bool ehDinamica = false; //Para string
-	int escopo;
-	vector<string> pilhaTamanhoDimensoesArray; //Para arrays -> Guarda as dimensões do array. Para obter a qtd de dim, só usar o size()
-	string tipoArray; //Para arrays -> Tipo primitivo do Array.
-};
-
-struct ATRIBUTOS
-	{
-		string label;
-		string traducaoDeclaracaoDeVariaveis;
-		string traducao;
-		string tipo;
-		int escopoDeAcesso = -1;
-		int tamanho = 0;
-		bool ehDinamica = false;
-		string estruturaDoConteudo;
-		string labelTamanhoDinamicoString;
-		int valorNum = -1;
-
-	};
-
- TK_NUM
-			{
-				$$.label = gerarNovaVariavel();
-				$$.traducaoDeclaracaoDeVariaveis = $1.tipo + " " + $$.label + ";\n";
-				$$.traducao = "\t" + $$.label + " = " + $1.label + ";\n";
-				$$.tipo = $1.tipo;
-				$$.estruturaDoConteudo = constante_estrutura_tipoPrimitivo;
-			}
-
-ID			: TK_ID
-			{
-			//	cout << "//Entrou em ID: TK_ID\n";
-				if(variavelJaDeclarada($1.label))
-				{
-					DADOS_VARIAVEL metaData = recuperarDadosVariavel($1.label);
-					$$.label = metaData.nome;
-					$$.tipo = metaData.tipo;
-					$$.estruturaDoConteudo = constante_estrutura_variavel;
-					$$.tamanho = metaData.tamanho;
-					$$.ehDinamica = metaData.ehDinamica;
-			//		cout << "//Entrou em ID: TK_ID\n" << "metaData.nome: " << metaData.nome << "\nlabel$: " << $$.label << "label1: " << $1.label << endl;
-				}
-				else
-				{
-					string params[1] = {$1.label};
-					yyerror(montarMensagemDeErro(MSG_ERRO_VARIAVEL_NAO_DECLARADA ,params, 1));
-				}
-
-			}
-
-
-		void adicionarTamanhoDimensoesArray(string,vector<string>*,bool);
-		void removerTopoTamanhoDimensoesArray(vector<string>*,bool);
-		bool pilhaTamanhoDimensoesArrayVazia(vector<string>*,bool);
-		string obterTopoTamanhoDimensoesArray(vector<string>*,bool);
-		string obterElementoTamanhoDimensoesArray(int,vector<string>*,bool);
-
-		void resetarVarGlobaisArray();
-		void definicaoTipoTamArray(string tipo, string tipoCodInterm, string labelResul);
-
-*/
-
 
 ID			: TK_ID
 			{
@@ -1061,7 +989,7 @@ ATRIBUICAO_VARIAVEL	:  ID '=' E
 						cout << "------------------\n";*/
 					}
 					|
-					ARRAY '=' E //Caso ternura[x1,x2,...,xn] = luadecristal[x1,x2,...,xm] OU ternura[x1,x2,...,xn] = 90;
+					ARRAY '=' E //Caso livia[x1,x2,...,xn] = compilador[x1,x2,...,xm] OU livia[x1,x2,...,xn] = 90;
 					{
 
 						//O usuário poderia escrever int[x,y] = int[u,v] ; int[x,y] = 90/livia[x,y]/2.3
@@ -1234,6 +1162,9 @@ COMANDO_IF	: TK_IF '(' E ')' COMANDO %prec IFX
 			{
 				if($3.tipo != constante_tipo_booleano) ;
 					//dispara erro ...
+
+				//cout << "Traducao String: " << endl << $3.traducao << endl << endl << "Traducao de Var String: " << endl << $3.traducaoDeclaracaoDeVariaveis << endl << endl;
+				//cout << "Label String: " << $3.label << endl << endl;
 
 				$$.label = gerarNovaVariavel();
 				$$.traducaoDeclaracaoDeVariaveis = $3.traducaoDeclaracaoDeVariaveis + $5.traducaoDeclaracaoDeVariaveis +
@@ -2020,7 +1951,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 				adicionarTraducaoComandosFree(label);
 			}
 
-			resetarTamanhoDimensoesArray(valoresReaisDim);
+			resetarTamanhoDimensoesArray();
 			resetarVarGlobaisArray();
 		}
 
@@ -2263,35 +2194,11 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 						//tipoDolar1
 						//labelIndice
 						//labelRecuperada
-
-					/*	string label;
-					string traducaoDeclaracaoDeVariaveis;
-					string traducao;
-					string tipo;
-					int escopoDeAcesso = -1;
-					int tamanho = 0;
-					bool ehDinamica = false;
-					string estruturaDoConteudo;
-					string labelTamanhoDinamicoString;
-					int valorNum = -1; //Retornar valor tipoPrimitivo TK_NUM inteiro.
-					string labelIndice; //Salvar o label resultado de um cálculo de indice do array.
-					string nomeIdOriginal; //Poder retornar os valores do array corretamente.
-					bool acessoArray = false; //Poder reconhecer o caso ternura[x,y] = luadecristal[z,w].
-					bool criacaoArray = false; //Poder tratar os erros de livia[x,y] = int[u,v].
-					string tipoArray; //Se for array de acesso, saber o tipo do mesmo.
-				*/
-
-
-						//string tipo;
-						//tipoDolar3
-						//tipoDolar1
-						//labelIndice
-						//labelRecuperada
 					}
 
 				}
 
-				resetarTamanhoDimensoesArray(valoresReaisDim);
+				resetarTamanhoDimensoesArray();
 				resetarVarGlobaisArray();
 
 			}
