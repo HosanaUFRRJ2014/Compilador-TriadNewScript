@@ -25,8 +25,15 @@ namespace Atributos
 		bool ehDinamica = false;
 		string estruturaDoConteudo;
 		string labelTamanhoDinamicoString;
+		int valorNum = -1; //Retornar valor tipoPrimitivo TK_NUM inteiro.
+		string labelIndice; //Salvar o label resultado de um cálculo de indice do array.
+		string nomeIdOriginal; //Poder retornar os valores do array corretamente.
+		bool acessoArray = false; //Poder reconhecer o caso ternura[x,y] = luadecristal[z,w].
+		bool criacaoArray = false; //Poder tratar os erros de livia[x,y] = int[u,v].
+		string tipoArray; //Se for array de acesso, saber o tipo do mesmo.
 
 	};
+
 
 	ATRIBUTOS concatenarTraducoesAtributos(ATRIBUTOS , ATRIBUTOS );
 	ATRIBUTOS copiarDadosAtributos(ATRIBUTOS );

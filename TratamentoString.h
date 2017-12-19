@@ -108,6 +108,12 @@ namespace TratamentoString
 	/*Função responsável por gerar as declarações das variáveis de usuário e das temporárias para as operações relacionais */
 	string realizarTraducaoDeclaracaoOperacaoRelacionalString(string operacao, ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3, vector <string>  vetorTemporarias )
 	{
+
+	}
+*/
+	string realizarOperacaoAritmeticaString(string operacao,ATRIBUTOS * dolarDolar, ATRIBUTOS * dolar1, ATRIBUTOS * dolar3,
+		string varTamDolarDolar, string varTamDolar1, string varTamDolar3)
+	{
 		string retorno = "";
 
 		//retorno = "char * " + dolarDolar->label + ";\n"; //remover na relacional
@@ -152,6 +158,7 @@ namespace TratamentoString
 			retorno += montarConcatenarString(dolarDolar->label, dolar1->label) + ";\n";
 			retorno += montarConcatenarString(dolarDolar->label, dolar3->label) + ";\n";
 			dolarDolar->tamanho = dolar1->tamanho + dolar3->tamanho - 1; //para remover um dos '\0'
+		
 
 		}
 		//TODO - fazer para outras operações aritméticas ...

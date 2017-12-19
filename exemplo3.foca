@@ -1,4 +1,69 @@
+//var b = 3;
+//var a = int[2,3,4,5];
+//var b;
+//b = 10;
+
+var a,livia = int[2,3];
+var b = 1;
+var braida = int[3,3];
+
+braida[2,2] = 7;
+
+/*
+livia[0,0] = 10;
+livia[0,1] = 20;
+livia[1,0] = 30;
+livia[1,1] = 40;
+livia[1,2] = 50;
+
+a = livia[0,0]; //Caso a = livia[x,y] --> 'a' sem valor
+a = livia[0,1]; //Caso a = livia[x,y] --> 'a' com valor
+*/
+
+/*
+livia[1,2] = b; //Caso livia[x,y] = b | 50 | true | ...
+livia[0,0] = livia[1,1]; //Caso livia[x,y] = livia[u,v]
+
+livia[1,1] = braida[2,2]; //Caso livia[x,y] = braida[u,v]
+*/
+
+
+/*
+var b = 1,a = 90;
+a = b;
+*/
+
+//var livia = int[2,2,5];
+
+//b = livia[0,1,4];
+
+//var a = livia[0,b,4];
+
+/*
+livia[0,0] = 100;
+livia[0,1] = 50;
+livia[1,0] = 25;
+livia[1,1] = 5;
+*/
+
+/*
 var a;
+a = string[1];
+
+var b = string[2,3,4];
+b = string[livia];
+
+var c = float[6,6];
+c = float[15];
+*/
+
+/*
+var livia = int[2,2];
+var william,hosana;
+
+william = livia[0,1];
+*/
+
 
 /*
 var a;
