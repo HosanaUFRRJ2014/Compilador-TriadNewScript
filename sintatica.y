@@ -1775,6 +1775,7 @@ ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 
 		dolarDolar.traducao = dolarDolar.traducao + traducao;
 		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + realizarTraducaoDeclaracaoOperacaoRelacionalString(op, &dolarDolar, &dolar1,&dolar3, vetorTemporarias);
+		dolarDolar.label = vetorTemporarias.at(2); //pode dar problemas
 
 	}
 

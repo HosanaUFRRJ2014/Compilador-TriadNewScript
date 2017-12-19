@@ -61,7 +61,7 @@ show(b);
 */
 
 
-if("banana" == "jaca")
+if("banana" == "banana")
   show("Palavras iguais");
 else
   show("Palavras diferentes");

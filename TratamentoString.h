@@ -75,10 +75,10 @@ namespace TratamentoString
 			vetorTemporarias->push_back(gerarNovaVariavel());
 		}
 
-		if(operacao == "==")
+		/*if(operacao == "==")
 		{
 			vetorTemporarias->push_back(gerarNovaVariavel());
-		}
+		}*/
 
 	}
 
@@ -115,11 +115,11 @@ namespace TratamentoString
 		retorno += "int " + vetorTemporarias.at(1)+ ";\n";
 		retorno += "int " + vetorTemporarias.at(2) + ";\n";
 
-		if(operacao == "==")
+	/*	if(operacao == "==")
 		{
 		//	vetorTemporarias->push_back(gerarNovaVariavel());
 			retorno += "int " + vetorTemporarias.at(3) + ";\n";
-		}
+		}*/
 
 /*
 		else
@@ -162,7 +162,7 @@ namespace TratamentoString
 			retorno = '\t' + vetorTemporarias.at(0) + " = 0;\n";
 			retorno += '\t' + vetorTemporarias.at(1) + " = " + montarCompararString(dolar1->label, dolar3->label);
 			retorno += '\t' + vetorTemporarias.at(2) + " = " + vetorTemporarias.at(0) + " == " + vetorTemporarias.at(1) + ";\n";
-			retorno += '\t' + vetorTemporarias.at(3) + " =! " + vetorTemporarias.at(2) +  ";\n";
+		//	retorno += '\t' + vetorTemporarias.at(3) + " =! " + vetorTemporarias.at(2) +  ";\n";
 
 		}
 
