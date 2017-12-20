@@ -20,6 +20,7 @@ namespace ConstanteTipos
 	#define constante_estrutura_funcao "funcao"
 	#define constante_estrutura_chamadaFuncao "chamadaFuncao"
 	#define constante_estrutura_bloco "BLOCO"
+	#define constante_estrutura_comandoReturn "comandpReturn"
 
 	#define constante_tipo_default "default"
 	#define constante_tipo_break "break"

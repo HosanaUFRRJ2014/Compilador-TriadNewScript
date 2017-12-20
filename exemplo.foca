@@ -37,13 +37,44 @@ while(a < 10)
 }
 */
 {
-var a = 1;
-func f(a:int, b:float, c:string(3), d:bool, e:char) : int, bool, string, string(10) {
-	a + b;
-};//(1,(float)2,"aaa", true, 'a');
 
-f(1,(float)2,"aaa", true, 'a'); //+ 2; não tentar isso ...
+func f(x:int, y:int): string(3){
+	return "aaaa";
+};
+
+/*var a = 1.9;
+func d(i:int): string(3){
+	return "aaa";
+};
+
+func f(): float, int{
+	show(a);
+	func t(b:int) : float, int{
+		return b*1.0, b*2;
+	};
+	return 1.5,1;
+};
+f();
+show(a);
+*/
+
+/*func e(t:float): int, float, string(3), bool, char, int{
+	1+1;
+	return 1, (float)2,"aaaaa", true, 'a',1;
+	
+};
+
+func f(a:int, b:float, c:string(3), d:bool, e:char): int, float, string(3), bool, char, int {
+	return (backscope 1)e(b);
+}(1,(float)2,"aaa", true, 'a');
+*/
+
+//e(f(1,(float)2,"aaa", true, 'a'));
+//f(e(a));
+//var b;
+//b = f(1,(float)2,"aaa", true, 'a');
 }
 //(1,2,"aaa", true, 'a');
+
 
 //}
