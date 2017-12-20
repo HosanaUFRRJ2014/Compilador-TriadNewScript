@@ -13,38 +13,45 @@
 #define FATOR_MULTIPLICADOR_STRING 2
 
 
+char **variavelDoUsuario1; //VARUSER_a
 int temp1;
 int temp2;
-int temp3;
-int temp4;
+char* *temp3;
 
 
 
 
 int main(void)
 {
-	temp1 = 0;
-	temp2 = strcmp("banana","banana");
-	temp3 = temp1 == temp2;
-	temp4 = temp3;
-	if(temp4)
-		goto IF_TRUE1;
+	temp1 = 5;
+	variavelDoUsuario1 = (char**) malloc(temp1 * sizeof(char*));
+	variavelDoUsuario1[0] = "Lívia";
+	variavelDoUsuario1[1] = "de";
+	variavelDoUsuario1[2] = "Azevedo";
+	variavelDoUsuario1[3] = "da";
+	variavelDoUsuario1[4] = "Silva";
 
-	std::cout << "Palavras diferentes" <<  '\n';
-
-	goto FIM_IF1;
-	IF_TRUE1:
-
-	std::cout << "Palavras iguais" <<  '\n';
-
-	FIM_IF1:;
+	temp2 = 5;
+	temp3 = (char**) malloc(temp2 * sizeof(char*));
+	temp3[0] = "William";
+	temp3[1] = "Anderson";
+	temp3[2] = "de";
+	temp3[3] = "Brito";
+	temp3[4] = "Gomes";
+	free(variavelDoUsuario1);
+	variavelDoUsuario1 = temp3;
 
 	goto FIMCODINTER;
 
 
-	INDEX_NEG_ZERO:
-	std::cout << "Acesso ou alocação de memória indevida (Memory fault)." <<  '\n';
+	INDEX_FORA_LIMITE:
+	std::cout << "Acesso a memória indevido (Memory fault)." <<  '\n';
+
+
+	ALOCACAO_NEG_ZERO:
+	std::cout << "Alocação de memória indevida (Memory fault)." <<  '\n';
 
 	FIMCODINTER:
+	free(variavelDoUsuario1);
 	return 0;
 }

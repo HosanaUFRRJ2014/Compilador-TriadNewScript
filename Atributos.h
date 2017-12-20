@@ -27,7 +27,8 @@ namespace Atributos
 		string labelTamanhoDinamicoString;
 		int valorNum = -1; //Retornar valor tipoPrimitivo TK_NUM inteiro.
 		string labelIndice; //Salvar o label resultado de um cálculo de indice do array.
-		string nomeIdOriginal; //Poder retornar os valores do array corretamente.
+		//string nomeIdOriginal; //Poder retornar os valores do array corretamente.
+		string labelAux; //Para poder armazenar o label indexado do array em $$.label de ARRAY. Útil para outros casos, como show(a[0]).
 		bool acessoArray = false; //Poder reconhecer o caso livia[x,y] = compilador[z,w].
 		bool criacaoArray = false; //Poder tratar os erros de livia[x,y] = int[u,v].
 		string tipoArray; //Se for array de acesso, saber o tipo do mesmo.

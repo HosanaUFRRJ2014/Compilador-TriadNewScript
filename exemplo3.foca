@@ -45,7 +45,26 @@ livia[1,0] = 25;
 livia[1,1] = 5;
 */
 
-["oi","livia","de","silva","meu deus","pf compila",7];
+var livia = int[2,2,2],braida = int[3,3];
+var a,b = 1;
+//var a = livia[0,0,0];
+
+//a = livia[0,1,1]; //sem valor --> OK
+//b = livia[1,1,1]; //com valor --> OK
+
+livia[0,0,0] = 9; //----> OK
+//livia[1,1,1] = braida[0,1]; ---> OK
+//livia[1,1,1] = livia[0,0,0]; ----> OK
+
+/*
+var a,b = 1;
+a = ["Lívia","de","Azevedo","da","Silva"];
+//a = ["William","Anderson","de","Brito","Gomes"];
+
+show(a[b]);
+*/
+//a[0] = "Filipe";
+//a[1] = "Braida";
 
 /*
 var a,livia = 9;

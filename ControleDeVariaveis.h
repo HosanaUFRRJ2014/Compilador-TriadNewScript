@@ -20,6 +20,7 @@ namespace ControleDeVariaveis
 		vector<string> pilhaTamanhoDimensoesArray; //Para arrays -> Guarda as dimensões do array. Para obter a qtd de dim, só usar o size()
 		string tipoArray; //Para arrays -> Tipo primitivo do Array.
 		vector<pair<string,bool>> valoresReaisDim; //Para arrays ---> Para tratamente em tempo de compilação dos erros da indexação(TK_NUM).
+		bool foiCriadoDinamicamente;
 	};
 
 
@@ -105,7 +106,7 @@ namespace ControleDeVariaveis
 			return nome;
 		}
 
-		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<pair<string,bool>> valorReal = {},vector<string> dim = {})
+		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<pair<string,bool>> valorReal = {},vector<string> dim = {}, bool foiCriadoDinamicamente = false)
 		{
 			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
@@ -119,6 +120,7 @@ namespace ControleDeVariaveis
 				variavel.pilhaTamanhoDimensoesArray = dim; //Para o Array.
 				variavel.tipoArray = tipoArray; //Para o Array.
 				variavel.valoresReaisDim = valorReal; //Para o Array.
+				variavel.foiCriadoDinamicamente = foiCriadoDinamicamente; //Para o Array
 				dicionarioNomeTraducaoParaNome.insert(pair<string, string>(variavel.nomeTraducao, nome));
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
 
@@ -138,6 +140,8 @@ namespace ControleDeVariaveis
 				mapaDeContexto->at(variavel.nome).labelTamanhoDinamicoString = variavel.labelTamanhoDinamicoString;
 				mapaDeContexto->at(variavel.nome).pilhaTamanhoDimensoesArray = variavel.pilhaTamanhoDimensoesArray;
 				mapaDeContexto->at(variavel.nome).valoresReaisDim = variavel.valoresReaisDim;
+				mapaDeContexto->at(variavel.nome).tipoArray = variavel.tipoArray;
+				mapaDeContexto->at(variavel.nome).foiCriadoDinamicamente = variavel.foiCriadoDinamicamente;
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;

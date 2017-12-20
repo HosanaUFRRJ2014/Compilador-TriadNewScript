@@ -368,7 +368,7 @@ VALOR		: TK_NUM
 			{
 				$$ = $1;
 				$$.tipo = constante_tipo_array;
-				$$.estruturaDoConteudo = constante_estrutura_tipoPrimitivo;
+				$$.estruturaDoConteudo = $1.estruturaDoConteudo;
 			}
 			|
 			ID
@@ -578,12 +578,13 @@ VALOR		: TK_NUM
 ACESSO_ARRAY	: ID '['
 				{
 					acessoArray = true;
-					dadosArray = recuperarDadosVariavel($1.nomeIdOriginal,0);
+					dadosArray = recuperarDadosVariavel($1.label,0); //nomeIdOriginal
 
 					//cout << "Label: " << $1.label << endl << "Nome: " << dadosArray.nome << endl << "Tipo: " << dadosArray.tipo << endl;
 
 					$$ = $1;
 					$$.acessoArray = true;
+					$$.label = $1.label;
 				}
 				;
 
@@ -597,22 +598,26 @@ ARRAY	: TIPO '[' DIMENSOES_INDICES ']' //Criação de array
 			$$.criacaoArray = true; //Para tratamento de erros.
 			definicaoTipoArray($1.tipo,$1.label);
 			count_dim = 0;
+			$$.estruturaDoConteudo = constante_estrutura_tipoPrimitivo;
 		}
 		|
 		'[' ELEM_CHAVES ']'//Criação de array com elementos definidos --> Restrito a duas dimensoes. //ELEMENTOS
 		{
 			$$ = $2;
 			$$.estruturaDoConteudo = constante_estrutura_criacaoArrayPreDefinido;
+			$$.criacaoArray = true;
+			definicaoTipoArray($2.tipo,tipoCodigoIntermediario($2.tipo));
+			$$.tipoArray = $2.tipo;
+			$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
+			$$.traducao = $2.traducao;
 
 			string label_dim = gerarNovaVariavel();
-
-			adicionarValoresReaisDim(to_string($1.valorNum),true);
-			adicionarTamanhoDimensoesArray(label_dim);
+			adicionarValoresReaisDim(to_string($2.valorNum),true); //Valor da dimensão.
+			adicionarTamanhoDimensoesArray(label_dim); //label que terá o tam do vetor.
 		}
 		|
 		ACESSO_ARRAY DIMENSOES_INDICES ']' //ACESSO_ARRAY DIMENSOES_INDICES ']'
 		{
-
 			if($1.tipo != constante_tipo_array)
 			{
 				//dispara erro...
@@ -633,9 +638,11 @@ ARRAY	: TIPO '[' DIMENSOES_INDICES ']' //Criação de array
 				$$.ehDinamica = $2.ehDinamica;
 				$$.label = $2.label; //Para tratar o caso da pilha ter tamanho 1.
 
-				tradRetorno = traducaoCalculoIndiceArray(pilhaTamanhoDimensoesArray,dadosArray.pilhaTamanhoDimensoesArray,&$$);
+				tradRetorno = traducaoCalculoIndiceArray(pilhaTamanhoDimensoesArray,dadosArray.pilhaTamanhoDimensoesArray,&$$,valoresReaisDim,
+																									dadosArray.valoresReaisDim,dadosArray.foiCriadoDinamicamente);
 
-				$$.label = $1.label;
+				$$.label = recuperarNomeTraducao($1.label) + "[" + $$.labelIndice + "]";
+				$$.labelAux = $1.label;
 				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis + tradRetorno.first;
 				$$.traducao = $2.traducao + tradRetorno.second;
 				//$$.tipo = dadosArray.tipoArray;
@@ -644,6 +651,9 @@ ARRAY	: TIPO '[' DIMENSOES_INDICES ']' //Criação de array
 				$$.tipoArray = dadosArray.tipoArray;
 				count_dim = 0; //Terminou a contagem das dimensoes. Aguardando a proxima.
 				resetarTamanhoDimensoesArray();
+
+				cout << "TRADUCAO VAR: " << endl << $$.traducaoDeclaracaoDeVariaveis << endl << endl;
+				cout << "TRADUCAO: " << endl << $$.traducao << endl << endl;
 			}
 
 		}
@@ -651,26 +661,37 @@ ARRAY	: TIPO '[' DIMENSOES_INDICES ']' //Criação de array
 
 ELEM_CHAVES	: ELEM_CHAVES ',' E
 						{
-								if($1.tipo != $3.tipo || ($3.estruturaDoConteudo != constante_tipo_array || $3.estruturaDoConteudo == constante_tipo_funcao))
+								if($1.tipo != $3.tipo || ($3.tipo == constante_tipo_array || $3.tipo == constante_tipo_funcao))
 								{
 										//dispara erro...
+										yyerror("Tipos do vetor pré-determinado são distintos entre si ou são inválidos (array e função).");
 								}
 
+								//Por algum motivo o yacc não estava executando o comando $$.valorNum = $1.valorNum + 1 adequadamente.
+								$1.valorNum += 1;
 
-								$$.valorNum = $1.valorNum + 1;
+								$$.valorNum = $1.valorNum;
 								$$ = $1;
+								$$.tipo = $1.tipo;
+								$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+								$$.traducao = $1.traducao + $3.traducao;
+								adicionarTamanhoDimensoesArray($3.label,&labelsDosElementosLidos, true);
 						}
 						|
 						E
 						{
-							if(($1.estruturaDoConteudo != constante_tipo_array || $1.estruturaDoConteudo == constante_tipo_funcao))
+							if(($1.tipo == constante_tipo_array || $1.tipo == constante_tipo_funcao))
 							{
 									//dispara erro...
+									yyerror("Tipos do vetor pré-determinado são distintos entre si ou são inválidos (array e função).");
 							}
 
 								$$ = $1;
 								$$.valorNum = 1;
-								$$.estruturaDoConteudo = $1.estruturaDoConteudo;
+								//$$.estruturaDoConteudo = $1.estruturaDoConteudo;
+								$$.tipo = $1.tipo;
+								$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis;
+								$$.traducao = $1.traducao;
 								adicionarTamanhoDimensoesArray($1.label,&labelsDosElementosLidos, true);
 						}
 						;
@@ -803,16 +824,6 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' E
 												";\n\t" + label_cond_if + " = !" + label_if_index + ";\n\t" +
 												"if(" + label_cond_if + ")\n\t\t" + "goto " + tag_erro_index + ";\n";
 								}
-
-								/*
-								if($3.valorNum >= stoi(obterElementoTamanhoDimensoesArray(count_dim,&dadosArray.valoresReaisDim,true)))
-								{
-									//dispara erro...
-									//(Aqui queria com a msm mensagem de erro que eu coloquei no código)
-									yyerror(MSG_FIM_EXECUCAO_ARRAY);
-								}
-								*/
-
 							}
 
 
@@ -956,14 +967,6 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' E
 												"if(" + label_cond_if + ")\n\t\t" + "goto " + tag_erro_index + ";\n";
 
 								}
-								/*
-								if($1.valorNum >= stoi(obterElementoTamanhoDimensoesArray(count_dim,&dadosArray.valoresReaisDim,true)))
-								{
-									//dispara erro...
-									//(Aqui queria com a msm mensagem de erro que eu coloquei no código)
-									yyerror(MSG_FIM_EXECUCAO_ARRAY);
-								}
-								*/
 							}
 
 							//Fazer lógica para índice como sendo numero inteiro.
@@ -988,7 +991,7 @@ ID			: TK_ID
 					$$.tamanho = metaData.tamanho;
 					$$.ehDinamica = metaData.ehDinamica;
 			//		cout << "//Entrou em ID: TK_ID\n" << "metaData.nome: " << metaData.nome << "\nlabel$: " << $$.label << "label1: " << $1.label << endl;
-					$$.nomeIdOriginal = $1.label; //Subir nome original.
+					//$$.nomeIdOriginal = $1.label; //Subir nome original.
 				}
 				else
 				{
@@ -1025,7 +1028,7 @@ ID			: TK_ID
 					$$.escopoDeAcesso = escopo;
 
 
-					$$.nomeIdOriginal = $1.label; //Subir nome original.
+					//$$.nomeIdOriginal = $1.label; //Subir nome original.
 
 				}else{
 					string params[1] = {$5.label};
@@ -1047,7 +1050,7 @@ ID			: TK_ID
 
 					$$.escopoDeAcesso = 0;
 
-					$$.nomeIdOriginal = $1.label; //Subir nome original.
+					//$$.nomeIdOriginal = $1.label; //Subir nome original.
 
 				}else{
 					string params[1] = {$4.label};
@@ -2028,7 +2031,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 		int tamanho = 0;
 
 		if(!acessoArray)
-			incluirNoMapa(dolar2.label,dolar4.tamanho, dolar4.tipo,tipoArray,valoresReaisDim,pilhaTamanhoDimensoesArray);
+			incluirNoMapa(dolar2.label,dolar4.tamanho, dolar4.tipo,tipoArray,valoresReaisDim,pilhaTamanhoDimensoesArray,dolar4.ehDinamica);
 		else
 			incluirNoMapa(dolar2.label,dolar4.tamanho, tipoArray);
 
@@ -2078,25 +2081,43 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 				dolarDolar.traducaoDeclaracaoDeVariaveis =  dolar4.traducaoDeclaracaoDeVariaveis +
 															tipoCodigoIntermediario(tipoArray) + " " + label +
 															"; //" + labelPrefix + "\n";
-				dolarDolar.traducao = dolar4.traducao + "\t" + label + " = " + recuperarNomeTraducao(dolar4.nomeIdOriginal) + "[" + dolar4.labelIndice + "];\n";
+				/*
+				dolarDolar.traducao = dolar4.traducao + "\t" + label + " = " +
+															recuperarNomeTraducao(dolar4.label) + "[" + dolar4.labelIndice + "];\n"; //nomeIdOriginal
+				*/
+				dolarDolar.traducao = dolar4.traducao + "\t" + label + " = " + dolar4.labelAux + ";\n";
 				dolar4.tipo = tipoArray;
 			}
 			else
 			{
-				//cout << "CASO: var a = tipo[x,y]" << endl << endl;
+				if(dolar4.estruturaDoConteudo != constante_estrutura_criacaoArrayPreDefinido)
+				{
+						//cout << "CASO: var a = tipo[x,y]" << endl << endl;
+						aux = recuperarDadosVariavel(dolar2.label);
 
-				aux = recuperarDadosVariavel(dolar2.label);
+						if(dolar4.ehDinamica)
+							resultTraducao = traducaoCriacaoArray(label,&aux.pilhaTamanhoDimensoesArray);
+						else
+							resultTraducao = traducaoCriacaoArray(label,NULL,dolar4.valorNum);
 
-				if(dolar4.ehDinamica)
-					resultTraducao = traducaoCriacaoArray(label,&aux.pilhaTamanhoDimensoesArray);
-				else
-					resultTraducao = traducaoCriacaoArray(label,NULL,dolar4.valorNum);
+						dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis +
+																	tipoCodigoIntermediario(tipoArray) + " *" +
+																	label + "; //" + labelPrefix + "\n" + resultTraducao.first;
+																	//tipoArrayCodInterm
+						dolarDolar.traducao = dolar4.traducao + resultTraducao.second;
+				}
+				else //Definição de elementos pré definidos.
+				{
+						//cout << "CASO: var a = [x1,x2,x3,x4,...xn] << endl << endl"
 
-				dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis +
-															tipoCodigoIntermediario(tipoArray) + " *" +
-															label + "; //" + labelPrefix + "\n" + resultTraducao.first;
-															//tipoArrayCodInterm
-				dolarDolar.traducao = dolar4.traducao + resultTraducao.second;
+						cout << obterDimInteiraArray(0).first << endl << endl;
+						resultTraducao = traducaoCriacaoArray(label,&labelsDosElementosLidos,stoi(obterDimInteiraArray(0).first),true);
+
+						dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(tipoArray) + " *" + label +
+																										"; //" + labelPrefix + "\n" + resultTraducao.first;
+						dolarDolar.traducao = dolar4.traducao + resultTraducao.second;
+				}
+
 				adicionarTraducaoComandosFree(label);
 			}
 
@@ -2128,19 +2149,26 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 	ATRIBUTOS dolarDolar;
 	string tipo = "";
 	int tamanho = 0;
-	//cout << "LABEL ID: " << dolar1.label << endl;
 
 	string labelRecuperada = recuperarNomeTraducao(dolar1.label);
 
 	bool nuncaAtribuida = false;
 	string tipoDolar1 = "";
 	string tipoDolar3 = "";
+	string swap;
 
 	if(dolar1.label != dolar3.label)
 	{
 		if(ehTipoNaoAtribuivel(dolar3.tipo, dolar3.estruturaDoConteudo)){
 			string params[1] = {dolar1.label};
 			yyerror(montarMensagemDeErro(MSG_ERRO_VALOR_ATRIBUIDO_NAO_PODE_SER_ATRIBUIDO, params, 1));
+		}
+
+		if(dolar1.tipo == constante_tipo_array && dolar1.acessoArray)
+		{
+			swap = dolar1.label; //label indexado
+			dolar1.label = dolar1.labelAux; //label original
+			dolar1.labelAux = swap; //label indexado
 		}
 
 		DADOS_VARIAVEL metaData;
@@ -2153,6 +2181,8 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 		if(metaData.tipo == "") //A variável não tipo, ou seja, já existe, mas sem valor. CASO ARRAY '=' E NUNCA ENTRARÁ AQUI
 		{
+			cout << "NÃO EXISTO" << endl;
+
 			nuncaAtribuida = true;
 			//isso aqui também pode causar problema no futuro devido as lacunas
 			metaData.tipo = dolar3.tipo;
@@ -2183,6 +2213,8 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 				{
 					metaData.pilhaTamanhoDimensoesArray = pilhaTamanhoDimensoesArray;
 					metaData.valoresReaisDim = valoresReaisDim;
+					metaData.tipoArray = tipoArray;
+					metaData.foiCriadoDinamicamente = dolar3.ehDinamica;
 				}
 			}
 
@@ -2200,10 +2232,12 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 		}
 		else //A variável tem tipo, ou seja, já existe e tem um valor.
 		{
+			cout << "EU EXISTO" << endl;
+
 			//CASO ESPECIFICO DO ARRAY
 			if(dolar1.tipo != constante_tipo_array && dolar3.acessoArray) //CASO: a = livia[x,y] //'a' tem valor
 			{
-				//cout << "CASO: a = livia[x,y] //'a' tem valor ---> Preparar pra entrar no ==" << endl << endl;
+				cout << "CASO: a = livia[x,y] //'a' tem valor ---> Preparar pra entrar no ==" << endl << endl;
 
 				if(dolar1.tipo != dolar3.tipoArray)
 				{
@@ -2219,7 +2253,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 			if(dolar1.tipo == constante_tipo_array && dolar3.tipo != constante_tipo_array) //CASO: livia[x,y] = a|30|2.6
 			{
-				//cout << "CASO: livia[x,y] = a|30|2.6 ---> Preparar pra entrar no ==" << endl << endl;
+				cout << "CASO: livia[x,y] = a|30|2.6 ---> Preparar pra entrar no ==" << endl << endl;
 
 				if(dolar1.tipoArray != dolar3.tipo)
 				{
@@ -2235,6 +2269,8 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 			if(dolar1.acessoArray && dolar3.acessoArray) //Caso livia[x,y] = braida[u,v]
 			{
+				cout << "CASO: livia[x,y] = braida[u,v] ---> Preparar pra entrar no ==" << endl << endl;
+
 				if(dolar1.tipoArray != dolar3.tipoArray)
 				{
 					//dispara erro...
@@ -2252,31 +2288,53 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 				dolarDolar.traducao = dolar3.traducao + montarCopiarString(labelRecuperada, dolar3.label) + ";\n";
 			else if(dolar3.tipo == constante_tipo_array) //CASO ARRAY
 			{
+				cout << "SOU DO TIPO ARRAY" << endl << endl;
+
 				//Caso novo array ---> Varável estava sem valor algum inicialmente. Criação normal.
 				if(nuncaAtribuida)
 				{
 					if(!dolar3.acessoArray) //Criação de novo array.
 					{
-						//cout << "CASO: a = tipo[x,y] //'a' sem valor" << endl << endl;
+						cout << "CASO: a = tipo[x,y] //'a' sem valor" << endl << endl;
 
 						pair<string,string> resultTraducao;
 
-						if(ehDinamica)
-							resultTraducao = traducaoCriacaoArray(labelRecuperada,&pilhaTamanhoDimensoesArray);
-						else
-							resultTraducao = traducaoCriacaoArray(labelRecuperada,NULL,dolar3.valorNum);
+						if(dolar3.estruturaDoConteudo != constante_estrutura_criacaoArrayPreDefinido)
+						{
+								//pair<string,string> resultTraducao;
 
-						dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis + resultTraducao.first;
-						dolarDolar.traducao = dolar3.traducao + resultTraducao.second;
+								if(ehDinamica)
+									resultTraducao = traducaoCriacaoArray(labelRecuperada,&pilhaTamanhoDimensoesArray);
+								else
+									resultTraducao = traducaoCriacaoArray(labelRecuperada,NULL,dolar3.valorNum);
+
+								dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis + resultTraducao.first;
+								dolarDolar.traducao = dolar3.traducao + resultTraducao.second;
+								//adicionarTraducaoComandosFree(labelRecuperada);
+						}
+						else
+						{
+								cout << "CASO: a = [x1,x2,x3,x4,...xn] //'a' sem valor" << endl << endl;
+
+								resultTraducao = traducaoCriacaoArray(labelRecuperada,&labelsDosElementosLidos,stoi(obterDimInteiraArray(0).first),true);
+
+								dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis + resultTraducao.first;
+								dolarDolar.traducao = dolar3.traducao + resultTraducao.second;
+						}
+
 						adicionarTraducaoComandosFree(labelRecuperada);
 					}
 					else //Atribuição de valor dentro do array. // CASO: a = livia[x,y] (a já existe, mas está sem valor.)
 					{
-						//cout << "CASO: a = livia[x,y] (a já existe, mas está sem valor.)" << endl << endl << endl;
+						cout << "CASO: a = livia[x,y] (a já existe, mas está sem valor.)" << endl << endl << endl;
 
 						dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis; //TALVEZ MUDE
+
+						/*
 						dolarDolar.traducao = dolar3.traducao + "\t" + labelRecuperada + " = " + recuperarNomeTraducao(dolar3.label) +
 												"[" + dolar3.labelIndice + "];\n";
+						*/
+						dolarDolar.traducao = dolar3.traducao + "\t" + labelRecuperada + " = " + dolar3.label + ";\n";
 						dolar1.tipo = tipoDolar1;
 					}
 
@@ -2301,16 +2359,27 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 						}
 						else
 						{
-							//cout << "CASO: a = tipo[x,y] //'a' com valor e mesmo tipo do array novo" << endl << endl;
-
 							pair<string,string> resultTraducao;
 							string labelTemp = gerarNovaVariavel();
 
-							if(ehDinamica)
-								resultTraducao = traducaoCriacaoArray(labelTemp,&pilhaTamanhoDimensoesArray);
-							else
-								resultTraducao = traducaoCriacaoArray(labelTemp,NULL,dolar3.valorNum);
+							if(dolar3.estruturaDoConteudo != constante_estrutura_criacaoArrayPreDefinido)
+							{
+									cout << "CASO: a = tipo[x,y] //'a' com valor e mesmo tipo do array novo" << endl << endl;
 
+									//pair<string,string> resultTraducao;
+									//string labelTemp = gerarNovaVariavel();
+
+									if(ehDinamica)
+										resultTraducao = traducaoCriacaoArray(labelTemp,&pilhaTamanhoDimensoesArray);
+									else
+										resultTraducao = traducaoCriacaoArray(labelTemp,NULL,dolar3.valorNum);
+							}
+							else //Atribuição com array com valores pré-determinados.
+							{
+									cout << "CASO: a = [x1,x2,x3,x4,...xn] //'a' com valor" << endl << endl;
+
+									resultTraducao = traducaoCriacaoArray(labelTemp,&labelsDosElementosLidos,stoi(obterDimInteiraArray(0).first),true);
+							}
 
 							dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis + resultTraducao.first +
 																		tipoArrayCodInterm + " *" + labelTemp + ";\n";
@@ -2325,6 +2394,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 								atualizarNoMapa(metaData, dolar1.escopoDeAcesso);
 							else
 								atualizarNoMapa(metaData);
+
 						}
 					}
 					else //Atribuição de valor dentro do array.
@@ -2337,40 +2407,45 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 						if(!dolar1.acessoArray && dolar3.acessoArray) //a = livia[x,y] // 'a' com valor
 						{
-							//cout << "CASO: a = livia[x,y] // 'a' com valor" << endl;
+							cout << "CASO: a = livia[x,y] // 'a' com valor" << endl;
 
 							dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis;
+							/*
 							dolarDolar.traducao = dolar3.traducao + "\t" + labelRecuperada + " = " + recuperarNomeTraducao(dolar3.label) +
-													"[" + dolar3.labelIndice + "];\n";
+													"[" + dolar3.labelIndice + "];\n"
+							*/
+							dolarDolar.traducao = dolar3.traducao + "\t" + labelRecuperada + " = " + dolar3.label + ";\n";
 							dolar1.tipo = tipoDolar1;
+
 						}
 						else if(dolar1.acessoArray && dolar3.acessoArray) //livia[x,y] = braida[u,v];
 						{
-							//cout << "CASO: livia[x,y] = braida[u,v]" << endl;
+							cout << "CASO: livia[x,y] = braida[u,v]" << endl;
 
 							dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis +
 																		 dolar3.traducaoDeclaracaoDeVariaveis;
+							/*
 							dolarDolar.traducao = dolar1.traducao + dolar3.traducao + "\t" + recuperarNomeTraducao(dolar1.label) + "[" +
 													dolar1.labelIndice + "] = " + recuperarNomeTraducao(dolar3.label) + "[" +
 													dolar3.labelIndice + "];\n";
+							*/
+							dolarDolar.traducao = dolar1.traducao + dolar3.traducao + "\t" + dolar1.labelAux + " = " + dolar3.label + ";\n";
 							//dolar1.tipo = tipoDolar1;
 						}
 						else if(dolar1.acessoArray && !dolar3.acessoArray) //livia[x,y] = a | 2.3 | 30 | "ola" | 'a' | true
 						{
-							//cout << "CASO: livia[x,y] = a | 2.3 | 30 | 'ola' | 'a' | true" << endl;
+							cout << "CASO: livia[x,y] = a | 2.3 | 30 | 'ola' | 'a' | true" << endl;
 
 							dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis +
 																		 dolar3.traducaoDeclaracaoDeVariaveis;
+							/*
 							dolarDolar.traducao = dolar1.traducao + dolar3.traducao + "\t" + recuperarNomeTraducao(dolar1.label) +
 													"[" + dolar1.labelIndice + "] = " + recuperarNomeTraducao(dolar3.label) + ";\n";
+							*/
+							dolarDolar.traducao = dolar1.traducao + dolar3.traducao + "\t" + dolar1.labelAux + " = " +
+																		recuperarNomeTraducao(dolar3.label) + ";\n";
 							//dolar1.tipo = tipoDolar1;
 						}
-
-						//string tipo;
-						//tipoDolar3
-						//tipoDolar1
-						//labelIndice
-						//labelRecuperada
 					}
 
 				}
@@ -2404,6 +2479,9 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 	}
 	else //TRATAR CASO ESPECÍFICO DO ARRAY: livia[2,3] = livia[0,0];
 	{
+
+		cout << "LABELS SÃO IGUAIS" << endl << endl;
+		/*
 		if(dolar1.acessoArray && dolar3.acessoArray)
 		{
 			string atribuicao = " = ";
@@ -2419,6 +2497,9 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 		{
 			dolarDolar = dolar3;
 		}
+		*/
+
+		dolarDolar = dolar3;
 	}
 
 
