@@ -662,8 +662,8 @@ ARRAY	: TIPO '[' DIMENSOES_INDICES ']' //Criação de array
 				count_dim = 0; //Terminou a contagem das dimensoes. Aguardando a proxima.
 				resetarTamanhoDimensoesArray();
 
-				cout << "TRADUCAO VAR: " << endl << $$.traducaoDeclaracaoDeVariaveis << endl << endl;
-				cout << "TRADUCAO: " << endl << $$.traducao << endl << endl;
+				//cout << "//TRADUCAO VAR: " << endl << $$.traducaoDeclaracaoDeVariaveis << endl << endl;
+				//cout << "//TRADUCAO: " << endl << $$.traducao << endl << endl;
 			}
 
 		}
@@ -1127,11 +1127,11 @@ CRIACAO_VARIAVEL	: TK_PALAVRA_VAR TK_ID
 ATRIBUICAO_VARIAVEL_CRIACAO	:  TK_ID '=' E
 					{
 						$$ = tratarDeclaracaoComAtribuicao($1,$3);
-						cout << "++ATRIBUICAO_VARIAVEL----------------\n";
+						//cout << "//++ATRIBUICAO_VARIAVEL----------------\n";
 					//	cout << "label1: " << $1.label << " tamaho: " << $1.tamanho << endl;
 						//cout << "label3: " << $3.label << " tamaho: " << $3.tamanho << endl;
 						//cout << "label$$: " << $$.label << " tamaho: " << $$.tamanho << endl;
-						cout << "------------------\n";
+						//cout << "//------------------\n";
 
 					}
 					|
@@ -2134,7 +2134,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 				{
 						//cout << "CASO: var a = [x1,x2,x3,x4,...xn] << endl << endl"
 
-						cout << obterDimInteiraArray(0).first << endl << endl;
+						//cout << obterDimInteiraArray(0).first << endl << endl;
 						resultTraducao = traducaoCriacaoArray(label,&labelsDosElementosLidos,stoi(obterDimInteiraArray(0).first),true);
 
 						dolarDolar.traducaoDeclaracaoDeVariaveis = dolar4.traducaoDeclaracaoDeVariaveis + tipoCodigoIntermediario(tipoArray) + " *" + label +
@@ -2205,7 +2205,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 		if(metaData.tipo == "") //A variável não tipo, ou seja, já existe, mas sem valor. CASO ARRAY '=' E NUNCA ENTRARÁ AQUI
 		{
-			cout << "NÃO EXISTO" << endl;
+		//	cout << "NÃO EXISTO" << endl;
 
 			nuncaAtribuida = true;
 			//isso aqui também pode causar problema no futuro devido as lacunas
@@ -2259,7 +2259,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 			//CASO ESPECIFICO DO ARRAY
 			if(dolar1.tipo != constante_tipo_array && dolar3.acessoArray) //CASO: a = livia[x,y] //'a' tem valor
 			{
-				cout << "CASO: a = livia[x,y] //'a' tem valor ---> Preparar pra entrar no ==" << endl << endl;
+			//	cout << "//CASO: a = livia[x,y] //'a' tem valor ---> Preparar pra entrar no ==" << endl << endl;
 
 				if(dolar1.tipo != dolar3.tipoArray)
 				{
@@ -2275,7 +2275,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 			if(dolar1.tipo == constante_tipo_array && dolar3.tipo != constante_tipo_array) //CASO: livia[x,y] = a|30|2.6
 			{
-				cout << "CASO: livia[x,y] = a|30|2.6 ---> Preparar pra entrar no ==" << endl << endl;
+				//cout << "CASO: livia[x,y] = a|30|2.6 ---> Preparar pra entrar no ==" << endl << endl;
 
 				if(dolar1.tipoArray != dolar3.tipo)
 				{
@@ -2291,7 +2291,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 			if(dolar1.acessoArray && dolar3.acessoArray) //Caso livia[x,y] = braida[u,v]
 			{
-				cout << "CASO: livia[x,y] = braida[u,v] ---> Preparar pra entrar no ==" << endl << endl;
+		//		cout << "CASO: livia[x,y] = braida[u,v] ---> Preparar pra entrar no ==" << endl << endl;
 
 				if(dolar1.tipoArray != dolar3.tipoArray)
 				{
@@ -2315,7 +2315,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 				{
 					if(!dolar3.acessoArray) //Criação de novo array.
 					{
-						cout << "CASO: a = tipo[x,y] //'a' sem valor" << endl << endl;
+						//cout << "CASO: a = tipo[x,y] //'a' sem valor" << endl << endl;
 
 						pair<string,string> resultTraducao;
 
@@ -2334,7 +2334,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 						}
 						else
 						{
-								cout << "CASO: a = [x1,x2,x3,x4,...xn] //'a' sem valor" << endl << endl;
+//								cout << "CASO: a = [x1,x2,x3,x4,...xn] //'a' sem valor" << endl << endl;
 
 								resultTraducao = traducaoCriacaoArray(labelRecuperada,&labelsDosElementosLidos,stoi(obterDimInteiraArray(0).first),true);
 
@@ -2346,7 +2346,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 					}
 					else //Atribuição de valor dentro do array. // CASO: a = livia[x,y] (a já existe, mas está sem valor.)
 					{
-						cout << "CASO: a = livia[x,y] (a já existe, mas está sem valor.)" << endl << endl << endl;
+	//					cout << "CASO: a = livia[x,y] (a já existe, mas está sem valor.)" << endl << endl << endl;
 
 						dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis; //TALVEZ MUDE
 
@@ -2384,7 +2384,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 							if(dolar3.estruturaDoConteudo != constante_estrutura_criacaoArrayPreDefinido)
 							{
-									cout << "CASO: a = tipo[x,y] //'a' com valor e mesmo tipo do array novo" << endl << endl;
+			//						cout << "CASO: a = tipo[x,y] //'a' com valor e mesmo tipo do array novo" << endl << endl;
 
 									//pair<string,string> resultTraducao;
 									//string labelTemp = gerarNovaVariavel();
@@ -2396,7 +2396,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 							}
 							else //Atribuição com array com valores pré-determinados.
 							{
-									cout << "CASO: a = [x1,x2,x3,x4,...xn] //'a' com valor" << endl << endl;
+				//					cout << "CASO: a = [x1,x2,x3,x4,...xn] //'a' com valor" << endl << endl;
 
 									resultTraducao = traducaoCriacaoArray(labelTemp,&labelsDosElementosLidos,stoi(obterDimInteiraArray(0).first),true);
 							}
@@ -2427,7 +2427,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 						if(!dolar1.acessoArray && dolar3.acessoArray) //a = livia[x,y] // 'a' com valor
 						{
-							cout << "CASO: a = livia[x,y] // 'a' com valor" << endl;
+		//					cout << "CASO: a = livia[x,y] // 'a' com valor" << endl;
 
 							dolarDolar.traducaoDeclaracaoDeVariaveis = dolar3.traducaoDeclaracaoDeVariaveis;
 							/*
@@ -2440,7 +2440,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 						}
 						else if(dolar1.acessoArray && dolar3.acessoArray) //livia[x,y] = braida[u,v];
 						{
-							cout << "CASO: livia[x,y] = braida[u,v]" << endl;
+				//			cout << "CASO: livia[x,y] = braida[u,v]" << endl;
 
 							dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis +
 																		 dolar3.traducaoDeclaracaoDeVariaveis;
@@ -2454,7 +2454,7 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 						}
 						else if(dolar1.acessoArray && !dolar3.acessoArray) //livia[x,y] = a | 2.3 | 30 | "ola" | 'a' | true
 						{
-							cout << "CASO: livia[x,y] = a | 2.3 | 30 | 'ola' | 'a' | true" << endl;
+				//			cout << "CASO: livia[x,y] = a | 2.3 | 30 | 'ola' | 'a' | true" << endl;
 
 							dolarDolar.traducaoDeclaracaoDeVariaveis = dolar1.traducaoDeclaracaoDeVariaveis +
 																		 dolar3.traducaoDeclaracaoDeVariaveis;
