@@ -15,16 +15,18 @@ namespace ControleDeVariaveis
 		string nomeTraducao; //Nome da variável no código intermediário.
 		int tamanho = 0; //Para string
 		bool ehDinamica = false; //Para string
+		string labelTamanhoDinamicoString;
 		int escopo;
 		vector<string> pilhaTamanhoDimensoesArray; //Para arrays -> Guarda as dimensões do array. Para obter a qtd de dim, só usar o size()
 		string tipoArray; //Para arrays -> Tipo primitivo do Array.
-		vector<string> valoresReaisDim; //Para arrays ---> Para tratamente em tempo de compilação dos erros da indexação(TK_NUM).
+		vector<pair<string,bool>> valoresReaisDim; //Para arrays ---> Para tratamente em tempo de compilação dos erros da indexação(TK_NUM).
 	};
 
 
 	namespace MapaDeContexto
 	{
-		#define prefixo_variavel_usuario "VARUSER_"
+		//define de prefixo do usuario movido para o sintatica para que todos os arquivos tenham acesso
+//		#define prefixo_funcao_usuario "FUNCUSER_"
 //		#define constante_TamanhoInicialPilha 5
 		int numeroEscopoAtual = 0;
 		vector<map<string, DADOS_VARIAVEL>*> pilhaDeMapas(0);
@@ -32,7 +34,7 @@ namespace ControleDeVariaveis
 		map<string, string> dicionarioNomeTraducaoParaNome;
 
 		void inicializarMapaDeContexto();
-		bool incluirNoMapa(string,int, string,string,vector<string>,vector<string>);
+		bool incluirNoMapa(string,int, string,string,vector< pair<string,bool>>,vector<string>);
 		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
 		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
@@ -47,6 +49,15 @@ namespace ControleDeVariaveis
 		void diminuirEscopo();
 		bool ehMaiorIgualQueEscopoAtual(int);
 		int escopoResultante(int);
+
+		//Impressao e debugs
+		void imprimirVarDados(DADOS_VARIAVEL);
+
+		void imprimirVarDados(DADOS_VARIAVEL metaData){
+			cout << "Nome: " << metaData.nome << endl << "Nome Traducao: " << metaData.nomeTraducao << endl << "Tipo: " << metaData.tipo << endl;
+			cout << "Tam pilhaDimArray: " << metaData.pilhaTamanhoDimensoesArray.size() << endl << "Tam valoresReaisDim: " << metaData.valoresReaisDim.size() << endl;
+			cout << "Tipo Array: " << metaData.tipoArray << endl;
+		}
 
 
 		bool ehMaiorIgualQueEscopoAtual(int qtdRetornoEscopo)
@@ -94,8 +105,8 @@ namespace ControleDeVariaveis
 			return nome;
 		}
 
-		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<string> valorReal = {},vector<string> dim = {})
-		{		
+		bool incluirNoMapa(string nome, int tamanho, string tipo = "",string tipoArray = "",vector<pair<string,bool>> valorReal = {},vector<string> dim = {})
+		{
 			nome = adicionaPrefixo(nome);
 			if(!variavelJaDeclarada(nome, false))
 			{
@@ -110,10 +121,10 @@ namespace ControleDeVariaveis
 				variavel.valoresReaisDim = valorReal; //Para o Array.
 				dicionarioNomeTraducaoParaNome.insert(pair<string, string>(variavel.nomeTraducao, nome));
 				pilhaDeMapas[numeroEscopoAtual]->insert(pair<string,DADOS_VARIAVEL>(nome,variavel));
-				
+
 				return true;
 			}
-					
+
 			return false;
 		}
 
@@ -124,12 +135,20 @@ namespace ControleDeVariaveis
 			{
 				mapaDeContexto->at(variavel.nome).tamanho = variavel.tamanho;
 				mapaDeContexto->at(variavel.nome).ehDinamica = variavel.ehDinamica;
+				mapaDeContexto->at(variavel.nome).labelTamanhoDinamicoString = variavel.labelTamanhoDinamicoString;
 				mapaDeContexto->at(variavel.nome).pilhaTamanhoDimensoesArray = variavel.pilhaTamanhoDimensoesArray;
 				mapaDeContexto->at(variavel.nome).valoresReaisDim = variavel.valoresReaisDim;
 				if(mapaDeContexto->at(variavel.nome).tipo == "")
 				{
 					mapaDeContexto->at(variavel.nome).tipo = variavel.tipo;
 					return true;
+				}
+				else
+				{
+					if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_funcao)
+					{
+						mapaDeContexto->at(variavel.nome).nomeTraducao = variavel.nomeTraducao;
+					}
 				}
 
 				/*if(mapaDeContexto->at(variavel.nome).tipo == constante_tipo_string){
@@ -318,24 +337,24 @@ namespace ControleDeVariaveis
 			else if(tipo == constante_tipo_array)
 			{
 				string varArray;
-				string asteristicoDeCristal = " *";
-				string asteristicoDuploDeCristal = " **";
-								
+				string asteristico = " *";
+				string asteristicoDuplo = " **";
+
 				if(tipoArray == constante_tipo_inteiro)
-					varArray = constante_tipo_inteiro + asteristicoDeCristal + tipoProvisorio;
-				
+					varArray = constante_tipo_inteiro + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_flutuante)
-					varArray = constante_tipo_flutuante + asteristicoDeCristal + tipoProvisorio;
-					
+					varArray = constante_tipo_flutuante + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_booleano)
-					varArray = constante_tipo_inteiro + asteristicoDeCristal + tipoProvisorio;
-					
+					varArray = constante_tipo_inteiro + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_caracter)
-					varArray = constante_tipo_caracter + asteristicoDeCristal + tipoProvisorio;
-					
+					varArray = constante_tipo_caracter + asteristico + tipoProvisorio;
+
 				if(tipoArray == constante_tipo_string)
-					varArray = constante_tipo_caracter + asteristicoDuploDeCristal + tipoProvisorio;
-				
+					varArray = constante_tipo_caracter + asteristicoDuplo + tipoProvisorio;
+
 				mapaSubstituicaoDeTipoProvisorio[tipoProvisorio] = varArray;
 			}
 			else

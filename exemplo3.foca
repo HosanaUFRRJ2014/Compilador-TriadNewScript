@@ -3,28 +3,27 @@
 //var b;
 //b = 10;
 
+/*
 var a,livia = int[2,3];
 var b = 1;
 var braida = int[3,3];
 
-braida[2,2] = 7;
+//braida[2,2] = 7;
 
-/*
-livia[0,0] = 10;
-livia[0,1] = 20;
-livia[1,0] = 30;
-livia[1,1] = 40;
-livia[1,2] = 50;
+//livia[0,0] = 10;
+//livia[0,1] = 20;
+//livia[1,0] = 30;
+//livia[1,1] = 40;
+//livia[1,2] = 50;
 
-a = livia[0,0]; //Caso a = livia[x,y] --> 'a' sem valor
-a = livia[0,1]; //Caso a = livia[x,y] --> 'a' com valor
-*/
+//a = livia[0,0]; //Caso a = livia[x,y] --> 'a' sem valor >> OK
+//a = livia[0,1]; //Caso a = livia[x,y] --> 'a' com valor >> OK
 
-/*
-livia[1,2] = b; //Caso livia[x,y] = b | 50 | true | ...
-livia[0,0] = livia[1,1]; //Caso livia[x,y] = livia[u,v]
+//livia[1,2] = b; //Caso livia[x,y] = b | 50 | true | ...
 
-livia[1,1] = braida[2,2]; //Caso livia[x,y] = braida[u,v]
+//livia[0,0] = livia[1,1]; //Caso livia[x,y] = livia[u,v]
+
+//livia[1,1] = braida[2,2]; //Caso livia[x,y] = braida[u,v]
 */
 
 
@@ -46,15 +45,25 @@ livia[1,0] = 25;
 livia[1,1] = 5;
 */
 
+["oi","livia","de","silva","meu deus","pf compila",7];
+
 /*
-var a;
-a = string[1];
+var a,livia = 9;
+//a = string[1];
+a = 3;
+var b = string[livia,3,4];
 
-var b = string[2,3,4];
-b = string[livia];
+//b[1,1,1] = "lua de cristal";
 
-var c = float[6,6];
-c = float[15];
+b = string[9];
+
+//var c = float[6,6];
+//c = float[15];
+
+//var d = bool[4,livia + 4,livia,6,7];
+
+//b[livia] = "oi";
+b[a] = "pf funciona";
 */
 
 /*
@@ -84,79 +93,79 @@ else
 //Colocar ; no fim de todas as labels de fim; consertar o continue no comando for; colocar mensagem de erro na condição não declarada no for
 
 
-		//--------------------------------------------------------------------------------------------------------------------------------	 
-	
+		//--------------------------------------------------------------------------------------------------------------------------------
+
 	//If / if-else
-	
+
 	/*
 	var hue,contador = 0,zueira = "";
-	
+
 	show("Quantas vezes vc esta afim de zuar hoje?");
 	read(hue:int);
-	
+
 	if(hue != 0){
 		show("*********INICIO DA ZUEIRA*********");
-	
+
 		while(contador < hue){
-	
+
 			zueira = zueira + "hue";
 			show(zueira);
 			++contador;
 		}
-	
-		show(zueira); 
+
+		show(zueira);
 	}else{
 		show("Poxa,zueira é tão boa...");
 	}
 	*/
-	
+
 	/*
 	var luaDeCristal = "Lua de Cristal";
 	var verso = "Que me faz sonhar!";
 	var vezesOuvir = 0;
 	var amo = "AMO", queroMais = "QUERO MAIS!";
-	
+
 	for(var i = 0;i < 10;++i,++vezesOuvir){
 		show("Eu ouvi esta música: ");
 		show(vezesOuvir);
-		
+
 		if(i < 5)
 			show(queroMais);
 		else
 			show(amo);
 	}
 	*/
-	
+
 	//Exemplo de calculadora simples.
 	/*
 	var num1,num2,op,result,c;
-		
+
 	while(true)
 	{
 		show("Diga-me a operacao desejada (+,-,*,/): ");
 		read(op:char);
 		show("Diga-me o operando 1: ");
-		read(num1:int);		
+		read(num1:int);
 		show("Diga-me o operando 2: ");
-		read(num2:int);	
-		
+		read(num2:int);
+
 		switch(op){
-		
+
 			case '+':{
 				result = num1 + num2;
 				break;
 			}
-					
+
 			case '-':{
 				result = num1 - num2;
 				break;
 			}
-			
+
 			case '*':{
 				result = num1 * num2;
 				break;
 			}
-			
+
 			case '/':{
 				result = num1 / num2;
 				break;
@@ -166,43 +175,43 @@ else
 				continue;
 			}
 		}
-		
+
 		show("Resultado: ");
 		show(result);
-		
+
 		show("Deseja continuar? Digite 's' ou 'n':");
 		read(c:char);
-		
+
 		if(c == 'n')
 			break;
-		
+
 	}
 	*/
-	
-	
+
+
 	/*
 		var op = '+',num1 = 10,num2 = 5,result;
-	
+
 		switch(op){
-		
+
 			case '+':{
 				result = num1 + num2;
 				//2 + 2;
 				break;
 			}
-					
+
 			case '-':{
 				result = num1 - num2;
 				//2 - 2;
 				break;
 			}
-			
+
 			case '*':{
 				result = num1 * num2;
 				//9 * 9;
 				break;
 			}
-			
+
 			case '/':{
 				result = num1 / num2;
 				//10 + 90;
@@ -212,13 +221,13 @@ else
 				show("Operando inválido.Por favor, reescreva a operacao.");
 			}
 		}
-		
+
 		show(result);
-	
+
 	*/
-	
-	
-	
+
+
+
 
 	/*
 	var a;
@@ -270,31 +279,31 @@ show(a);
 	if(3 != 9 and 4 == 0){
 		50 - 50;
 	}
-	
+
 	if((1 < 2 and 4 == 4) or not 20 != 60){
 		50 - 50;
 	}else{
 		10 + 10;
 	}
 	*/
-		
+
 	/* //TESTE WHILE
 	while((1 < 2 and 4 == 4) or not 20 != 60){
 		50 - 50;
 	}
 	*/
-	
+
 	/* //TESTE DO-WHILE
 	var a = 9;
-	
+
 	do{
 		50 - 50;
 	}while(a > 8000 or a < 5 and 3 == 3);
 	*/
-	
+
 	/* //TESTE SWITCH
 	var funcionaPf = 7;
-	
+
 	switch(funcionaPf){
 		case 1:{
 			10 - 10;
@@ -309,26 +318,26 @@ show(a);
 		}
 		default:{
 			8 - 8;
-		}		
+		}
 	}
 	*/
-	
+
 	//TESTE DECLARACOES / MULTI-DECLARACAO
 	/*
 	var a = 9;
 	var b = 8;
 	var c;
-	
+
 	c = 9000;
-	
+
 	var a = 10,b;
 	b = 8000;
-	
+
 	var c,d = -1,e,f = 25;
 	*/
-	
+
 	//TESTE FOR
-	
+
 	/*
 	var a = 7, b = -9, c = -10, d = 100, e = 9000;
 
@@ -338,7 +347,7 @@ show(a);
 	}
 	*/
 
-	/*	
+	/*
 	for(e = -1,b = 10;e < 0;-e){
 		8000 + 8000;
 		while(1==1){
@@ -347,39 +356,38 @@ show(a);
 		break;
 	}
 	*/
-	
-	
-	
-	
+
+
+
+
 	//TESTE BREAK-CONTINUE
-	
+
 	/*
 	if(3 == 9){
 		break;
 		continue;
 	}
 	*/
-	
+
 	/*
 	while(2 == 2 and 3 != 4){
 		4 + 4;
 		if(0 < 0){
 			break;
 		}
-		9 - 0;		
+		9 - 0;
 		do{
 			9000 - 9000;
 			continue;
 		}while(3 < 9);
 	}
 	*/
-	
+
 	/*
 	do{
 		1 - 1;
 		4 + 4;
 		continue;
-	
-	}while(0 == 0);	
+
+	}while(0 == 0);
 	*/
-	

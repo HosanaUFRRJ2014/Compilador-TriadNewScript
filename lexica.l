@@ -31,6 +31,7 @@ STRING \"([^\"\n]|\\\")*\"
 %%
 
 {STRING}	{yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_STRING;}
+"len"		{return TK_LEN;}
 
 "\n"		{}
 
@@ -47,7 +48,7 @@ STRING \"([^\"\n]|\\\")*\"
 "global"		{return TK_PALAVRA_GLOBAL;}
 "show"		{return TK_PALAVRA_PRINT;}
 "read"		{return TK_PALAVRA_SCAN;}
-"func"	{return TK_PALAVRA_FUNC;}
+"func"	{ yylval.tipo = constante_tipo_funcao; return TK_PALAVRA_FUNC;} //funciona como tipo ou como criacao de funcao
 
 "//".*		{/*Não faça nada.
 			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}
@@ -56,7 +57,7 @@ STRING \"([^\"\n]|\\\")*\"
 											yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO,params, 1));}
 [*][/]                                    {	string params[1] = {yytext};
 											yyerror(montarMensagemDeErro(MSG_ERRO_COMENTARIO,params, 1));}
-
+["."]		{return '.';}
 
 "(int)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_inteiro; return TK_CONVERSAO_EXPLICITA;}
 "(float)"	{ yylval.label = yytext; yylval.tipo = constante_tipo_flutuante; return TK_CONVERSAO_EXPLICITA;}

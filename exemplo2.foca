@@ -45,8 +45,33 @@ senh += "ar" + "ara";
 show(senh);
 */
 
-
+//Não funciona apenas para o caso da string.
+/*
 var a;
 a = 1.0;
-
 a -= 5;
+*/
+
+//Não funciona para string dinâmica
+/*var a;// = "uva";
+read(a:string);
+var b = a.len();
+show(a);
+show(b);
+*/
+
+
+if("banana" == "banana")
+  show("Palavras iguais");
+else
+  show("Palavras diferentes");
+
+
+/*
+if(1==1)
+    5 + 5;
+else if(3 != 9)
+    4 + 4;
+else
+    8 + 8;
+*/

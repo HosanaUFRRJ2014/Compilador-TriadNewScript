@@ -6,7 +6,7 @@
 	
 	
 }*/
-
+/*
 var b = 1.1 + 2 * 3 / 4 - 10 == 40.3, a = 10, c = 'q';
 show(a);
 show(c);
@@ -35,5 +35,15 @@ while(a < 10)
 	show(a);
 		
 }
+*/
+{
+var a = 1;
+func f(a:int, b:float, c:string(3), d:bool, e:char) : int, bool, string, string(10) {
+	a + b;
+};//(1,(float)2,"aaa", true, 'a');
 
+f(1,(float)2,"aaa", true, 'a'); //+ 2; não tentar isso ...
 }
+//(1,2,"aaa", true, 'a');
+
+//}

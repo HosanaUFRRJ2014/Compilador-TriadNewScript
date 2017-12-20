@@ -3,6 +3,11 @@ Este repositório contém o trabalho da disciplina de Compiladores, de 2017-2, d
 
 O objetivo do trabalho é implementar um analisador léxico e sintático, usando as ferramentas Lex e Bison, a fim de compilar uma linguagem criada pelos integrantes do grupo.
 
+## Bibliotecas Externas: 
+Esta aplicação precisa da libboost para funcionar. Para instalá-la, digite o seguinte comando no terminal:
+
+    sudo apt-get install libboost-dev -y
+
 
 ##  Para compilar:
   No terminal, digite o seguinte comando:
