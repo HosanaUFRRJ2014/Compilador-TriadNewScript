@@ -15,29 +15,28 @@ namespace ControleDeFuncoes
 	struct BODY{
 		string traducaoDeclaracaoDeVariaveis;
 		string traducao;
-		map<string, int> qtdDeRetornosDeTipos;
+		vector<int>qtdReturnsNoCorpo;
+		int qtdSubBlocos = 0;
 	};
 
 	struct FUNCTION{
 		map<string, DADOS_VARIAVEL> parametros;
-		map<string, DADOS_VARIAVEL> vvariaveisDeRetorno;
+		vector<DADOS_VARIAVEL> variaveisDeRetorno;
 		BODY corpo;
 		string nomeDaFuncao;
 		string label;
 		int escopoDeDefinicao;
-		int qtdCombinacoesParametros;
 		vector<string>tiposDeRetorno;
-		vector<string>variaveisDeRetorno;
-		string nomeVariavelDeRetorno;
+		bool fezDeclaracaoDeParametros = false;
+		
 	};
 
 	string gerarNomePadraoFuncao();
 	string funcaoEmConstrucao();
 
 	map<string, FUNCTION> mapaDeDadosDasFuncoes;
-	map<string, string> dicionarioDeinonimosDasFuncoes;
+	map<string, string> dicionarioDeSinonimosDasFuncoes;
 	vector<string> pilhaFuncoesEmCriacao(0);
-	vector<bool> inferirTipoRetorno(0);
 
 	string nome_funcao_invocadora = "invocarFuncoes";
 
@@ -51,8 +50,8 @@ namespace ControleDeFuncoes
 		f.label = nomeFuncao;
 		pilhaFuncoesEmCriacao.push_back(f.nomeDaFuncao);
 		mapaDeDadosDasFuncoes.insert(pair<string,FUNCTION>(f.nomeDaFuncao,f));
-		dicionarioDeinonimosDasFuncoes.insert(pair<string,string>(nomeFuncao,f.nomeDaFuncao));
-		dicionarioDeinonimosDasFuncoes.insert(pair<string,string>(f.nomeDaFuncao,f.nomeDaFuncao));
+		dicionarioDeSinonimosDasFuncoes.insert(pair<string,string>(nomeFuncao,f.nomeDaFuncao));
+		dicionarioDeSinonimosDasFuncoes.insert(pair<string,string>(f.nomeDaFuncao,f.nomeDaFuncao));
 		return f.nomeDaFuncao;
 	}
 
@@ -97,15 +96,11 @@ namespace ControleDeFuncoes
 		return temp + numInt;
 	}
 
-	bool adicionarTipoDeRetorno(string tipo, bool verificarInferencia = true, int tamanho = 0, bool ehDinamica = true)
+	bool adicionarTipoDeRetorno(string tipo, int tamanho = 0, bool ehDinamica = true)
 	{
 		string nomeFuncao = funcaoEmConstrucao();
 		if(mapaDeDadosDasFuncoes.count(nomeFuncao) > 0)
 		{
-			if(verificarInferencia && !inferirTipoRetorno.back())
-			{
-				return true;
-			}
 			DADOS_VARIAVEL d;
 			d.nome = gerarLabelRetornosFuncao();
 			d.nomeTraducao = d.nome;
@@ -116,7 +111,7 @@ namespace ControleDeFuncoes
 				tipo = tipo + "(" + to_string(tamanho) + ")";
 			}
 
-			mapaDeDadosDasFuncoes.at(nomeFuncao).vvariaveisDeRetorno.insert(pair<string, DADOS_VARIAVEL>(d.nome, d));
+			mapaDeDadosDasFuncoes.at(nomeFuncao).variaveisDeRetorno.push_back(d);
 			mapaDeDadosDasFuncoes.at(nomeFuncao).tiposDeRetorno.push_back(tipo);
 			return true;
 		}
@@ -145,13 +140,10 @@ namespace ControleDeFuncoes
 	{
 		string nomeFuncao = funcaoEmConstrucao();
 		FUNCTION f;
-		if(mapaDeDadosDasFuncoes.count(nomeFuncao) > 0)
+		if(mapaDeDadosDasFuncoes.count(nomeFuncao) > 0 && mapaDeDadosDasFuncoes.at(nomeFuncao).fezDeclaracaoDeParametros == false && mapaDeDadosDasFuncoes.at(nomeFuncao).parametros.size()>0)
 		{
+			mapaDeDadosDasFuncoes.at(nomeFuncao).fezDeclaracaoDeParametros = true;
 			f = mapaDeDadosDasFuncoes.at(nomeFuncao);
-			if(f.tiposDeRetorno.size() > 0)
-				inferirTipoRetorno.push_back(false);
-			else
-				inferirTipoRetorno.push_back(true);
 
 			for(map<string, DADOS_VARIAVEL>::iterator it=f.parametros.begin();it!=f.parametros.end(); ++it)
 			{
@@ -181,6 +173,10 @@ namespace ControleDeFuncoes
 			}
 			mapaDeDadosDasFuncoes.at(nomeFuncao).corpo.traducaoDeclaracaoDeVariaveis.pop_back();
 			mapaDeDadosDasFuncoes.at(nomeFuncao).corpo.traducaoDeclaracaoDeVariaveis.pop_back();
+		}else{
+			if(mapaDeDadosDasFuncoes.at(nomeFuncao).fezDeclaracaoDeParametros == true)
+				mapaDeDadosDasFuncoes.at(nomeFuncao).corpo.qtdSubBlocos++;
+				
 		}
 
 	}
@@ -195,10 +191,9 @@ namespace ControleDeFuncoes
 			{
 				int contador = 1;
 
-				for(map<string, DADOS_VARIAVEL>::iterator it=mapaDeDadosDasFuncoes.at(nomeFuncao).vvariaveisDeRetorno.begin();it!=mapaDeDadosDasFuncoes.at(nomeFuncao).vvariaveisDeRetorno.end(); ++it, ++contador)
+				for(vector<DADOS_VARIAVEL>::iterator it=mapaDeDadosDasFuncoes.at(nomeFuncao).variaveisDeRetorno.begin();it!=mapaDeDadosDasFuncoes.at(nomeFuncao).variaveisDeRetorno.end(); ++it, ++contador)
 				{
-					string tipo = it->first;
-					DADOS_VARIAVEL d = it->second;
+					DADOS_VARIAVEL d = (*it);
 
 					string declaracao = "";
 					if(!d.ehDinamica){
@@ -209,7 +204,7 @@ namespace ControleDeFuncoes
 					}
 
 					mapaDeDadosDasFuncoes.at(nomeFuncao).corpo.traducaoDeclaracaoDeVariaveis += declaracao;
-					mapaDeDadosDasFuncoes.at(nomeFuncao).variaveisDeRetorno.push_back(d.nome);
+//					mapaDeDadosDasFuncoes.at(nomeFuncao).variaveisDeRetorno.push_back(d.nome);
 				}
 			}
 			mapaDeDadosDasFuncoes.at(nomeFuncao).corpo.traducaoDeclaracaoDeVariaveis += blocoDecVar;
@@ -232,7 +227,6 @@ namespace ControleDeFuncoes
 	void finalizarCriacaoFuncao()
 	{
 		pilhaFuncoesEmCriacao.pop_back();
-		inferirTipoRetorno.pop_back();
 	}
 
 	string definicoesDeFuncoes()
@@ -250,18 +244,18 @@ namespace ControleDeFuncoes
 
 
 			traducaoFuncoes += value.corpo.traducaoDeclaracaoDeVariaveis + "\n";
-			traducaoFuncoes += value.corpo.traducao + "\n";
+			traducaoFuncoes += value.corpo.traducao + "\n\n";
 		}
 		//traducaoCaller += "}\n\n\n";
 
-		return traducaoFuncoes + "\n"; //+ traducaoCaller;
+		return traducaoFuncoes; //+ traducaoCaller;
 	}
 
 	string recuperarNomeDaFuncaoPorLabel(string label)
 	{
-		 if(dicionarioDeinonimosDasFuncoes.count(label) > 0)
+		 if(dicionarioDeSinonimosDasFuncoes.count(label) > 0)
 		 {
-			return dicionarioDeinonimosDasFuncoes.at(label);
+			return dicionarioDeSinonimosDasFuncoes.at(label);
 		 }
 		 return "";
 	}
@@ -282,15 +276,14 @@ namespace ControleDeFuncoes
 		pos++;
 		int tamNumero = tipoEnviado.find(")") - pos;
 		tamanho = stoi(tipoEnviado.substr(pos, tamNumero));
-
-		if(param.tipo != constante_tipo_string || param.tamanho-1 != tamanho)
+		if(param.tipo != constante_tipo_string || param.tamanho != tamanho)
 		{
 			string p5 = param.tipo;
 
 			if(p5 == constante_tipo_string && param.tamanho != 0)
-				p5 += "("+ to_string(param.tamanho-1) +")";
+				p5 += "("+ to_string(param.tamanho) +")";
 
-			string p[5] = {recuperarNome(f.label), to_string(contador), param.nome, tipoEnviado, p5};
+			string p[5] = {recuperarNome(f.label), to_string(contador), param.nome, param.tipo+"("+to_string(tamanho)+")", p5};
 		 	return MensagensDeErro::montarMensagemDeErro(MSG_ERRO_PARAMETRO_ATRIBUIDO_POSSUI_TIPO_DIFERENTE,p,5);
 
 		}
@@ -366,6 +359,76 @@ namespace ControleDeFuncoes
 		traducao += ");\n";
 
 		return traducao;
+	}
+	
+	int verificarQtdDeRetornos(string nomeFuncao){
+		if(dicionarioDeSinonimosDasFuncoes.count(nomeFuncao) > 0)
+			if(mapaDeDadosDasFuncoes.count(dicionarioDeSinonimosDasFuncoes.at(nomeFuncao)) > 0)
+				return mapaDeDadosDasFuncoes.at(dicionarioDeSinonimosDasFuncoes.at(nomeFuncao)).variaveisDeRetorno.size();
+		return -1;
+	}
+	
+	DADOS_VARIAVEL recuperarDadosRetornoDaFuncaoParaOperacao(string nomeFuncao)
+	{
+		if(verificarQtdDeRetornos(nomeFuncao) == 1)
+			return *mapaDeDadosDasFuncoes.at(dicionarioDeSinonimosDasFuncoes.at(nomeFuncao)).variaveisDeRetorno.begin();
+	}
+	
+	DADOS_VARIAVEL recuperarDadosRetornoDaFuncaoPorChamada(string nomeFuncao){
+		static vector<DADOS_VARIAVEL>::iterator r;
+		static string nome = "";
+		string oldNome = nome;
+		if(nome != nomeFuncao)
+			nome = nomeFuncao;
+		
+		if(dicionarioDeSinonimosDasFuncoes.count(nome) > 0)
+		{
+			if(mapaDeDadosDasFuncoes.count(dicionarioDeSinonimosDasFuncoes.at(nome)) > 0)
+			{
+				DADOS_VARIAVEL d;
+				if(nome != oldNome)
+					r = mapaDeDadosDasFuncoes.at(dicionarioDeSinonimosDasFuncoes.at(nome)).variaveisDeRetorno.begin();
+					
+				if(r==mapaDeDadosDasFuncoes.at(dicionarioDeSinonimosDasFuncoes.at(nome)).variaveisDeRetorno.end()){
+					d.nome = constante_erro;
+					r = mapaDeDadosDasFuncoes.at(dicionarioDeSinonimosDasFuncoes.at(nome)).variaveisDeRetorno.begin();
+				}
+				else{
+					d = (*r);
+					++r;
+				}
+				
+				return d;
+			}
+		}
+		
+	}
+	
+	string recuperarLabelFuncaoDaFuncaoEmConstrucao(){
+		string nome = funcaoEmConstrucao();
+		if(nome != "")
+			return mapaDeDadosDasFuncoes.at(nome).label;
+			
+		return nome;
+	}
+	
+	void adicionarFezRetornoFuncaoAtual(int tamanho){
+		mapaDeDadosDasFuncoes.at(funcaoEmConstrucao()).corpo.qtdReturnsNoCorpo.push_back(tamanho);
+	}
+	
+	bool verificarSeFezReturnEmTodosOsSubblocos(){
+		return mapaDeDadosDasFuncoes.at(funcaoEmConstrucao()).corpo.qtdReturnsNoCorpo.size() == mapaDeDadosDasFuncoes.at(funcaoEmConstrucao()).corpo.qtdSubBlocos;
+	}
+	
+	int recuperarQuantidadeDeParametros(string nomeFuncao){
+		if(dicionarioDeSinonimosDasFuncoes.count(nomeFuncao) > 0)
+		{
+			if(mapaDeDadosDasFuncoes.count(dicionarioDeSinonimosDasFuncoes.at(nomeFuncao)) > 0)
+			{
+				return mapaDeDadosDasFuncoes.at(dicionarioDeSinonimosDasFuncoes.at(nomeFuncao)).parametros.size();
+			}
+		}
+		return -1;
 	}
 
 }

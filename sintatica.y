@@ -53,6 +53,7 @@ ATRIBUTOS tratarExpressaoLogicaUnaria(string, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoLogicaComposta(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS tratarExpressaoRelacional(string, ATRIBUTOS, ATRIBUTOS);
 ATRIBUTOS verificarPossibilidadeDeAplicarFuncaoEmExpressao(ATRIBUTOS);
+ATRIBUTOS tratarFuncaoEmExpressaoOuAtribuicao(ATRIBUTOS);
 //string gerarNovaVariavel();
 
 ATRIBUTOS tratarDeclaracaoSemAtribuicao(ATRIBUTOS, string tipo = "");
@@ -96,7 +97,7 @@ int conta;
 %token TK_CONTINUE
 %token TK_LEN
 
-%token TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_PALAVRA_PRINT TK_PALAVRA_SCAN
+%token TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_TIPO_ARRAY TK_PALAVRA_PRINT TK_PALAVRA_SCAN TK_PALAVRA_RETURN
 //%token TK_FIM TK_ERROR //estes tokens só tinham uma referência nesse sintatica se quebrar descomentar
 %token TK_CONVERSAO_EXPLICITA
 //*********** F
@@ -147,6 +148,7 @@ BLOCO		: UP_S '{' COMANDOS '}'
 			{
 				$$ = $3;
 				diminuirEscopo();
+				$$.tamanho = $3.tamanho;
 			}
 			;
 
@@ -174,6 +176,18 @@ COMANDO 	: E ';'
 			E_FLUXO_CONTROLE
 			|
 			E_BREAK_CONTINUE ';'
+			|
+			RETURN ';'
+			|
+			MULTIPLOS_IDS '<''=' E';'
+			;
+
+MULTIPLOS_IDS: TK_PALAVRA_VAR TK_ID '|' OUTROiD
+			| TK_ID '|' OUTROiD
+			;
+OUTROiD: TK_ID '|' OUTROiD
+			|
+			TK_ID
 			;
 
 E			: E TK_OP_ARIT_PRIO1 E
@@ -300,12 +314,15 @@ E			: E TK_OP_ARIT_PRIO1 E
 				$$ = $1;
 				//cout << $1.labelTamanhoDinamicoString << " << EM E: VALOR\n";
 				if($1.estruturaDoConteudo == constante_estrutura_variavel)
-					$$.label = recuperarNomeTraducao($$.label);
-
+					$$.label = $$.escopoDeAcesso > 0 ? recuperarNomeTraducao($$.label, $$.escopoDeAcesso) : recuperarNomeTraducao($$.label);
 			}
 			|
 			TK_CONVERSAO_EXPLICITA VALOR
 			{
+				if($2.tipo == constante_tipo_funcao){
+					$2 = tratarFuncaoEmExpressaoOuAtribuicao($2);
+				}
+
 				$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
 				$$.traducao = $2.traducao;
 				if(verificarPossibilidadeDeConversaoExplicita($2.tipo, $1.tipo)){
@@ -393,6 +410,7 @@ VALOR		: TK_NUM
 				$1.tamanho = metadata.tamanho;*/
 
 				//$1.tipo = metadata.tipo; //pode ser que precise
+				$$ = $1;
 			}
 			|
 			'(' E ')'
@@ -428,162 +446,348 @@ VALOR		: TK_NUM
 
 			}
 			;
-			DECLARACAO_FUNCAO:
-					TK_PALAVRA_FUNC NOME_DECLARACAO_FUNC PARAMETROS_DECLARACAO DECLARACAO_TIPO_RETORNO_FUNC BLOCO
-					{
 
-						adcionarTraducaoAoCorpoDaFuncao($5.traducao);
-						adcionarTraducaoDeclaracaoAoCorpoDaFuncao($5.traducaoDeclaracaoDeVariaveis);
-						//DEFINITIVAMENTE NÃO TROQUE A ORDEM DAS DUAS LINHAS ACIMA
-						$$.label = $2.label;
-						$$.tipo = constante_tipo_funcao;
-						$$.estruturaDoConteudo = constante_estrutura_funcao;
-						finalizarCriacaoFuncao();
-					}
-					;
-			//nome da funcao
-			NOME_DECLARACAO_FUNC:
-					TK_ID
-					{
-						$$ = tratarDeclaracaoSemAtribuicao($1, constante_tipo_funcao);
-						criarFuncao(recuperarNomeTraducao($$.label));
-					}
-			/*		|
-					{
-						$$.label = criarFuncao();
-						$$.tipo = constante_tipo_funcao;
-					}*/
-					;
-			//declaracao de parametros
-			PARAMETROS_DECLARACAO:
-					'(' ARGS_FUNC_DECLARACAO ')'
-					{
-						$$ = $2;
-						//imprimirTodosOsParametros();
-					}
-					|
-					'(' ')'
-					;
-			ARGS_FUNC_DECLARACAO: ARGS_FUNC_DECLARACAO ',' ARG_FUNC_DECLARACAO | ARG_FUNC_DECLARACAO ;
-			ARG_FUNC_DECLARACAO:
-					TK_ID ':' TIPO
-					{
-						//necessario para poder declarar os parametros dentro do escopo da funcao e não fora
-						$1.label = prefixo_variavel_usuario + $1.label;
-						adicionarParametro($1.label, $3.tipo);
-						$$ = $1;
-						$$.tipo = $3.tipo;
-					}
-					|
-					TK_ID ':' TK_TIPO_STRING '(' TK_NUM ')'
-					{
-						$1.label = prefixo_variavel_usuario + $1.label;
-						if($5.tipo != constante_tipo_inteiro)
-							yyerror("dispara erro\n"); //declarar erro
+/*Merge manual - sprint3-merge8 - branch de funções*/
+DECLARACAO_FUNCAO:
+		TK_PALAVRA_FUNC NOME_DECLARACAO_FUNC PARAMETROS_DECLARACAO DECLARACAO_TIPO_RETORNO_FUNC BLOCO
+		{
+			adcionarTraducaoAoCorpoDaFuncao($5.traducao);
+			adcionarTraducaoDeclaracaoAoCorpoDaFuncao($5.traducaoDeclaracaoDeVariaveis);
+			//DEFINITIVAMENTE NÃO TROQUE A ORDEM DAS DUAS LINHAS ACIMA
+			if(verificarQtdDeRetornos(recuperarNomeTraducao($2.label)) > 0){
+				if(verificarSeFezReturnEmTodosOsSubblocos())
+				{
+					string p[1] = {$2.label};
+					yyerror(montarMensagemDeErro(MSG_ERRO_FUNCAO_DEFINIDA_COM_BLOCO_SEM_RETORNAR,p,1));
+				}
+			}
+			$$.label = $2.label;
+			$$.tipo = constante_tipo_funcao;
+			$$.estruturaDoConteudo = constante_estrutura_funcao;
+			finalizarCriacaoFuncao();
+		}
+		;
+//nome da funcao
+NOME_DECLARACAO_FUNC:
+		TK_ID
+		{
+			$$ = tratarDeclaracaoSemAtribuicao($1, constante_tipo_funcao);
+			criarFuncao(recuperarNomeTraducao($$.label));
+		}
+		;
+//declaracao de parametros
+PARAMETROS_DECLARACAO:
+		'(' ARGS_FUNC_DECLARACAO ')'
+		{
+			$$ = $2;
+			//imprimirTodosOsParametros();
+		}
+		|
+		'(' ')'
+		{
+			$$.label = "";
+		}
+		;
+ARGS_FUNC_DECLARACAO: ARGS_FUNC_DECLARACAO ',' ARG_FUNC_DECLARACAO | ARG_FUNC_DECLARACAO ;
+ARG_FUNC_DECLARACAO:
+		TK_ID ':' TIPO
+		{
+			//necessario para poder declarar os parametros dentro do escopo da funcao e não fora
+			$1.label = prefixo_variavel_usuario + $1.label;
+			adicionarParametro($1.label, $3.tipo);
+			$$ = $1;
+			$$.tipo = $3.tipo;
+		}
+		|
+		TK_ID ':' TK_TIPO_STRING '(' TK_NUM ')'
+		{
+			$1.label = prefixo_variavel_usuario + $1.label;
+			if($5.tipo != constante_tipo_inteiro){
+				string p[1] = {constante_tipo_string};
+				yyerror(montarMensagemDeErro(MSG_ERRO_TAMANHO_INFORMADO_DEVE_SER_INTEIRO, p, 1));
+			}
 
-						adicionarParametro($1.label, $3.tipo, stoi($5.label), false);
+			adicionarParametro($1.label, $3.tipo, stoi($5.label), false);
 
+		}
+		;
+
+//tipo de retorno da funcao
+DECLARACAO_TIPO_RETORNO_FUNC: ':' TIPOS_RETORNO | ;
+TIPOS_RETORNO: TIPOS_RETORNO ',' TIPO_RETORNO | TIPO_RETORNO ;
+TIPO_RETORNO:
+		TIPO
+		{
+			adicionarTipoDeRetorno($1.tipo, false);
+		}
+		|
+		TK_TIPO_STRING '(' TK_NUM ')'
+		{
+			if($3.tipo != constante_tipo_inteiro){
+				string p[1] = {constante_tipo_string};
+				yyerror(montarMensagemDeErro(MSG_ERRO_TAMANHO_INFORMADO_DEVE_SER_INTEIRO, p, 1));
+			}
+
+			adicionarTipoDeRetorno($1.tipo, stoi($3.label)+1, false);
+		}
+		;
+
+//chamada da função
+CHAMADA_FUNCAO:
+		DECLARACAO_FUNCAO PARAMETROS_CHAMADA
+		{
+			//ESSE ERRO SÓ OCORRE SE FOR POR ERRO DO PRÓPRIO COMPILADOR
+			$$ = $1;
+			$$.traducao += $2.traducao;
+
+			if(!existeFuncao(recuperarNomeTraducao($1.label, $1.escopoDeAcesso)))
+			{
+				string p[1] = {$1.label};
+				yyerror(montarMensagemDeErro(MSG_ERRO_NOME_DE_FUNCAO_NAO_IDENTIFICADO, p, 1));
+			}
+			if($2.label != "")
+			{
+				string msgErro = "";
+				if(!verificacaoDeParametros(recuperarNomeTraducao($1.label, $1.escopoDeAcesso), $2.label, &msgErro))
+					yyerror(msgErro);
+				$$.traducao += gerarTraducaoChamadaDaFuncao(recuperarNomeTraducao($1.label, $1.escopoDeAcesso), $2.label);
+			}else{
+				int qtdParams = recuperarQuantidadeDeParametros(recuperarNomeTraducao($1.label,$1.escopoDeAcesso));
+				//cout << endl << endl << $1.label << endl << endl;
+				if(qtdParams > 0){
+					string p[3] = {$1.label, "0", to_string(qtdParams)};
+					yyerror(montarMensagemDeErro(MSG_ERRO_QUANTIDADE_DE_PARAMETROS_INCOPATiVEL,p,3));
+				}
+				$$.traducao += "\t" + recuperarNomeTraducao($1.label,$1.escopoDeAcesso) + "();\n";
+			}
+				$$.traducaoDeclaracaoDeVariaveis += $2.traducaoDeclaracaoDeVariaveis;
+				$$.estruturaDoConteudo = constante_estrutura_chamadaFuncao;
+		}
+		|
+		ID PARAMETROS_CHAMADA
+		{
+			$$.traducao = $2.traducao;
+
+			if($1.tipo != constante_tipo_funcao)
+			{
+				string p[1] = {$1.label};
+				yyerror(montarMensagemDeErro(MSG_ERRO_ID_NAO_REFERENTE_A_UMA_FUNCAO, p, 1));
+			}
+
+			string nomeTraducaoId = recuperarNomeTraducao($1.label, $1.escopoDeAcesso);
+			if(!existeFuncao(nomeTraducaoId))
+			{
+				string p[1] = {$1.label};
+				yyerror(montarMensagemDeErro(MSG_ERRO_NOME_DE_FUNCAO_NAO_IDENTIFICADO, p, 1));
+			}
+			if($2.label != "")
+			{
+				string msgErro = "";
+				if(!verificacaoDeParametros(recuperarNomeTraducao($1.label, $1.escopoDeAcesso), $2.label, &msgErro))
+					yyerror(msgErro);
+
+			$$.traducao += gerarTraducaoChamadaDaFuncao(recuperarNomeTraducao($1.label, $1.escopoDeAcesso), $2.label);
+			}else{
+				int qtdParams = recuperarQuantidadeDeParametros(recuperarNomeTraducao($1.label,$1.escopoDeAcesso));
+				//cout << endl << endl << $1.label << endl << endl;
+				if(qtdParams > 0){
+					string p[3] = {$1.label, "0", to_string(qtdParams)};
+					yyerror(montarMensagemDeErro(MSG_ERRO_QUANTIDADE_DE_PARAMETROS_INCOPATiVEL,p,3));
+				}
+				$$.traducao += recuperarNomeTraducao($1.label, $1.escopoDeAcesso) + "();\n";
+			}
+			$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
+			$$.label = $1.label;
+			$$.tipo = constante_tipo_funcao;
+			$$.estruturaDoConteudo = constante_estrutura_chamadaFuncao;
+		}
+		;
+
+//parametros de chamada
+PARAMETROS_CHAMADA:
+		'(' ARGS_FUNC_CHAMADA ')'
+		{
+			$$ = $2;
+			$$.label.pop_back();//remove o ultimo ";" para não gerar um elemento vazio dentro da verificação
+		}
+		|
+		'(' ')'
+		{
+			$$.label = "";
+		}
+		;
+ARGS_FUNC_CHAMADA:
+		ARGS_FUNC_CHAMADA ',' ARG_FUNC_CHAMADA
+		{
+			$$.traducao = $1.traducao + $3.traducao;
+			$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
+			$$.label = $1.label + $3.label;
+		}
+		|
+		ARG_FUNC_CHAMADA
+		;
+ARG_FUNC_CHAMADA:
+		E
+		{
+			if($1.tipo == constante_tipo_funcao){
+				if($1.estruturaDoConteudo == constante_estrutura_funcao)
+					yyerror(MSG_ERRO_DECLARACAO_DE_FUNCAO_NAO_EH_OPERAVEL_OU_ATRIBUIVEL);
+
+				$$.traducao = $1.traducao;
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis;
+
+				DADOS_VARIAVEL retorno;
+				string l = "";
+				while(retorno.nome != constante_erro){
+					retorno = recuperarDadosRetornoDaFuncaoPorChamada(recuperarNomeTraducao($1.label, $1.escopoDeAcesso));
+					if(retorno.tipo == constante_tipo_string && !retorno.ehDinamica)
+						l += retorno.nome + ":" + retorno.tipo + "(" + to_string(retorno.tamanho) + ");";
+					else
+						l += retorno.nome + ":" + retorno.tipo + ";";
+				}
+				$$.label = l;
+			}else{
+				$$ = $1;
+
+				if($$.tipo == constante_tipo_string && !$$.ehDinamica)
+					$$.label = $1.label + ":" + $1.tipo + "(" + to_string($1.tamanho) + ");";
+				else
+					$$.label = $1.label + ":" + $1.tipo + ";";
+			}
+
+		}
+		;
+RETURN: TK_PALAVRA_RETURN VALORES_RETORNO
+		{
+			//não precisa verificar se realmente tem uma função aqui pq já verificou nos valores de retorno
+			string nomeFuncao = funcaoEmConstrucao();
+			DADOS_VARIAVEL r = recuperarDadosRetornoDaFuncaoPorChamada(recuperarNomeTraducao(nomeFuncao));
+			if(r.nome != constante_erro){
+				string p[3] = {recuperarNome(recuperarLabelFuncaoDaFuncaoEmConstrucao()),
+									to_string($2.tamanho),
+									to_string(verificarQtdDeRetornos(nomeFuncao))};
+				yyerror(montarMensagemDeErro(MSG_ERRO_VALORES_DE_RETORNO_INCOMPATIVEIS, p, 3));
+			}
+
+			$$ = $2;
+			$$.traducao += "\treturn;\n";
+			$$.estruturaDoConteudo = constante_estrutura_comandoReturn;
+			adicionarFezRetornoFuncaoAtual($$.tamanho);
+		}
+		;
+VALORES_RETORNO:
+		VALORES_RETORNO ',' VALOR_RETORNO
+		{
+			$$ = $1;
+			$$.traducao += $3.traducao;
+			$$.traducaoDeclaracaoDeVariaveis += $3.traducaoDeclaracaoDeVariaveis;
+			$$.tamanho += $3.tamanho;
+
+		}
+		|
+		VALOR_RETORNO
+		|
+		;
+VALOR_RETORNO :
+		E
+		{
+			string nomeFuncao = funcaoEmConstrucao();
+			if(nomeFuncao == "")
+			{
+				yyerror(MSG_ERRO_COMANDO_RETURN_USADO_INDEVIDAMENTE);
+			}
+
+			string msgErro = "";
+			$$.traducao = $1.traducao;
+			$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis;
+			$$.tamanho = 0; //vai ser usado para contar a quantidade de parametros
+
+			if($1.tipo == constante_tipo_funcao){
+				if($1.estruturaDoConteudo == constante_estrutura_funcao)
+					yyerror(MSG_ERRO_DECLARACAO_DE_FUNCAO_NAO_EH_OPERAVEL_OU_ATRIBUIVEL);
+
+				vector<DADOS_VARIAVEL> retornoRetorno;
+				DADOS_VARIAVEL r;
+//				cout << "ar.nome: " << r.nome;
+				while(r.nome != constante_erro){
+					r = recuperarDadosRetornoDaFuncaoPorChamada(recuperarNomeTraducao($1.label, $1.escopoDeAcesso));
+					retornoRetorno.push_back(r);
+				}
+				retornoRetorno.pop_back();
+				for(vector<DADOS_VARIAVEL>::iterator it=retornoRetorno.begin(); it!=retornoRetorno.end();++it)
+				{
+					r = recuperarDadosRetornoDaFuncaoPorChamada(recuperarNomeTraducao(nomeFuncao));
+//					cout << r.tipo << endl << endl;
+					if(r.nome == constante_erro){
+						string p[2] = {recuperarNome(recuperarLabelFuncaoDaFuncaoEmConstrucao()),
+											to_string(verificarQtdDeRetornos(nomeFuncao))};
+						yyerror(montarMensagemDeErro(MSG_ERRO_PARAMETRO_A_MAIS_PASSADOS_NO_RETORNO, p, 2));
 					}
-					;
-
-			//tipo de retorno da funcao
-			DECLARACAO_TIPO_RETORNO_FUNC: ':' TIPOS_RETORNO | ;
-			TIPOS_RETORNO: TIPOS_RETORNO ',' TIPO_RETORNO | TIPO_RETORNO ;
-			TIPO_RETORNO:
-					TIPO
-					{
-						adicionarTipoDeRetorno($1.tipo, false);
+					if(r.tipo != it->tipo){
+						string p[4] = {recuperarNome(recuperarLabelFuncaoDaFuncaoEmConstrucao()),
+											to_string($$.tamanho+1),
+											it->tipo,
+											r.tipo};
+							yyerror(montarMensagemDeErro(MSG_ERRO_TIPO_DIFERENTE_ENTRE_VALOR_E_RETORNO,p,4));
 					}
-					|
-					TK_TIPO_STRING '(' TK_NUM ')'
-					{
-						if($3.tipo != constante_tipo_inteiro)
-							yyerror("dispara erro\n"); //declarar erro
 
-						adicionarTipoDeRetorno($1.tipo, false, stoi($3.label), false);
-					}
-					;
-
-			//chamada da função
-			CHAMADA_FUNCAO:
-					DECLARACAO_FUNCAO PARAMETROS_CHAMADA
-					{
-						//ESSE ERRO SÓ OCORRE SE FOR POR ERRO DO PRÓPRIO COMPILADOR
-
-						if(!existeFuncao(recuperarNomeTraducao($1.label)))
-						{
-							yyerror(montarMensagemDeErro(MSG_ERRO_NOME_DE_FUNCAO_NAO_IDENTIFICADO));
+					if(r.tipo != constante_tipo_string){
+						$$.traducao += "\t" + r.nome + " = " + it->nome + ";\n";
+					}else{
+						if(r.tamanho != it->tamanho){
+							string p[5] = { constante_tipo_string,
+											recuperarNome(recuperarLabelFuncaoDaFuncaoEmConstrucao()),
+											to_string($$.tamanho+1),
+											to_string(it->tamanho),
+											to_string(r.tamanho-1)};
+							yyerror(montarMensagemDeErro(MSG_ERRO_TAMANHO_DIFERENTE_ENTRE_VALOR_E_RETORNO, p, 5));
 						}
-						if($2.label != "")
-						{
-							string msgErro = "";
-							if(!verificacaoDeParametros(recuperarNomeTraducao($1.label), $2.label, &msgErro))
-								yyerror(msgErro);
 
-							$$ = $1;
-							$$.traducao += $2.traducao;
-							$$.traducaoDeclaracaoDeVariaveis += $2.traducaoDeclaracaoDeVariaveis;
-							$$.estruturaDoConteudo = constante_estrutura_chamadaFuncao;
-							$$.traducao = gerarTraducaoChamadaDaFuncao(recuperarNomeTraducao($1.label), $2.label);
+						$$.traducao += montarCopiarString(r.nome, it->nome) + ";\n";
+					}
+					$$.tamanho++;
+				}
+				//cout << $$.tamanho << endl;
+			}else{
+				DADOS_VARIAVEL r = recuperarDadosRetornoDaFuncaoPorChamada(recuperarNomeTraducao(nomeFuncao));
+				if(r.nome == constante_erro){
+					string p[2] = {recuperarNome(recuperarLabelFuncaoDaFuncaoEmConstrucao()),
+											to_string(verificarQtdDeRetornos(nomeFuncao))};
+					yyerror(montarMensagemDeErro(MSG_ERRO_PARAMETRO_A_MAIS_PASSADOS_NO_RETORNO, p, 2));
+				}
+				if(r.tipo != $1.tipo){
+					//cout << r.tipo << "  " << $1.tipo<< endl;
+					string p[4] = {recuperarNome(recuperarLabelFuncaoDaFuncaoEmConstrucao()),
+											to_string($$.tamanho+1),
+											$1.tipo,
+											r.tipo};
+					yyerror(montarMensagemDeErro(MSG_ERRO_TIPO_DIFERENTE_ENTRE_VALOR_E_RETORNO,p,4));
+				}
 
-						}
+				if($1.tipo == constante_tipo_string){
+					if($1.tamanho != r.tamanho){
+						string p[5] = { constante_tipo_string,
+							recuperarNome(recuperarLabelFuncaoDaFuncaoEmConstrucao()),
+							to_string($$.tamanho+1),
+							to_string($1.tamanho-1),
+							to_string(r.tamanho-1)};
+							yyerror(montarMensagemDeErro(MSG_ERRO_TAMANHO_DIFERENTE_ENTRE_VALOR_E_RETORNO, p, 5));
 					}
-					|
-					ID PARAMETROS_CHAMADA
-					{
-						if($1.tipo != constante_tipo_funcao)
-						{
-							yyerror(montarMensagemDeErro(MSG_ERRO_ID_NAO_REFERENTE_A_UMA_FUNCAO));
-						}
+						$$.traducao += montarCopiarString(r.nome, $1.label) + ";\n";
+				}
+				else
+					$$.traducao += "\t" + r.nome + " = " + $1.label + ";\n";
 
-						if(!existeFuncao(recuperarNomeTraducao($1.label)))
-						{
-							yyerror(montarMensagemDeErro(MSG_ERRO_NOME_DE_FUNCAO_NAO_IDENTIFICADO));
-						}
-						if($2.label != "")
-						{
-							string msgErro = "";
-							if(!verificacaoDeParametros(recuperarNomeTraducao($1.label), $2.label, &msgErro))
-								yyerror(msgErro);
-						//============ PAREI ESCREVENDO A CHAMADA E TESTANDO O RUN ... DEPOIS FAZER ATRIBUICAO E RETORNO
-							$$.traducao = $2.traducao;
-							$$.traducaoDeclaracaoDeVariaveis = $2.traducaoDeclaracaoDeVariaveis;
-							$$.label = $1.label;
-							$$.tipo = constante_tipo_funcao;
-							$$.estruturaDoConteudo = constante_estrutura_chamadaFuncao;
-							$$.traducao += gerarTraducaoChamadaDaFuncao(recuperarNomeTraducao($1.label), $2.label);
-						}
-					}
-					;
+				$$.tamanho++;
+			}
 
-			//parametros de chamada
-			PARAMETROS_CHAMADA:
-					'(' ARGS_FUNC_CHAMADA ')'
-					{
-						$$ = $2;
-						$$.label.pop_back();//remove o ultimo ";" para não gerar um elemento vazio dentro da verificação
-					}
-					| '(' ')' ;
-			ARGS_FUNC_CHAMADA:
-					ARGS_FUNC_CHAMADA ',' ARG_FUNC_CHAMADA
-					{
-						$$.traducao = $1.traducao + $3.traducao;
-						$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
-						$$.label = $1.label + $3.label;
-					}
-					|
-					ARG_FUNC_CHAMADA
-					;
-			ARG_FUNC_CHAMADA:
-					E
-					{
-						$$ = $1;
-						if($$.tipo == constante_tipo_string && !$$.ehDinamica)
-							$$.label = $1.label + ":" + $1.tipo + "(" + to_string($1.tamanho-1) + ")" + ";";
-						else
-							$$.label = $1.label + ":" + $1.tipo + ";";
-					}
-					;
+		}
+		;
+
+
+/*Fim Merge manul - sprint3-merge8 - branch de funções*/
+
+/*Merge manual - sprint3-merge8 - branch de arrays*/
 
 ACESSO_ARRAY	: ID '['
 				{
@@ -662,8 +866,8 @@ ARRAY	: TIPO '[' DIMENSOES_INDICES ']' //Criação de array
 				count_dim = 0; //Terminou a contagem das dimensoes. Aguardando a proxima.
 				resetarTamanhoDimensoesArray();
 
-				//cout << "//TRADUCAO VAR: " << endl << $$.traducaoDeclaracaoDeVariaveis << endl << endl;
-				//cout << "//TRADUCAO: " << endl << $$.traducao << endl << endl;
+				cout << "TRADUCAO VAR: " << endl << $$.traducaoDeclaracaoDeVariaveis << endl << endl;
+				cout << "TRADUCAO: " << endl << $$.traducao << endl << endl;
 			}
 
 		}
@@ -989,6 +1193,9 @@ DIMENSOES_INDICES	: DIMENSOES_INDICES ',' E
 					}
 					;
 
+/*Fim merge manual - sprint3-merge8 - branch de arrays*/
+
+
 ID			: TK_ID
 			{
 			//	cout << "//Entrou em ID: TK_ID\n";
@@ -1030,7 +1237,7 @@ ID			: TK_ID
 					$$.tipo = metaData.tipo;
 					$$.tamanho = metaData.tamanho;
 					$$.ehDinamica = metaData.ehDinamica;
-
+					$$.label = metaData.nome;
 					if($$.tipo == "")
 						$$.estruturaDoConteudo = constante_estrutura_variavelSemTipo;
 					else
@@ -1081,8 +1288,26 @@ STRING	: TK_STRING
 			}
 			;
 
+/*
+ATRIBUICAO_POR_FUNCAO:
+	TK_PALAVRA_VAR MULTIPLOS_IDS
+	{
+	}
+	|
+	MULTIPLOS_IDS
+	{
+	}
+	;*/
 
-
+/*
+MULTIPLOS_IDS:
+		MULTIPLOS_IDS '|' TK_ID '<''=' E
+		|
+		TK_ID
+		|
+		TK_PALAVRA_VAR TK_ID
+		;
+		*/
 INICIO_DECLARACAO	: CRIACAO_VARIAVEL ',' MULTI_DECLARACAO
 					{
 						$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
@@ -1179,6 +1404,30 @@ ATRIBUICAO_VARIAVEL	:  ID '=' E
 
 						$$ = tratarAtribuicaoVariavel($1,$3);
 					}
+					|
+					ARRAY '=' E //Caso livia[x1,x2,...,xn] = compilador[x1,x2,...,xm] OU livia[x1,x2,...,xn] = 90;
+					{
+
+						//O usuário poderia escrever int[x,y] = int[u,v] ; int[x,y] = 90/livia[x,y]/2.3
+						if($1.criacaoArray)
+						{
+							//dispara erro...
+							yyerror("Array de criação do lado esquerdo sendo atribuido incorretamente.");
+						}
+
+						if($1.acessoArray && $3.criacaoArray) //O usuário poderia escrever livia[x,y] = int[x,y]
+						{
+							yyerror("Array de criação do lado esquerdo sendo atribuido incorretamente.");
+						}
+
+						//int[x,y] = int[3,4] ; livia[x,y] = int[4,5] ; int[x,y] = 90/livia[x,y]/2.3
+						//	F			F			T			F			F		F	T			F
+
+						//livia[x,y] = 90 / a[x,y],livia[u,v] / 2.3
+						//		T		F			T			F
+
+						$$ = tratarAtribuicaoVariavel($1,$3);
+					}
 					;
 
 PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')'
@@ -1193,7 +1442,7 @@ PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')'
 
 ARG_PRINT: E
 			{
-				$$.traducao = $1.traducao + "\n" + constroiPrint(recuperarNomeTraducao($1.label));
+				$$.traducao = $1.traducao + "\n" + constroiPrint(recuperarNomeTraducao($1.label, $1.escopoDeAcesso));
 			}
 			;
 
@@ -1764,28 +2013,14 @@ int main( int argc, char* argv[] )
 
 ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
-	//cout << "Entrou em exp arti\n";
-//	cout << "entrou exp arit" << endl;
-//	cout << dolar1.label << " " << op << " " << dolar3.label << endl << endl;
-	if(dolar1.tipo == constante_tipo_funcao && dolar1.estruturaDoConteudo == constante_estrutura_funcao)
-		yyerror("dispara erro\n");//declarar erro
+	if(dolar1.tipo == constante_tipo_funcao){
+		dolar1 = tratarFuncaoEmExpressaoOuAtribuicao(dolar1);
+	}
 
-	if(dolar3.tipo == constante_tipo_funcao && dolar3.estruturaDoConteudo == constante_estrutura_funcao)
-		yyerror("dispara erro\n");//declarar erro
-/*
-	if(dolar1.tipo == constante_tipo_funcao)
-	{
-		dolar1 = verificarPossibilidadeDeAplicarFuncaoEmExpressao(dolar1);
-		if(dolar1.tipo == constante_erro)
-			yyerror(dolar1.label);
+	if(dolar3.tipo == constante_tipo_funcao){
+		dolar3 = tratarFuncaoEmExpressaoOuAtribuicao(dolar3);
 	}
-	if(dolar3.tipo == constante_tipo_funcao)
-	{
-		dolar1 = verificarPossibilidadeDeAplicarFuncaoEmExpressao(dolar1);
-		if(dolar1.tipo == constante_erro)
-			yyerror(dolar1.label);
-	}
-	*/
+
 	ATRIBUTOS dolarDolar;
 
 	dolarDolar.label = gerarNovaVariavel();
@@ -1862,6 +2097,15 @@ ATRIBUTOS tratarExpressaoAritmetica(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar
 
 ATRIBUTOS tratarExpressaoAritmeticaComposta(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
+	if(dolar1.estruturaDoConteudo != constante_estrutura_variavel){
+		string p[1] = {op};
+		yyerror(montarMensagemDeErro(MSG_ERRO_VALOR_A_ESQUERDA_DE_OPERADOR_COPOSTO_PRECISA_SER_VARIAVEL, p, 1));
+	}
+
+	if(dolar3.tipo == constante_tipo_funcao){
+		dolar3 = tratarFuncaoEmExpressaoOuAtribuicao(dolar3);
+	}
+
 	ATRIBUTOS dolarDolar;
 	string operadorSimples = removerSimboloIgualdade(op);
 	dolarDolar = tratarExpressaoAritmetica(operadorSimples, dolar1, dolar3);
@@ -1872,11 +2116,16 @@ ATRIBUTOS tratarExpressaoAritmeticaComposta(string op, ATRIBUTOS dolar1, ATRIBUT
 
 ATRIBUTOS tratarExpressaoLogicaUnaria(string op, ATRIBUTOS dolar2)
 {
+	if(dolar2.tipo == constante_tipo_funcao){
+		dolar2 = tratarFuncaoEmExpressaoOuAtribuicao(dolar2);
+	}
+
 	ATRIBUTOS dolarDolar;
 	if(dolar2.tipo == constante_tipo_booleano)
 	{
 		dolarDolar.traducaoDeclaracaoDeVariaveis = dolar2.traducaoDeclaracaoDeVariaveis;
 		string tipo = constante_tipo_inteiro;
+		dolarDolar.label = gerarNovaVariavel();
 		dolarDolar.traducaoDeclaracaoDeVariaveis = dolarDolar.traducaoDeclaracaoDeVariaveis + "\t" + tipo + " " + dolarDolar.label + ";\n";
 		dolarDolar.traducao = dolar2.traducao;
 		dolarDolar.traducao = dolarDolar.traducao + "\t\t" + dolarDolar.label + " = " + op + " "+ dolar2.label + ";\n";
@@ -1889,6 +2138,14 @@ ATRIBUTOS tratarExpressaoLogicaUnaria(string op, ATRIBUTOS dolar2)
 
 ATRIBUTOS tratarExpressaoLogicaBinaria(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
+	if(dolar1.tipo == constante_tipo_funcao){
+		dolar1 = tratarFuncaoEmExpressaoOuAtribuicao(dolar1);
+	}
+
+	if(dolar3.tipo == constante_tipo_funcao){
+		dolar3 = tratarFuncaoEmExpressaoOuAtribuicao(dolar3);
+	}
+
 	ATRIBUTOS dolarDolar;
 	if(dolar1.tipo == constante_tipo_booleano && dolar3.tipo == constante_tipo_booleano){
 		dolarDolar.label = gerarNovaVariavel();
@@ -1906,6 +2163,15 @@ ATRIBUTOS tratarExpressaoLogicaBinaria(string op, ATRIBUTOS dolar1, ATRIBUTOS do
 
 ATRIBUTOS tratarExpressaoLogicaComposta(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
+	if(dolar1.estruturaDoConteudo != constante_estrutura_variavel){
+		string p[1] = {op};
+		yyerror(montarMensagemDeErro(MSG_ERRO_VALOR_A_ESQUERDA_DE_OPERADOR_COPOSTO_PRECISA_SER_VARIAVEL, p, 1));
+	}
+
+	if(dolar3.tipo == constante_tipo_funcao){
+		dolar3 = tratarFuncaoEmExpressaoOuAtribuicao(dolar3);
+	}
+
 	ATRIBUTOS dolarDolar;
 	string operadorSimples = removerSimboloIgualdade(op);
 	dolarDolar = tratarExpressaoLogicaBinaria(operadorSimples, dolar1, dolar3);
@@ -1916,6 +2182,14 @@ ATRIBUTOS tratarExpressaoLogicaComposta(string op, ATRIBUTOS dolar1, ATRIBUTOS d
 
 ATRIBUTOS tratarExpressaoRelacional(string op, ATRIBUTOS dolar1, ATRIBUTOS dolar3)
 {
+	if(dolar1.tipo == constante_tipo_funcao){
+		dolar1 = tratarFuncaoEmExpressaoOuAtribuicao(dolar1);
+	}
+
+	if(dolar3.tipo == constante_tipo_funcao){
+		dolar3 = tratarFuncaoEmExpressaoOuAtribuicao(dolar3);
+	}
+
 	ATRIBUTOS dolarDolar;
 	string resultado = getTipoResultante(dolar1.tipo, dolar3.tipo,op);
 	string operador = op;
@@ -2052,6 +2326,10 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 			yyerror(montarMensagemDeErro(MSG_ERRO_VALOR_ATRIBUIDO_NAO_PODE_SER_ATRIBUIDO, params, 1));
 		}
 
+		if(dolar4.tipo == constante_tipo_funcao){
+			dolar4 = tratarFuncaoEmExpressaoOuAtribuicao(dolar4);
+		}
+
 		int tamanho = 0;
 
 		if(!acessoArray)
@@ -2060,7 +2338,7 @@ ATRIBUTOS tratarDeclaracaoComAtribuicao(ATRIBUTOS dolar2, ATRIBUTOS dolar4)
 			incluirNoMapa(dolar2.label,dolar4.tamanho, tipoArray);
 
 		string tipo = dolar4.tipo;
-		string label = recuperarNomeTraducao(dolar2.label);
+		string label = recuperarNomeTraducao(dolar2.label, dolar2.escopoDeAcesso);
 
 		//meramente para leitura do código intermediário
 		string labelPrefix = prefixo_variavel_usuario;
@@ -2173,13 +2451,12 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 	ATRIBUTOS dolarDolar;
 	string tipo = "";
 	int tamanho = 0;
-
 	string labelRecuperada = recuperarNomeTraducao(dolar1.label);
 
 	bool nuncaAtribuida = false;
 	string tipoDolar1 = "";
 	string tipoDolar3 = "";
-	string swap;
+	string swap = "";
 
 	if(dolar1.label != dolar3.label)
 	{
@@ -2195,6 +2472,11 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 			dolar1.labelAux = swap; //label indexado
 		}
 
+
+		if(dolar3.tipo == constante_tipo_funcao){
+			dolar3 = tratarFuncaoEmExpressaoOuAtribuicao(dolar3);
+		}
+
 		DADOS_VARIAVEL metaData;
 		if(dolar1.escopoDeAcesso >= 0){
 			metaData = recuperarDadosVariavel(dolar1.label, dolar1.escopoDeAcesso);
@@ -2205,8 +2487,6 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 		if(metaData.tipo == "") //A variável não tipo, ou seja, já existe, mas sem valor. CASO ARRAY '=' E NUNCA ENTRARÁ AQUI
 		{
-		//	cout << "NÃO EXISTO" << endl;
-
 			nuncaAtribuida = true;
 			//isso aqui também pode causar problema no futuro devido as lacunas
 			metaData.tipo = dolar3.tipo;
@@ -2528,8 +2808,35 @@ ATRIBUTOS tratarAtribuicaoVariavel(ATRIBUTOS dolar1, ATRIBUTOS dolar3, bool ehDi
 
 ATRIBUTOS verificarPossibilidadeDeAplicarFuncaoEmExpressao(ATRIBUTOS dolarx)
 {
-	dolarx.tipo = constante_erro;
-	dolarx.label = "\ntermina\n";
+	if(verificarQtdDeRetornos(recuperarNomeTraducao(dolarx.label, dolarx.escopoDeAcesso)) != 1)
+	{
+		dolarx.tipo = constante_erro;
+		string p[1] = {dolarx.label};
+		dolarx.label = montarMensagemDeErro(MSG_ERRO_FUNCAO_COM_MAIS_DE_UM_RETORNO_NAO_PODE_SER_OPERADA_OU_ATRIBUIDA, p, 1);
+		return dolarx;
+	}
+
+	DADOS_VARIAVEL retorno = recuperarDadosRetornoDaFuncaoParaOperacao(recuperarNomeTraducao(dolarx.label, dolarx.escopoDeAcesso));
+	dolarx.tipo = retorno.tipo;
+	dolarx.label = retorno.nomeTraducao;
+	if(retorno.tipo == constante_tipo_string)
+	{
+		dolarx.ehDinamica = retorno.ehDinamica;
+		dolarx.tamanho = retorno.tamanho;
+	}
+	return dolarx;
+}
+
+ATRIBUTOS tratarFuncaoEmExpressaoOuAtribuicao(ATRIBUTOS dolarx){
+	if(dolarx.tipo == constante_tipo_funcao && dolarx.estruturaDoConteudo == constante_estrutura_funcao)
+		yyerror(MSG_ERRO_DECLARACAO_DE_FUNCAO_NAO_EH_OPERAVEL_OU_ATRIBUIVEL);//declarar erro
+
+	if(dolarx.tipo == constante_tipo_funcao)
+	{
+		dolarx = verificarPossibilidadeDeAplicarFuncaoEmExpressao(dolarx);
+		if(dolarx.tipo == constante_erro)
+			yyerror(dolarx.label);
+	}
 	return dolarx;
 }
 

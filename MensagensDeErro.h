@@ -34,6 +34,8 @@ namespace MensagensDeErro{
 
 	//****** erros da parte de tratamento de erros ***********
 
+	#define MSG_ERRO_VALOR_A_ESQUERDA_DE_OPERADOR_COPOSTO_PRECISA_SER_VARIAVEL "Erro: o operador composto \"valor_esquerda \t valor_direita\" requer que valor_esquerda seja uma variável."
+
 	#define MSG_ERRO_OPERADOR_UNARIO_INVALIDO_PARA_OPERANDO "Erro: o operador \"\t\" não pode ser utilizado no operando especificado, porque \t."
 
 	#define MSG_ERRO_TIPO_NAO_INPUTAVEL "Erro: o comando \"read\" não permite leitura de variáveis do tipo \"\t\"."
@@ -45,13 +47,23 @@ namespace MensagensDeErro{
 	#define MSG_ERRO_QUANTIDADE_DE_PARAMETROS_INCOPATiVEL "Erro: em chamada da função \"\t\", a quantidade de parametros atribuída (\t parametros), difere da quantidade de parametros esperada (\t parameros)."
 
 
-	#define MSG_ERRO_NOME_DE_FUNCAO_NAO_IDENTIFICADO "Erro: a função chamada não foi encontrada."
-	#define MSG_ERRO_ID_NAO_REFERENTE_A_UMA_FUNCAO "Erro: o id informado não do tipo função"
-	#define MSG_ERRO_A_FUNCAO_CHAMADA_NAO_EXISTE ""
+	#define MSG_ERRO_NOME_DE_FUNCAO_NAO_IDENTIFICADO "Erro: a função \"\t\" não foi encontrada."
+	#define MSG_ERRO_ID_NAO_REFERENTE_A_UMA_FUNCAO "Erro: o id \"\t\" não é do tipo função"
+
+	#define MSG_ERRO_FUNCAO_COM_MAIS_DE_UM_RETORNO_NAO_PODE_SER_OPERADA_OU_ATRIBUIDA "Erro: a função de id \"\t\" precisa possuir um e somente um tipo de retorno para poder ser operada ou atribuída."
+	#define MSG_ERRO_DECLARACAO_DE_FUNCAO_NAO_EH_OPERAVEL_OU_ATRIBUIVEL "Erro: declaração de função não pode ser operado ou atribuído a uma variável."
+	
+	#define MSG_ERRO_COMANDO_RETURN_USADO_INDEVIDAMENTE "Erro: o comando \"return\" não pode ser utilizado fora do corpo de uma função."
+	#define MSG_ERRO_VALORES_DE_RETORNO_INCOMPATIVEIS "Erro: o comando \"return\" na função \"\t\" possui quantidade de valores incompativel com os especificados na declaração da função. Foi passado \t quando se esperava \t."
+	#define MSG_ERRO_FUNCAO_DEFINIDA_COM_BLOCO_SEM_RETORNAR "Erro: a função \"\t\" possuí tipos de retorno definidos nem todos os seus caminhos fazem \"return\"."
+	#define MSG_ERRO_TAMANHO_INFORMADO_DEVE_SER_INTEIRO "Erro: o tamanho informado para o tipo \"\t\" deve ser um número inteiro."
+	#define MSG_ERRO_PARAMETRO_A_MAIS_PASSADOS_NO_RETORNO "Erro: parametros a mais foram informados no retorno da função \"\t\", nesta são necessários apenas \t parametros"
+	#define MSG_ERRO_TIPO_DIFERENTE_ENTRE_VALOR_E_RETORNO "Erro: o valor de retorno da função \"\t\" na posição \t foi fornecido como \"\t\", quando se esperava \"\t\""
+	#define MSG_ERRO_TAMANHO_DIFERENTE_ENTRE_VALOR_E_RETORNO "Erro: o valor de retorno do tipo \"\t\" da função \"\t\" na posição \t foi fornecido com tamanho \t quando era esperado o tamanho \t"
 
 	#define MSG_ERRO_VALOR_NEGATIVO_ARRAY "Erro: Dimensão/Índice negativo ou zero no acesso ao Array."
 	#define MSG_FIM_EXECUCAO_ARRAY "Acesso ou alocação de memória indevida (Memory fault)."
-
+	#define MSG_ERRO_VARIAVEL_PRECISA_CONTER_UM_ARRAY "Erro: a váriavel de id \"\t\" precisa conter um array para poder ser operada pelos operadores de array"
 	string montarMensagemDeErro(string, string*, int);
 	void yywarnning(string);
 

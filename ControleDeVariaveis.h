@@ -225,6 +225,8 @@ namespace ControleDeVariaveis
 		}
 
 		string recuperarNomeTraducao(string nome, int escopo){
+			if(escopo == -1)
+				escopo = numeroEscopoAtual;
 			if(variavelJaDeclarada(nome, true, escopo))
 			{
 				return recuperarDadosVariavel(nome, escopo).nomeTraducao;

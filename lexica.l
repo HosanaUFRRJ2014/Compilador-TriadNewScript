@@ -49,6 +49,7 @@ STRING \"([^\"\n]|\\\")*\"
 "show"		{return TK_PALAVRA_PRINT;}
 "read"		{return TK_PALAVRA_SCAN;}
 "func"	{ yylval.tipo = constante_tipo_funcao; return TK_PALAVRA_FUNC;} //funciona como tipo ou como criacao de funcao
+"return"		{yylval.label = yytext; return TK_PALAVRA_RETURN;}
 
 "//".*		{/*Não faça nada.
 			  OBS: Lembrando que o '.' não considera a quebra de linha, por isso funciona.*/}
@@ -64,7 +65,7 @@ STRING \"([^\"\n]|\\\")*\"
 "(char)"		{ yylval.label = yytext; yylval.tipo = constante_tipo_caracter; return TK_CONVERSAO_EXPLICITA;}
 "(string)"  { yylval.label = yytext; yylval.tipo = constante_tipo_string; return TK_CONVERSAO_EXPLICITA;}
 
-[(){}\[\];,:]	{ return *yytext; }
+[\|(){}\[\];,:]	{ return *yytext; }
 
 "++"	{yylval.label = yytext; return TK_OP_ARIT_UNA;}
 "--"	{yylval.label = yytext; return TK_OP_ARIT_UNA;}
