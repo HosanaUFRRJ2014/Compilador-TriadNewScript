@@ -1,0 +1,17 @@
+var a,b,c,d,e;
+a = 10.5;
+b = 10;
+c = 'a';
+d = "asd";
+e = true;
+
+{
+	a = 11.5; //escopo de cima
+	var a = true;
+	//a = 10.2; //erro devido a var acima...
+	//forma correta
+	{
+		(backscope 2)
+		(global) a = 10.2;
+	}
+}

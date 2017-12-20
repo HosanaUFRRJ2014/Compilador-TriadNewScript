@@ -1,0 +1,12 @@
+/*Funcionalidade .len()*/
+
+var a;
+read(a:string);
+var b = a.len();
+show(a);
+show(b);
+
+
+var c = "Rural";
+var d = c.len();
+show(d);

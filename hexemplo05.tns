@@ -1,0 +1,5 @@
+/*Concatenação de strings estáticas*/
+var a = "Universidade Federal";
+var d = " Rural do Rio de Janeiro";
+var e = a + d;
+show(e);

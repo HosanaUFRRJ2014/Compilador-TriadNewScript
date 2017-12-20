@@ -1,0 +1,4 @@
+var a = 10;
+var c = 'c';
+
+show(10+(int)c);

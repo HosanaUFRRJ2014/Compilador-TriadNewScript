@@ -1,0 +1,7 @@
+/*Concatenação de string dinâmica com estática*/
+var a;
+var d = "uma string";
+read(a:string);
+var e = d + a;
+show(e);
+

@@ -45,14 +45,16 @@ livia[1,0] = 25;
 livia[1,1] = 5;
 */
 
-var livia = int[2,2,2],braida = int[3,3];
+var livia = int[2,2,2,2],braida = int[3,3];
 var a,b = 1;
 //var a = livia[0,0,0];
 
 //a = livia[0,1,1]; //sem valor --> OK
 //b = livia[1,1,1]; //com valor --> OK
 
-livia[0,0,0] = 9; //----> OK
+livia[1,1,1,1] = 10;
+
+//livia[1,1,1] = 9; //----> OK
 //livia[1,1,1] = braida[0,1]; ---> OK
 //livia[1,1,1] = livia[0,0,0]; ----> OK
 

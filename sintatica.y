@@ -178,16 +178,6 @@ COMANDO 	: E ';'
 			E_BREAK_CONTINUE ';'
 			|
 			RETURN ';'
-			|
-			MULTIPLOS_IDS '<''=' E';'
-			;
-
-MULTIPLOS_IDS: TK_PALAVRA_VAR TK_ID '|' OUTROiD
-			| TK_ID '|' OUTROiD
-			;
-OUTROiD: TK_ID '|' OUTROiD
-			|
-			TK_ID
 			;
 
 E			: E TK_OP_ARIT_PRIO1 E
@@ -331,7 +321,7 @@ E			: E TK_OP_ARIT_PRIO1 E
 					$$.tamanho = $1.tamanho;
 					$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $$.tipo + " " + $$.label + ";\n";
 
-					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + $2.label + ";\n";
+					$$.traducao = $$.traducao + "\t" + $$.label + " = " + $1.label + recuperarNomeTraducao($2.label) + ";\n";
 				}else{
 					string params[2] = {$2.tipo, $1.tipo};
 					yyerror(montarMensagemDeErro(MSG_ERRO_CONVERSAO_EXPLICITA_INDEVIDA, params, 2));
@@ -404,13 +394,11 @@ VALOR		: TK_NUM
 			//	$1.labelTamanhoDinamicoString = metadata.labelTamanhoDinamicoString; //coloquei aqui pq em ID: TK isso volta vazio
 
 				$$ = $1;
-
 				//IMPORTANTE: comentando essas duas linhas pq o william falou que poderia dar problemas na parte dele.
 				/*$1.ehDinamica = metadata.ehDinamica;
 				$1.tamanho = metadata.tamanho;*/
 
 				//$1.tipo = metadata.tipo; //pode ser que precise
-				$$ = $1;
 			}
 			|
 			'(' E ')'
@@ -866,8 +854,8 @@ ARRAY	: TIPO '[' DIMENSOES_INDICES ']' //Criação de array
 				count_dim = 0; //Terminou a contagem das dimensoes. Aguardando a proxima.
 				resetarTamanhoDimensoesArray();
 
-				cout << "TRADUCAO VAR: " << endl << $$.traducaoDeclaracaoDeVariaveis << endl << endl;
-				cout << "TRADUCAO: " << endl << $$.traducao << endl << endl;
+	//			cout << "TRADUCAO VAR: " << endl << $$.traducaoDeclaracaoDeVariaveis << endl << endl;
+	//			cout << "TRADUCAO: " << endl << $$.traducao << endl << endl;
 			}
 
 		}
@@ -1432,7 +1420,6 @@ ATRIBUICAO_VARIAVEL	:  ID '=' E
 
 PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')'
 			{
-
 				$$.traducaoDeclaracaoDeVariaveis = $$.traducaoDeclaracaoDeVariaveis + $3.traducaoDeclaracaoDeVariaveis;
 				$$.traducao = $$.traducao + $3.traducao;
 
@@ -1442,6 +1429,9 @@ PRINT			: TK_PALAVRA_PRINT '(' ARG_PRINT ')'
 
 ARG_PRINT: E
 			{
+				$$.traducaoDeclaracaoDeVariaveis = $1.traducaoDeclaracaoDeVariaveis;
+				if($1.tipo == constante_tipo_funcao)
+					$1 = tratarFuncaoEmExpressaoOuAtribuicao($1);
 				$$.traducao = $1.traducao + "\n" + constroiPrint(recuperarNomeTraducao($1.label, $1.escopoDeAcesso));
 			}
 			;
@@ -2842,7 +2832,13 @@ ATRIBUTOS tratarFuncaoEmExpressaoOuAtribuicao(ATRIBUTOS dolarx){
 
 bool verificarPossibilidadeDeConversaoExplicita(string tipoOrigem, string tipoDestino){
 
-	return tipoOrigem != constante_tipo_booleano;
+	return !(
+					tipoOrigem == constante_tipo_booleano ||
+					tipoOrigem == constante_tipo_array ||
+					tipoDestino == constante_tipo_array ||
+					tipoOrigem == constante_tipo_string ||
+					tipoDestino == constante_tipo_string
+					);
 }
 
 bool ehTipoInputavel(string tipo){

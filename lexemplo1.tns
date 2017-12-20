@@ -1,0 +1,35 @@
+/*
+CASOS POSSÍVES TRATADOS PARA O ARRAY
+
+a = livia[x,y] //sem valor
+a = livia[x,y] //com valor
+livia[x,y] = b[u,v];
+livia[x,y] = a | 3 | 3.0 | 2 | "oi"
+livia[x,y] = livia[u,v]
+
+var a = int[x,y]
+
+var a;
+a = int[x,y]
+
+var a = int[x,y]
+a = int[u,v]
+
+var a = {2,3,5,1,90,18};
+
+var a
+a = {2,3,5,1,90,18};
+
+var a = int[2,3]
+a = {4,5,6,7,8};
+*/
+
+var c = 3;
+var b = string[c+5,4,5];
+b[4,0,0] = "livia";
+show(b[0,0,0]);
+
+b = string[4];
+
+
+//var a = [2.3,4.9,6.9,2.1];

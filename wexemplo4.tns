@@ -1,0 +1,16 @@
+
+
+var a = 10.5;
+
+func f(i:int) :float, int, char{
+	return a, i, 'a';
+};
+
+func e(r:float, s:int, t:char):int{
+	show(r);
+	show(s);
+	show(t);
+	return (int) a;
+};
+
+show(e(f(1)));

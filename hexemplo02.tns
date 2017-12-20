@@ -1,0 +1,22 @@
+/*Leitura de teclado*/
+
+/*Leitura de teclado de string dinâmica*/
+
+var h;
+read(h:string);
+show(h);
+
+
+/*Leitura de teclado de boolean*/
+var i;
+read(i:bool);
+show(i);
+
+
+/*Leitura de teclado de float e inteiro*/
+var j,k;
+
+read(j:float);
+read(k:int);
+
+show(j + k); //concatenação dentro do show

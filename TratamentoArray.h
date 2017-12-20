@@ -207,100 +207,134 @@ namespace TratamentoArray
 			return traducaoFree;
 		}
 
+		string traducaoMultiplicacaoDimensoes(int etapa, pair<string,string> *traducao,vector<string> labelsDim)
+		{
+				string label_mult, last_label;
+
+				last_label = TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(labelsDim.size()-1,&labelsDim,true);
+
+				for(int pos = (labelsDim.size() - 2) - etapa;pos > 0;pos--)
+				{
+						label_mult = gerarNovaVariavel();
+						traducao->first = traducao->first + constante_tipo_inteiro + " " + label_mult + ";\n";
+						traducao->second = traducao->second + "\t" + label_mult + " = " +
+																TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos,&labelsDim,true) +
+																" * " + last_label + ";\n";
+						last_label = label_mult;
+				}
+
+				return last_label;
+		}
+
+		string traducaoSomaIndice(string last_label,string label_mult,pair<string,string> *traducao)
+		{
+				string label_add;
+
+				label_add = gerarNovaVariavel();
+				traducao->first = traducao->first + constante_tipo_inteiro + " " + label_add + ";\n";
+				traducao->second = traducao->second + "\t" + label_add + " = " + label_mult + " + " + last_label + ";\n";
+				return label_add;
+		}
+
+		int valorMultiplicacaoDimensoes(int etapa, vector<pair<string,bool>> valRealDim)
+		{
+				int resultado = stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(valRealDim.size()-1,&valRealDim,true).first);
+
+				for(int pos = (valRealDim.size() - 2) - etapa; pos > 0; pos--)
+				{
+						resultado = resultado * stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(pos,&valRealDim,true).first);
+				}
+
+				return resultado;
+		}
+
 		//Cria a tradução do cálculo do índice correspontende do array no código do programa(conversão array --> vetor)
 		pair<string,string> traducaoCalculoIndiceArray(vector<string>labelsInd,vector<string>labelsDim,ATRIBUTOS *dolarDolar,
-			vector<pair<string,bool>>valRealInd,vector<pair<string,bool>>valRealDim,bool foiCriadoDinamicamente)
+		  vector<pair<string,bool>>valRealInd,vector<pair<string,bool>>valRealDim,bool foiCriadoDinamicamente)
 		{
-			pair<string,string> traducao; //first = tradVar; second = traducao;
-			string label_mult,label_add,last_label;
+		  pair<string,string> traducao; //first = tradVar; second = traducao;
+		  string last_label,label_mult_dim,label_mult_ind;
+		  string label_mult,label_add;
 
-			traducao.first = "";
-			traducao.second = "";
+		  traducao.first = "";
+		  traducao.second = "";
 
-			if(foiCriadoDinamicamente || dolarDolar->ehDinamica) //Calcular de forma dinamica
-			{
-					if(labelsInd.size() > 1)
-					{
-						label_mult = gerarNovaVariavel();
-						traducao.first = traducao.first + constante_tipo_inteiro + " " + label_mult + ";\n";
-						traducao.second = traducao.second + "\t" + label_mult + " = " +
-											TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(0,&labelsInd,true) +
-											" * " +
-											TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(1,&labelsDim,true) +
-											";\n";
-						last_label = label_mult;
-					}
-					else if(labelsInd.size() == 1)
-					{
-						label_add = gerarNovaVariavel();
-						traducao.first = traducao.first + constante_tipo_inteiro + " " + label_add + ";\n";
-						traducao.second = traducao.second + "\t" + label_add + " = " + dolarDolar->label + ";\n";
-					}
+		  if(foiCriadoDinamicamente || dolarDolar->ehDinamica) //Calcular de forma dinamica
+		  {
+		    if(labelsInd.size() > 1)
+		    {
+		        label_mult_dim = traducaoMultiplicacaoDimensoes(0,&traducao,labelsDim);
+		        label_mult_ind = TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(0,&labelsInd,true);
+		        label_mult = gerarNovaVariavel();
+		        traducao.first = traducao.first + constante_tipo_inteiro + " " + label_mult + ";\n";
+		        traducao.second = traducao.second + "\t" + label_mult + " = " + label_mult_ind + " * " + label_mult_dim + ";\n";
+		        last_label = label_mult;
+		    }
+		    else if(labelsInd.size() == 1)
+		    {
+		        label_add = gerarNovaVariavel();
+		        traducao.first = traducao.first + constante_tipo_inteiro + " " + label_add + ";\n";
+		        traducao.second = traducao.second + "\t" + label_add + " = " + dolarDolar->label + ";\n";
+		    }
 
-					for(int pos = 1;pos < labelsInd.size();pos++) //É válido pq o tam deles sempre será igual na lógica.
-					{
+				for (int pos = 1; pos < labelsInd.size(); pos++)
+		    {
 						if(pos != labelsInd.size() - 1)
 						{
+							label_mult_dim = traducaoMultiplicacaoDimensoes(pos,&traducao,labelsDim);
+							label_mult_ind = TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos,&labelsInd,true);
 							label_mult = gerarNovaVariavel();
-							traducao.second = traducao.second + "\t" + label_mult + " = " +
-										TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos,&labelsInd,true) +
-										" * " +
-										TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos + 1,&labelsDim,true) + ";\n";
-
-							label_add = gerarNovaVariavel();
-							traducao.second = traducao.second + "\t" + label_add + " = " + label_mult + " + " + last_label + ";\n";
-							traducao.first = traducao.first + constante_tipo_inteiro + " " + label_mult + ";\n" +
-											+ constante_tipo_inteiro + " " + label_add + ";\n";
+							traducao.first = traducao.first + constante_tipo_inteiro + " " + label_mult + ";\n";
+							traducao.second = traducao.second + "\t" + label_mult + " = " + label_mult_ind + " * " + label_mult_dim + ";\n";
+							label_add = traducaoSomaIndice(last_label,label_mult,&traducao);
 							last_label = label_add;
 						}
 						else
 						{
-							label_add = gerarNovaVariavel();
-							traducao.second = traducao.second + "\t" + label_add + " = " +
-											TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos,&labelsInd,true)
-											+ " + " + last_label + ";\n";
-							traducao.first = traducao.first + constante_tipo_inteiro + " " + label_add + ";\n";
+								label_add = gerarNovaVariavel();
+								traducao.first = traducao.first + constante_tipo_inteiro + " " + label_add + ";\n";
+								traducao.second = traducao.second + "\t" + label_add + " = " +
+																	TratamentoArray::PilhaTamanhoDimensoesArray::obterElementoTamanhoDimensoesArray(pos,&labelsInd,true) +
+																	" + " + last_label + ";\n";
 						}
-					}
-			}
-			else //Indice do vetor pode ser calculado em tempo de Compilacao.
-			{
-					int indice_vetor_cod_interm = 0;
-					int mult = 0, add = 0, aux_dim,aux_ind;
-					//vector<pair<string,bool>>valRealInd,vector<pair<string,bool>>valRealDim
-					//TratamentoArray::PilhaTamanhoDimensoesArray::
-					//pair<string,bool> obterDimInteiraArray(int,vector<pair<string,bool>> *,bool);
+				}
+		  }
+		  else //Indice do vetor pode ser calculado em tempo de Compilacao.
+		  {
+		      int indice_vetor_cod_interm = 0;
+		      int mult = 0, add = 0, aux_dim,aux_ind;
 
-					if(valRealDim.size() == 1)
-					{
-						indice_vetor_cod_interm = stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(0,&valRealInd,true).first);
-						label_add = to_string(indice_vetor_cod_interm);
-					}
-					else
-					{
-						for(int pos = 0;pos < valRealDim.size();pos++) //vale pq a qtd de indices tem que ser igual ao de dimensoes
-						{
-							if(pos == valRealDim.size() - 1)
-							{
-									add = add + stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(pos,&valRealInd,true).first);
-									break;
-							}
+		      if(valRealDim.size() == 1)
+		      {
+		        indice_vetor_cod_interm = stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(0,&valRealInd,true).first);
+		        label_add = to_string(indice_vetor_cod_interm);
+		      }
+		      else
+		      {
+		        for(int pos = 0;pos < valRealDim.size();pos++) //vale pq a qtd de indices tem que ser igual ao de dimensoes
+		        {
+		          if(pos == valRealDim.size() - 1)
+		          {
+		              add = add + stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(pos,&valRealInd,true).first);
+		              break;
+		          }
 
-							aux_ind = stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(pos,&valRealInd,true).first);
-							aux_dim = stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(pos + 1,&valRealDim,true).first);
-							mult = aux_ind * aux_dim;
-							add = add + mult;
-						}
+		          mult = valorMultiplicacaoDimensoes(pos,valRealDim);
+		          aux_ind = stoi(TratamentoArray::PilhaTamanhoDimensoesArray::obterDimInteiraArray(pos,&valRealInd,true).first);
+		          mult = aux_ind * mult;
+		          add = add + mult;
+		        }
 
-						label_add = to_string(add);
-					}
-			}
+		        label_add = to_string(add);
+		      }
+		  }
 
-			dolarDolar->labelIndice = label_add;
-			return traducao;
+		  dolarDolar->labelIndice = label_add;
+		  return traducao;
 
 		}
 
+		/*
 		string traducaoArrayCodIntermediario(int qtd_dim, ...)
 		{
 
@@ -320,6 +354,7 @@ namespace TratamentoArray
 
 			return traducao;
 		}
+		*/
 
 	}
 

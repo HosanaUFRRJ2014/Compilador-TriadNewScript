@@ -1,0 +1,13 @@
+var a;
+read(a:string);
+if(a == "igual")
+  show("Palavras iguais");
+else
+  show("Palavras diferentes");
+
+var b;
+read(b:string);
+if(b != "igual")
+  show("Palavras diferentes");
+else
+  show("Palavras iguais");

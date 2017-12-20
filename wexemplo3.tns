@@ -1,0 +1,9 @@
+func a(i:int):int{
+	return func b(f:float):int{
+		show(f);
+		return (int) f;
+	}((float)i);
+};
+
+show(a(10));
+
