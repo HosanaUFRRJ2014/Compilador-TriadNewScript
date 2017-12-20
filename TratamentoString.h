@@ -94,6 +94,12 @@ namespace TratamentoString
 			retorno += "int " + vetorTemporarias.at(1)+ ";\n";
 			retorno += "int " + vetorTemporarias.at(2) + ";\n";
 
+
+			retorno = "char * " + dolarDolar->label + ";\n"; //remover na relacional
+			retorno += "int " + vetorTemporarias.at(0) + ";\n";
+			retorno += "int " + vetorTemporarias.at(1)+ ";\n";
+			retorno += "int " + vetorTemporarias.at(2) + ";\n";
+
 			dolarDolar->ehDinamica = true;
 		}
 

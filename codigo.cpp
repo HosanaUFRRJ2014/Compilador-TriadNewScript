@@ -11,33 +11,10 @@
 #define TAMANHO_INICIAL_STRING 100
 
 
-char * variavelDoUsuario1; //VARUSER_a
-char * variavelDoUsuario2; //VARUSER_g
-char * temp1;
+char **variavelDoUsuario1; //VARUSER_a
+int temp1;
 int temp2;
-char temp3;
-int temp4;
-int temp5;
-int temp6;
-int temp7;
-int temp8;
-int temp9;
-int temp10;
-char * temp11;
-int temp12;
-char temp13;
-int temp14;
-int temp15;
-int temp16;
-int temp17;
-int temp18;
-int temp19;
-int temp20;
-char * temp21;
-int temp22;
-int temp23;
-int temp24;
-char * variavelDoUsuario3; //VARUSER_c
+char* *temp3;
 
 
 
