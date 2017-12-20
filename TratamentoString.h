@@ -75,10 +75,10 @@ namespace TratamentoString
 			vetorTemporarias->push_back(gerarNovaVariavel());
 		}
 
-		/*if(operacao == "==")
+		if(operacao == "!=")
 		{
 			vetorTemporarias->push_back(gerarNovaVariavel());
-		}*/
+		}
 
 	}
 
@@ -89,8 +89,6 @@ namespace TratamentoString
 
 		if(necessidaDeclaracaoDinamica(*dolar1, *dolar3))
 		{
-
-
 			retorno = "char * " + dolarDolar->label + ";\n"; //remover na relacional
 			retorno += "int " + vetorTemporarias.at(0) + ";\n";
 			retorno += "int " + vetorTemporarias.at(1)+ ";\n";
@@ -115,11 +113,11 @@ namespace TratamentoString
 		retorno += "int " + vetorTemporarias.at(1)+ ";\n";
 		retorno += "int " + vetorTemporarias.at(2) + ";\n";
 
-	/*	if(operacao == "==")
+		if(operacao == "!=")
 		{
 		//	vetorTemporarias->push_back(gerarNovaVariavel());
 			retorno += "int " + vetorTemporarias.at(3) + ";\n";
-		}*/
+		}
 
 /*
 		else
@@ -139,11 +137,19 @@ namespace TratamentoString
 		{
 			if(necessidaDeclaracaoDinamica(*dolar1,*dolar3))
 			{
-				//FIXME esses sizeofs podem estar bugando assim como o no .len com a string dinâmica
-				/****TODO colocar isso dentro de uma função***/
-				retorno = "\t" + vetorTemporarias.at(0) + " = sizeof("+ dolar1->label +");\n";
-				retorno += "\t" + vetorTemporarias.at(1) + " = sizeof("+ dolar3->label +");\n";
+				//FIXME esses sizeofs estão bugando assim como o no .len com a string dinâmica
+				/*std::cout << "Label tam1:  " << dolar1->labelTamanhoDinamicoString << '\n';
+				std::cout << "Label tam3:  " << dolar3->labelTamanhoDinamicoString << '\n';
+*/
+
+		//		retorno = "\t" + vetorTemporarias.at(0) + " = sizeof("+ dolar1->labelTamanhoDinamicoString +");\n";
+			//	retorno += "\t" + vetorTemporarias.at(1) + " = sizeof("+ dolar3->labelTamanhoDinamicoString +");\n";
+
+				retorno = "\t" + vetorTemporarias.at(0) + " = TAMANHO_INICIAL_STRING;\n";
+				retorno += "\t" + vetorTemporarias.at(1) + " = TAMANHO_INICIAL_STRING;\n";
+
 				retorno += "\t" + vetorTemporarias.at(2) + " = " + vetorTemporarias.at(0) + " + " + vetorTemporarias.at(1) + ";\n";
+			//	retorno += "\t" + vetorTemporarias.at(2) + " = " + dolar1.labelTamanhoDinamicoString + " + " + dolar3.labelTamanhoDinamicoString + ";\n";
 				retorno += montarMallocString(dolarDolar->label,vetorTemporarias.at(2));
 				/********/
 			}
@@ -166,6 +172,14 @@ namespace TratamentoString
 
 		}
 
+		if (operacao == "!=")
+		{
+			retorno = '\t' + vetorTemporarias.at(0) + " = 0;\n";
+			retorno += '\t' + vetorTemporarias.at(1) + " = " + montarCompararString(dolar1->label, dolar3->label);
+			retorno += '\t' + vetorTemporarias.at(2) + " = " + vetorTemporarias.at(0) + " == " + vetorTemporarias.at(1) + ";\n";
+			retorno += '\t' + vetorTemporarias.at(3) + " = !" + vetorTemporarias.at(2) +  ";\n";
+
+		}
 
 
 
@@ -188,7 +202,8 @@ namespace TratamentoString
 
 	string constroiDefinesParaStringDinamica()
 	{
-		return "#define TAMANHO_INICIAL_STRING 10\n#define FATOR_CARGA_STRING 1\n#define FATOR_MULTIPLICADOR_STRING 2\n\n\n";
+		//return "#define TAMANHO_INICIAL_STRING 10\n#define FATOR_CARGA_STRING 1\n#define FATOR_SOMADOR_STRING 1\n\n\n";
+		return "#define TAMANHO_INICIAL_STRING 100\n\n\n";
 
 	}
 
@@ -197,7 +212,6 @@ namespace TratamentoString
 	{
 
 		ATRIBUTOS atributos;
-		//string tempa, tempb,tempc,tempd;
 		int numVariaveis = 9, i;
 		string temps[numVariaveis];
 		string label = atrib.label;
@@ -218,7 +232,7 @@ namespace TratamentoString
 		atributos.traducao += constroiTraducaoAtribuicao(temps[0], "0");
 		atributos.traducao += constroiTraducaoAtribuicao(temps[2], "1");
 		atributos.traducao += constroiTraducaoAtribuicao(temps[3], "TAMANHO_INICIAL_STRING");
-		atributos.traducao += "\t" + label    + " = (char *) malloc(TAMANHO_INICIAL_STRING);\n";
+		atributos.traducao += "\t" + label    + " = (char *) malloc("+  temps[3] + ");\n";
 		atributos.traducao += constroiTraducaoAtribuicao(temps[1], "1");
 		atributos.traducao += constroiTraducaoAtribuicao(temps[4], "1");
 		atributos.traducao += constroiTraducaoAtribuicao(temps[8], "\'\\n\'");
@@ -227,22 +241,24 @@ namespace TratamentoString
 		atributos.traducao += "\tscanf(\"%c\",&" + temps[1] + ");\n";
 		atributos.traducao += "\t" + label + "[" + temps[0] + "] = " + temps[1] +";\n";
 		atributos.traducao += constroiTraducaoOperacao(temps[0], temps[0], temps[2], "+");
-		atributos.traducao += constroiTraducaoOperacao(temps[5], temps[3], "FATOR_CARGA_STRING", "*");
-		atributos.traducao += constroiTraducaoOperacao(temps[6], temps[0], temps[5], "<");
+		//atributos.traducao += constroiTraducaoOperacao(temps[5], temps[3], "FATOR_CARGA_STRING", "*");
+		atributos.traducao += constroiTraducaoOperacao(temps[6], temps[0], temps[3], "<");
 
 		atributos.traducao += constroiTraducaoIF(temps[6], "TAMINALTR" + label);
-		atributos.traducao += "\t" + constroiTraducaoOperacao(temps[3], temps[3], "FATOR_MULTIPLICADOR_STRING", "*");
+	//	atributos.traducao += "\t" + constroiTraducaoOperacao(temps[3], temps[3], "FATOR_SOMADOR_STRING", "+");
+		atributos.traducao += "\t" + constroiTraducaoOperacao(temps[3], temps[3], temps[2], "+"); //nova linha
 		atributos.traducao += "\t\t" + label + " = (char *) realloc(" + label + "," + temps[3] + ");\n";
 		atributos.traducao += "TAMINALTR" + label + ":\n";
 		atributos.traducao += constroiTraducaoOperacao(temps[7], temps[1], temps[8], "==");
 		atributos.traducao += constroiTraducaoIF(temps[7], "FIMWHILESTR" + label);
 		atributos.traducao += constroiTraducaoIF(temps[4], "WHILESTR" + label);
 		atributos.traducao += "FIMWHILESTR" + label + ":\n\n";
-		atributos.traducao += "\t" + label + "[" + temps[0] + "] = " + "\'\\0\'" +";\n";
+		atributos.traducao += constroiTraducaoOperacao(temps[5], temps[0], temps[2], "-"); //nova linha
+		atributos.traducao += "\t" + label + "[" + temps[5] + "] = " + "\'\\0\'" +";\n"; //linha alterada
 		atributos.traducao += "\t" + labelUsuario + " = (char *) realloc(" + label + "," + temps[3] + ");\n";
 
 
-		atributos.labelTamanhoDinamicoString = temps[0];
+		atributos.labelTamanhoDinamicoString = temps[5];  //tamanho sem o \0
 		return atributos;
 
 	}

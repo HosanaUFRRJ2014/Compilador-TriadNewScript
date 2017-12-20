@@ -1,16 +1,13 @@
 
 /*var a = 1;
-
 var b = 1.2;
-
-
 var c = a + b;
 
 show(c);
 
 var i, d = 1;
-
 i = d + 10.5 * 4;
+
 show(i);*/
 
 //dúvidas se a concatenação deverá gerar o resultado conforme gera no código abaixo
@@ -24,18 +21,16 @@ var h  = i + " atras de " + 1;
 //Corrigir problema de não poder mudar tipo de "h" de estático para dinâmico
 /*var h = "hosana";
 read(h:string);
-show(h);*/
+show(h);
+*/
 
-/*String dinâmica segue bugada
+/*String dinâmica segue bugada -  tamanho não consegue ser recuperado*/
 var a,g;
 read(a:string);
 read(g:string);
-//a = "eita atras de eita meus amores";
-//g = " nossa,  eu queria estar vendo series. socorro!";
 
 var c = a + g;
 show(c);
-*/
 
 //O tamanho da string receptora fica desatualizado. Trocar a atribuição final por strcpy
 /*
@@ -52,7 +47,7 @@ a = 1.0;
 a -= 5;
 */
 
-//Não funciona para string dinâmica
+//Aguardando resposta do William para ver se posso deixar feito da forma que eu fiz
 /*var a;// = "uva";
 read(a:string);
 var b = a.len();
@@ -60,11 +55,23 @@ show(a);
 show(b);
 */
 
-
-if("banana" == "banana")
+//Exemplo comparação de strings.
+/*var a;
+read(a:string);
+if(a == "banana")
   show("Palavras iguais");
 else
   show("Palavras diferentes");
+
+var b;
+read(b:string);
+if(b != "abacaxi")
+  show("Palavras diferentes");
+else
+  show("Palavras iguais");
+*/
+
+//show(a + "banana");
 
 
 /*

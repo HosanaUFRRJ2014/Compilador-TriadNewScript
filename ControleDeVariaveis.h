@@ -36,6 +36,8 @@ namespace ControleDeVariaveis
 		void inicializarMapaDeContexto();
 		bool incluirNoMapa(string,int, string,string,vector<string>,vector<string>);
 		bool atualizarNoMapa(DADOS_VARIAVEL, int escopo = numeroEscopoAtual);
+		bool atualizarLabelTamanhoDinamicoNoMapa(string, string, int escopo = numeroEscopoAtual);
+		string recuperarLabelTamanhoDinamicoString(string , int escopoDeAcesso = numeroEscopoAtual);
 		bool variavelJaDeclarada(string, bool varrerEscopo = true, int escopo = numeroEscopoAtual);
 		DADOS_VARIAVEL recuperarDadosVariavel(string, int escopo = numeroEscopoAtual);
 		string gerarNomeTraducaoVariavelUsuario();
@@ -147,6 +149,24 @@ namespace ControleDeVariaveis
 				}*/
 			}
 			return false;
+		}
+
+		bool atualizarLabelTamanhoDinamicoNoMapa(string labelNoMapa, string labelTamanhoDinamicoString, int escopo)
+		{
+			if(variavelJaDeclarada(labelNoMapa, true, escopo))
+			{
+				mapaDeContexto->at(labelNoMapa).labelTamanhoDinamicoString = labelTamanhoDinamicoString;
+				return true;
+			}
+
+			return false;
+		}
+
+		string recuperarLabelTamanhoDinamicoString(string label, int escopo)
+		{
+			if(variavelJaDeclarada(label, true, escopo))
+				 return mapaDeContexto->at(label).labelTamanhoDinamicoString;
+
 		}
 
 		bool variavelJaDeclarada(string nome, bool varrerEscopo, int escopo)
