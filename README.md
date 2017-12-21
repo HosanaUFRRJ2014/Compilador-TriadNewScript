@@ -36,7 +36,7 @@ Para poder executar o arquivo bash, não esqueça de dar as devidas permissões 
     make all
 
   Ou se preferir, utilize ao arquivo de bash ```runTeste.sh``` para informar o arquivo a ser compilado e uma opção
-      ( t - exibir o código no terminal; r - executar o código ou c - apagar os arquivos de compilação).
+      ( t - exibir o código no terminal; run - executar o código ou c - apagar os arquivos de compilação).
 
   Ex :
 
