@@ -4,7 +4,7 @@ Este repositório contém o trabalho da disciplina de Compiladores, de 2017-2, d
 O objetivo do trabalho é implementar um analisador léxico e sintático, usando as ferramentas Lex e Bison, a fim de compilar uma linguagem criada pelos integrantes do grupo.
 
 
-##Estrutura do diretório:
+## Estrutura do diretório:
 
 Na pasta "arquivos_diversos" encontram-se arquivos de testes para o compilador, arquivo-texto para teste da funcionalidade de string dinâmica, e alguns esboços de código intermediário.
 
