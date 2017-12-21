@@ -27,7 +27,7 @@ Esta aplicação precisa da libboost para funcionar. Para instalá-la, digite o 
 ### Permissões:
 Para poder executar o arquivo bash, não esqueça de dar as devidas permissões com o comando:
 
-    sudo chmod 777 runTeste.sh
+    chmod 777 runTeste.sh
 
 
 ##  Para compilar:
