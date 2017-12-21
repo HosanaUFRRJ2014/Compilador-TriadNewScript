@@ -29,7 +29,7 @@ Para poder executar o arquivo bash, não esqueça de dar as devidas permissões 
 
     chmod 777 runTeste.sh
 
-Obs: É necessário estar dentro do repositorio para executar o comando acima.
+Obs: É necessário estar dentro do repositório para executar o comando acima.
 
 ##  Para compilar:
   No terminal, digite o seguinte comando:
@@ -44,4 +44,5 @@ Obs: É necessário estar dentro do repositorio para executar o comando acima.
     ./runTeste.sh hexemplo01.tns t
 
   O exemplo acima irá imprimir no terminal o código fonte do arquivo fornecido.
-  Obs: É necessário estar dentro do repositorio para executar os comandos acima.
+  
+  Obs: É necessário estar dentro do repositório para executar os comandos acima.
