@@ -6,7 +6,7 @@ all:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo.foca > codigo.cpp
+		./glf < exemplos/wexemplo00.tns > codigo.cpp
 
 all-run:
 
@@ -15,7 +15,7 @@ all-run:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo.foca > codigo.cpp
+		./glf < exemplos/wexemplo00.tns > codigo.cpp
 		g++ codigo.cpp -o cod
 		./cod
 
@@ -27,14 +27,14 @@ all-no-code:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo.foca
+		./glf < exemplos/wexemplo00.tns
 
 
 all-clear:
 		rm y.tab.c y.tab.h lex.yy.c cod glf y.output
 
 
-#Makefile para o exemplo2.foca
+#Makefile para o hexemplo00.tns
 all2:
 
 
@@ -43,7 +43,7 @@ all2:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo2.foca > codigo.cpp
+		./glf < exemplos/hexemplo00.tns > codigo.cpp
 
 all2-run:
 
@@ -52,7 +52,7 @@ all2-run:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo2.foca > codigo.cpp
+		./glf < exemplos/hexemplo00.tns > codigo.cpp
 		g++ codigo.cpp -o cod
 		./cod
 
@@ -63,9 +63,9 @@ all2-no-code:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo2.foca
+		./glf < exemplos/hexemplo00.tns
 
-#Makefile para o exemplo3.foca
+#Makefile para o lexemplo00.tns
 all3:
 
 		clear
@@ -73,7 +73,7 @@ all3:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo3.foca > codigo.cpp
+		./glf < exemplos/lexemplo00.tns > codigo.cpp
 
 all3-run:
 
@@ -82,7 +82,7 @@ all3-run:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo3.foca > codigo.cpp
+		./glf < exemplos/lexemplo00.tns > codigo.cpp
 		g++ codigo.cpp -o cod
 		./cod
 
@@ -93,9 +93,9 @@ all3-no-code:
 		yacc -d -v -t sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < exemplo3.foca
-		
-#Makefile para o teste1.foca
+		./glf < exemplos/lexemplo00.tns
+
+#Makefile para o teste1.tns
 allT0:
 
 		clear
@@ -103,7 +103,7 @@ allT0:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste0.foca > codigo.cpp
+		./glf < arquivos_diversos/teste0.tns > codigo.cpp
 
 allT0-run:
 
@@ -112,7 +112,7 @@ allT0-run:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste0.foca > codigo.cpp
+		./glf < arquivos_diversos/teste0.tns > codigo.cpp
 		g++ codigo.cpp -o cod
 		./cod
 
@@ -123,9 +123,9 @@ allT0-no-code:
 		yacc -d -v -t sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste0.foca
-		
-#Makefile para o teste1.foca
+		./glf < arquivos_diversos/teste0.tns
+
+#Makefile para o teste1.tns
 allT:
 
 		clear
@@ -133,7 +133,7 @@ allT:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste1.foca > codigo.cpp
+		./glf < arquivos_diversos/teste1.tns > codigo.cpp
 
 allT-run:
 
@@ -142,8 +142,8 @@ allT-run:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste1.foca > codigo.cpp
-		g++ codigo.cpp -o cod
+		./glf < teste1.tns > codigo.cpp
+		g++ arquivos_diversos/codigo.cpp -o cod
 		./cod
 
 allT-no-code:
@@ -153,9 +153,9 @@ allT-no-code:
 		yacc -d -v -t sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste1.foca
+		./glf < arquivos_diversos/teste1.tns
 
-#Makefile para o teste2.foca
+#Makefile para o teste2.tns
 allT2:
 
 		clear
@@ -163,7 +163,7 @@ allT2:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste2.foca > codigo.cpp
+		./glf < arquivos_diversos/teste2.tns > codigo.cpp
 
 allT2-run:
 
@@ -172,7 +172,7 @@ allT2-run:
 		yacc -d -v sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste2.foca > codigo.cpp
+		./glf < arquivos_diversos/teste2.tns > codigo.cpp
 		g++ codigo.cpp -o cod
 		./cod
 
@@ -183,4 +183,4 @@ allT2-no-code:
 		yacc -d -v -t sintatica.y
 		g++ -std=c++0x -o glf y.tab.c -lfl
 
-		./glf < teste2.foca
+		./glf < arquivos_diversos/teste2.tns
