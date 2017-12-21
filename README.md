@@ -22,8 +22,11 @@ Esta aplicação precisa da libboost para funcionar. Para instalá-la, digite o 
   
     make all
 
-  Ou se preferir, utilize ao arquivo de bash ```runTeste.sh``` para informar o arquivo a ser compilado e uma opção ( t - exibir o código no terminal; r - executar o código ou c - apagar os arquivos de compilação). 
-  	Ex :
-  		./runTeste.sh hexemplo01.tns t
+  Ou se preferir, utilize ao arquivo de bash ```runTeste.sh``` para informar o arquivo a ser compilado e uma opção 
+      ( t - exibir o código no terminal; r - executar o código ou c - apagar os arquivos de compilação). 
+  
+  Ex :
+  
+    ./runTeste.sh hexemplo01.tns t
 
   O exemplo acima irá imprimir no terminal o código fonte do arquivo fornecido. 
